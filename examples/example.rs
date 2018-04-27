@@ -3,7 +3,7 @@ extern crate base64;
 extern crate failure;
 
 use a2::Argon2Builder;
-use a2::parameters::{Salt, SecretKey}}
+use a2::parameters::{Salt, SecretKey};
 
 fn main() {
     run().unwrap();

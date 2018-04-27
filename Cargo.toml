@@ -26,6 +26,7 @@ void = "1.0"
 
 [build-dependencies]
 bindgen = "0.35"
+cc = "1.0"
 
 [dev-dependencies]
 bindgen = "0.35"
