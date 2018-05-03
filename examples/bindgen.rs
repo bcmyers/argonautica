@@ -11,6 +11,7 @@ fn main() {
     fs::create_dir_all(out_dir).unwrap();
     let bindings = bindgen::Builder::default()
         .header("include/argon2.h")
+        .header("include/encoding.h")
         .layout_tests(false)
         .rustfmt_bindings(false)
         .generate()

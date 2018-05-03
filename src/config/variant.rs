@@ -1,3 +1,5 @@
+use config::defaults::DEFAULT_VARIANT;
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum Variant {
     Argon2d = 0,
@@ -5,10 +7,16 @@ pub enum Variant {
     Argon2id = 2,
 }
 
+impl Default for Variant {
+    fn default() -> Variant {
+        DEFAULT_VARIANT
+    }
+}
+
 #[cfg(feature = "serde")]
 mod serde {
-    use serde::ser::{Serialize, Serializer};
     use serde::de::{Deserialize, Deserializer};
+    use serde::ser::{Serialize, Serializer};
 
     use super::Variant;
 

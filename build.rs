@@ -28,6 +28,7 @@ fn main() {
     let out_dir = Path::new(&out_dir);
     let bindings = bindgen::Builder::default()
         .header("include/argon2.h")
+        .header("include/encoding.h")
         .layout_tests(true)
         .rustfmt_bindings(false)
         .generate()

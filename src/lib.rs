@@ -3,24 +3,20 @@ extern crate base64;
 extern crate bitflags;
 #[macro_use]
 extern crate failure;
+#[macro_use]
+extern crate log;
 extern crate rand;
 #[cfg(feature = "serde")]
 extern crate serde;
+extern crate scopeguard;
 extern crate void;
 
-mod argon2;
-mod argon2_builder;
+mod ffi;
+mod hasher;
+mod verifier;
 
-pub use argon2::Argon2;
-pub use argon2_builder::Argon2Builder;
-pub mod configuration;
-pub mod parameters;
+pub mod config;
+pub mod data;
+pub use hasher::Hasher;
 pub mod utils;
-
-mod ffi {
-    #![allow(dead_code)]
-    #![allow(non_upper_case_globals)]
-    #![allow(non_camel_case_types)]
-    #![allow(non_snake_case)]
-    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
-}
+pub use verifier::Verifier;
