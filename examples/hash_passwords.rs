@@ -6,8 +6,7 @@ extern crate lazy_static;
 
 use std::env;
 
-use a2::config::Variant;
-use a2::data::{SecretKey};
+use a2::data::{Salt, SecretKey};
 
 lazy_static! {
     static ref BASE64_ENCODED_SECRET_KEY: String = {
@@ -25,16 +24,16 @@ fn main() {
 }
 
 fn run() -> Result<(), failure::Error> {
-    let password = "😂😂😂😂😂😂😂😂😂😂";
+    let password = "P@ssw0rd";
+    let salt = Salt::random(32)?;
     let secret_key = SecretKey::from_base64_encoded_str(&*BASE64_ENCODED_SECRET_KEY)?;
 
     let mut hasher = a2::Hasher::default()?;
     let hash = hasher
-        .configure_variant(Variant::Argon2id)
         .with_password(password)
+        .with_salt(salt)
         .with_secret_key(&secret_key)
         .hash()?;
-    println!("{}", &hash);
 
     let mut verifier = a2::Verifier::new();
     let is_valid = verifier
@@ -46,5 +45,3 @@ fn run() -> Result<(), failure::Error> {
     assert!(is_valid);
     Ok(())
 }
-
-// TODO with_hash_raw

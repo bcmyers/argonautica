@@ -36,7 +36,10 @@ impl Verifier {
         }
     }
 
-    pub fn with_additional_data<AD: Into<AdditionalData>>(&mut self, additional_data: AD) -> &mut Verifier {
+    pub fn with_additional_data<AD: Into<AdditionalData>>(
+        &mut self,
+        additional_data: AD,
+    ) -> &mut Verifier {
         self.additional_data = additional_data.into();
         self
     }
@@ -72,7 +75,7 @@ impl Verifier {
         }
     }
 
-    pub fn _verify(&mut self, hash: &str)  -> Result<bool, failure::Error> {
+    pub fn _verify(&mut self, hash: &str) -> Result<bool, failure::Error> {
         let hash_length = hash.as_bytes().len();
         let mut buffer = vec![0u8; hash_length];
         let mut salt = vec![0u8; hash_length];

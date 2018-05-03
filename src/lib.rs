@@ -6,9 +6,9 @@ extern crate failure;
 #[macro_use]
 extern crate log;
 extern crate rand;
+extern crate scopeguard;
 #[cfg(feature = "serde")]
 extern crate serde;
-extern crate scopeguard;
 extern crate void;
 
 mod ffi;
