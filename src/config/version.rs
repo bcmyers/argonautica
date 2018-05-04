@@ -1,5 +1,6 @@
 use config::defaults::DEFAULT_VERSION;
 
+/// Enum repressenting the choice between versions of the Argon2 algorithm (`0x10` and `0x13`)
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum Version {
     _0x10 = 0x10,

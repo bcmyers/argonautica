@@ -14,7 +14,6 @@ fn main() {
             "phc-winner-argon2/src/encoding.c",
             "phc-winner-argon2/src/ref.c",
             "phc-winner-argon2/src/thread.c",
-            // "phc-winner-argon2/src/opt.c",
         ])
         .include("include")
         .flag_if_supported("-g")

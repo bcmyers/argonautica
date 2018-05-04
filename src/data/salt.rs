@@ -42,6 +42,12 @@ impl Salt {
     }
 }
 
+impl<'a> From<&'a Salt> for Salt {
+    fn from(salt: &'a Salt) -> Self {
+        salt.clone()
+    }
+}
+
 impl<'a> From<&'a [u8]> for Salt {
     fn from(bytes: &'a [u8]) -> Self {
         Salt {
