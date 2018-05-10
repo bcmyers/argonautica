@@ -10,8 +10,8 @@ struct Test {
 
 impl Test {
     fn run(&self) {
-        let mut hasher = a2::Hasher::default().unwrap();
-        let hash = hasher
+        let mut hasher = a2::Hasher::default();
+        let raw_hash = hasher
             .configure_hash_length(32)
             .configure_iterations(3)
             .configure_lanes(4)
@@ -26,7 +26,7 @@ impl Test {
             .with_secret_key(vec![3; 8])
             .hash_raw()
             .unwrap();
-        assert_eq!(hash, self.expected);
+        assert_eq!(raw_hash.raw_hash_bytes(), self.expected.as_slice());
     }
 }
 

@@ -49,7 +49,6 @@ impl Bench {
 }
 
 #[bench]
-#[ignore]
 fn bench_hashing_1(b: &mut Bencher) {
     let bench = Bench {
         hasher: None,
@@ -63,12 +62,12 @@ fn bench_hashing_1(b: &mut Bencher) {
 }
 
 #[bench]
-fn bench_hashing_4(b: &mut Bencher) {
+fn bench_hashing_2(b: &mut Bencher) {
     let bench = Bench {
         hasher: None,
         iterations: 192,
         memory_size: 2u32.pow(12),
-        threads: 4,
+        threads: 2,
     }.setup();
     b.iter(|| {
         bench.clone().run();

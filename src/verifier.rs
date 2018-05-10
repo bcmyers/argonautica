@@ -1,176 +1,183 @@
-use std::ffi::CString;
-use std::os::raw::c_char;
-
 use failure;
 use scopeguard;
 
-use config::variant::Variant;
-use data::additional_data::AdditionalData;
-use data::password::Password;
-use data::read::ReadPrivate;
-use data::secret_key::SecretKey;
-use ffi;
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct Verifier {
-    additional_data: AdditionalData,
-    hash: Hash,
-    password: Password,
-    secret_key: SecretKey,
-}
+use backend::{verify_c, verify_rust};
+use config::{Backend, VerifierConfig};
+use data::{AdditionalData, Password, SecretKey};
+use output::HashRaw;
 
 impl Default for Verifier {
+    /// Same as the `new` method
     fn default() -> Verifier {
-        Verifier::new()
-    }
-}
-
-// TODO: Getters
-impl Verifier {
-    pub fn new() -> Verifier {
         Verifier {
             additional_data: AdditionalData::none(),
-            hash: Hash::none(),
+            config: VerifierConfig::default(),
+            hash_enum: HashEnum::none(),
             password: Password::none(),
             secret_key: SecretKey::none(),
         }
     }
+}
 
-    pub fn with_additional_data<AD: Into<AdditionalData>>(
-        &mut self,
-        additional_data: AD,
-    ) -> &mut Verifier {
+/// One of the two main structs. Use it to verify passwords against hashes
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Verifier {
+    additional_data: AdditionalData,
+    config: VerifierConfig,
+    hash_enum: HashEnum,
+    #[serde(skip_serializing)]
+    password: Password,
+    #[serde(skip_serializing)]
+    secret_key: SecretKey,
+}
+
+// TODO: Getters
+impl Verifier {
+    /// Creates a new `Verifier` with sensible defaults:
+    /// * `backend`: `Backend::C`
+    /// * `password_clearing`: true
+    /// * `secret_key_clearing`: false
+    pub fn new() -> Verifier {
+        Verifier::default()
+    }
+    /// Allows you to configure `Verifier` to use a custom backend implementation. The default
+    /// is `Backend::C`. <i>Note: Currently the only backend implementation supported is </i> `Backend::C` <i>.
+    /// A Rust backend is planned, but is not currently available. If you configure</i>
+    /// `Hasher` <i>with</i> `Backend::Rust`<i>, it will panic at runtime</i>
+    pub fn configure_backend(&mut self, backend: Backend) -> &mut Verifier {
+        self.config.set_backend(backend);
+        self
+    }
+    /// Allows you to configure `Verifier` to erase the password bytes after each call to `verify`.
+    /// The default is to clear out the password bytes (i.e. `true`).
+    pub fn configure_password_clearing(&mut self, boolean: bool) -> &mut Verifier {
+        self.config.set_password_clearing(boolean);
+        self
+    }
+    /// Allows you to configure `Verifier` to erase the secret key bytes after each call to `verify`.
+    /// The default is to <b>not</b> clear out the secret key bytes (i.e. `false`).
+    /// This default was chosen to make it easier to keep using the same `Verifier` for multiple passwords.
+    pub fn configure_secret_key_clearing(&mut self, boolean: bool) -> &mut Verifier {
+        self.config.set_secret_key_clearing(boolean);
+        self
+    }
+    /// <b>The primary method.</b> After you have configured `Verifier` to your liking and provided
+    /// it will all the data it needs to verify a password (e.g. a string-encoded hash or `HashRaw`,
+    /// a `Password` and a `SecretKey`), call this method in order to determine whether the
+    /// provided password matches the provided hash
+    pub fn verify(&mut self) -> Result<bool, failure::Error> {
+        // TODO: validate?
+        let mut verifier = scopeguard::guard(self, |verifier| {
+            if verifier.config.password_clearing() {
+                verifier.password = Password::none();
+            }
+            if verifier.config.secret_key_clearing() {
+                verifier.secret_key = SecretKey::none();
+            }
+        });
+
+        let is_valid = match verifier.config.backend() {
+            Backend::C => verify_c(&mut verifier)?,
+            Backend::Rust => verify_rust(&mut verifier)?,
+        };
+
+        Ok(is_valid)
+    }
+    /// Allows you to provide `Verifier` with the additional data, if any, that was
+    /// originally used to create the hash. Normally hashes are not created with
+    /// additional data; so you are not likely to need this method
+    pub fn with_additional_data<AD>(&mut self, additional_data: AD) -> &mut Verifier
+    where
+        AD: Into<AdditionalData>,
+    {
         self.additional_data = additional_data.into();
         self
     }
-
+    /// Provides `Verifier` with the hash to verify against (in the form of an encode `&str`
+    /// like those produced by the `hash` method on `Hasher`)
     pub fn with_hash(&mut self, hash: &str) -> &mut Verifier {
-        self.hash = Hash::Encoded(hash.to_string());
+        self.hash_enum = HashEnum::Encoded(hash.to_string());
         self
     }
-
-    pub fn with_hash_raw(&mut self, hash_raw: &[u8]) -> &mut Verifier {
-        self.hash = Hash::Raw(hash_raw.to_vec());
+    /// Provides `Verifier` with the hash to verify against (in the form of a `RawHash`
+    /// like those produced by the `hash_raw` method on `Hasher`)
+    pub fn with_hash_raw(&mut self, hash_raw: &HashRaw) -> &mut Verifier {
+        self.hash_enum = HashEnum::Raw(hash_raw.clone());
         self
     }
-
-    pub fn with_password<P: Into<Password>>(&mut self, password: P) -> &mut Verifier {
+    /// Provides `Verifier` with the password to verify against
+    pub fn with_password<P>(&mut self, password: P) -> &mut Verifier
+    where
+        P: Into<Password>,
+    {
         self.password = password.into();
         self
     }
-
-    pub fn with_secret_key<SK: Into<SecretKey>>(&mut self, secret_key: SK) -> &mut Verifier {
+    /// Provides `Verifier` with the secret key that was initially used to create the hash
+    pub fn with_secret_key<SK>(&mut self, secret_key: SK) -> &mut Verifier
+    where
+        SK: Into<SecretKey>,
+    {
         self.secret_key = secret_key.into();
         self
     }
-
-    pub fn verify(&mut self) -> Result<bool, failure::Error> {
-        let mut instance = scopeguard::guard(self, |instance| {
-            instance.hash = Hash::none();
-            instance.password = Password::none();
-        });
-        match instance.hash.clone() {
-            Hash::Encoded(ref s) => Ok(instance._verify(s)?),
-            Hash::Raw(ref bytes) => Ok(instance._verify_raw(bytes)?),
+    /// Read-only access to the `Verifier`'s `AdditionalData`. If you never provided `AdditionalData`,
+    /// this will return a reference to an empty `AdditionalData` (i.e. one whose underlying
+    /// vector of bytes has zero length)
+    pub fn additional_data(&self) -> &AdditionalData {
+        &self.additional_data
+    }
+    /// Read-only access to the `Verifier`'s `VerifierConfig`
+    pub fn config(&self) -> &VerifierConfig {
+        &self.config
+    }
+    /// Read-only access to the `Verifier`'s string-encoded hash, if any. If you never provided a
+    /// string-encoded hash or a `RawHash`, this will return `Some("")`. If you provided a `RawHash`
+    /// but not a string-encoded hash, this will return `None`.
+    pub fn hash(&self) -> Option<&str> {
+        match self.hash_enum {
+            HashEnum::Encoded(ref s) => Some(s),
+            HashEnum::Raw(_) => None,
         }
     }
-
-    pub fn _verify(&mut self, hash: &str) -> Result<bool, failure::Error> {
-        let hash_length = hash.as_bytes().len();
-        let mut buffer = vec![0u8; hash_length];
-        let mut salt = vec![0u8; hash_length];
-
-        let mut context = ffi::Argon2_Context {
-            out: buffer.as_mut_ptr(),
-            outlen: buffer.len() as u32,
-            pwd: ::std::ptr::null_mut(),
-            pwdlen: 0,
-            salt: salt.as_mut_ptr(),
-            saltlen: salt.len() as u32,
-            secret: ::std::ptr::null_mut(),
-            secretlen: 0,
-            ad: ::std::ptr::null_mut(),
-            adlen: 0,
-            t_cost: 0,
-            m_cost: 0,
-            lanes: 0,
-            threads: 0,
-            version: 0,
-            allocate_cbk: None,
-            free_cbk: None,
-            flags: 0,
-        };
-
-        let context_ptr = &mut context as *mut ffi::argon2_context;
-        let hash_cstring = CString::new(hash)?;
-        let hash_cstring_ptr = hash_cstring.as_ptr();
-        let variant = parse_variant(&hash)?;
-        let err = unsafe { ffi::decode_string(context_ptr, hash_cstring_ptr, variant as u32) };
-        if err != 0 {
-            bail!("Argon2 error: {}", err); // Todo
+    /// Read-only access to the `Verifier`'s `RawHash`, if any. If you never provided a
+    /// `RawHash`, this will return `None`.
+    pub fn hash_raw(&self) -> Option<&HashRaw> {
+        match self.hash_enum {
+            HashEnum::Encoded(_) => None,
+            HashEnum::Raw(ref hash_raw) => Some(hash_raw),
         }
-
-        let desired_result_ptr = context.out as *const c_char;
-
-        let mut buffer = vec![0u8; context.outlen as usize];
-        context.ad = self.additional_data.as_mut_ptr();
-        context.adlen = self.additional_data.len() as u32;
-        context.out = buffer.as_mut_ptr();
-        context.outlen = buffer.len() as u32;
-        context.pwd = self.password.as_mut_ptr();
-        context.pwdlen = self.password.len() as u32;
-        context.secret = self.secret_key.as_mut_ptr();
-        context.secretlen = self.secret_key.len() as u32;
-
-        let context_ptr = &mut context as *mut ffi::argon2_context;
-        let err =
-            unsafe { ffi::argon2_verify_ctx(context_ptr, desired_result_ptr, variant as u32) };
-        let is_valid = if err == 0 {
-            true
-        } else if err == ffi::Argon2_ErrorCodes_ARGON2_VERIFY_MISMATCH {
-            false
-        } else {
-            bail!("Argon2 error: {}", err); // Todo
-        };
-        Ok(is_valid)
     }
-
-    // TODO
-    pub fn _verify_raw(&mut self, hash: &[u8]) -> Result<bool, failure::Error> {
-        let _ = hash;
-        Ok(true)
+    /// Read-only access to the `Verifier`'s `Password`. If you never provided a `Password`,
+    /// this will return a reference to an empty `Password` (i.e. one whose underlying
+    /// vector of bytes has zero length)
+    pub fn password(&self) -> &Password {
+        &self.password
+    }
+    /// Read-only access to the `Verifier`'s `SecretKey`. If you never provided a `SecretKey`,
+    /// this will return a reference to an empty `SecretKey` (i.e. one whose underlying
+    /// vector of bytes has zero length)
+    pub fn secret_key(&self) -> &SecretKey {
+        &self.secret_key
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-enum Hash {
-    Raw(Vec<u8>),
+impl Verifier {
+    pub(crate) fn hash_enum(&self) -> &HashEnum {
+        &self.hash_enum
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) enum HashEnum {
+    Raw(HashRaw),
     Encoded(String),
 }
 
-impl Hash {
-    fn none() -> Hash {
-        Hash::Raw(vec![])
+impl HashEnum {
+    fn none() -> HashEnum {
+        HashEnum::Encoded("".to_string())
     }
-}
-
-fn parse_variant(encoded: &str) -> Result<Variant, failure::Error> {
-    let first_letter = match encoded.chars().nth(7) {
-        Some(c) => c,
-        None => bail!("invalid hash format"),
-    };
-    let second_letter = match encoded.chars().nth(8) {
-        Some(c) => c,
-        None => bail!("invalid hash format"),
-    };
-    let variant = if first_letter == 'i' && second_letter == 'd' {
-        Variant::Argon2id
-    } else {
-        match first_letter {
-            'i' => Variant::Argon2i,
-            'd' => Variant::Argon2d,
-            _ => bail!("invalid hash format"),
-        }
-    };
-    Ok(variant)
 }

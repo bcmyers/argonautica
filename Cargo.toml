@@ -20,23 +20,25 @@ links = "argon2"
 base64 = "0.9"
 bindgen = "0.35"
 bitflags = "1.0"
+# blake2-rfc = "0.2"
 failure = "0.1"
 lazy_static = "1.0"
 log = "0.4"
+nom = "4.0.0-beta3"
 num_cpus = "1.8"
 rand = "0.4"
 scopeguard = "0.3"
-serde = { version = "1.0", optional = true }
-void = "1.0"
+serde = "1.0"
+serde_derive = "1.0"
 
 [build-dependencies]
 bindgen = "0.35"
 cc = "1.0"
 
 [dev-dependencies]
-bindgen = "0.35"
 dotenv = "0.11"
 env_logger = "0.5"
+serde_json = "1.0"
 
 [badges]
 travis-ci = { repository = "bcmyers/a2", branch = "master" }

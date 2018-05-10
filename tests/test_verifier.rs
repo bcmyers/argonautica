@@ -16,7 +16,7 @@ impl Test {
     fn run(self) {
         let additional_data = vec![4u8; 12];
         let secret_key = vec![3u8; 8];
-        let mut hasher = a2::Hasher::default().unwrap();
+        let mut hasher = a2::Hasher::default();
         hasher
             .configure_hash_length(32)
             .configure_iterations(3)

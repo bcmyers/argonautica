@@ -1,42 +1,75 @@
+use std::str::FromStr;
+
+use failure;
+
 use config::defaults::DEFAULT_VARIANT;
 
-/// Enum repressenting the choice between variants of the Argon2 algorithm (`Argon2d`, `Argon2i`,
-/// and `Argon2id`).
-///
-/// According to a [March 24, 2017 paper by the authors of the Argon2 algorithm](https://github.com/P-H-C/phc-winner-argon2/blob/master/argon2-specs.pdf),
-/// "`Ardon2d` is faster and uses data-depending memory access, which makes it suitable for
-/// cryptocurrencies and applications with no threats from side-channel timing attackes. `Argon2i`
-/// uses data-independent memory access, which is preferred for password hashing and password-based
-/// key derivation"
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum Variant {
-    Argon2d = 0,
-    Argon2i = 1,
-    Argon2id = 2,
-}
-
 impl Default for Variant {
+    /// `Variant::Argon2id`
     fn default() -> Variant {
         DEFAULT_VARIANT
     }
 }
 
-#[cfg(feature = "serde")]
-mod serde {
-    use serde::de::{Deserialize, Deserializer};
-    use serde::ser::{Serialize, Serializer};
+impl FromStr for Variant {
+    ///
+    type Err = failure::Error;
 
-    use super::Variant;
-
-    impl Serialize for Variant {
-        fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-            unimplemented!()
+    /// `"argon2d"` => `Ok(Variant::Argon2d)`<br/>
+    /// `"argon2i"` => `Ok(Variant::Argon2i)`<br/>
+    /// `"argon2id"` => `Ok(Variant::Argon2id)`<br/>
+    /// anything else => error
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "argon2d" => Ok(Variant::Argon2d),
+            "argon2i" => Ok(Variant::Argon2i),
+            "argon2id" => Ok(Variant::Argon2id),
+            _ => bail!("TODO: failed to parse Variant from &str"),
         }
     }
+}
 
-    impl<'de> Deserialize<'de> for Variant {
-        fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Variant, D::Error> {
-            unimplemented!()
+/// Enum repressenting the choice between variants of the Argon2 algorithm (`Argon2d`, `Argon2i`,
+/// and `Argon2id`).
+///
+/// According to the [latest (as of 5/18) Argon2 RFC](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03) ...
+/// "Argon2 has one primary variant: Argon2id, and two supplementary
+/// variants: Argon2d and Argon2i. Argon2d uses data-dependent memory
+/// access, which makes it suitable for ... applications with no threats from
+/// side-channel timing attacks. Argon2i uses data-independent memory access,
+/// which is preferred for password hashing and password-based key derivation.
+/// Argon2id works as Argon2i for the first half of the first iteration over the memory,
+/// and as Argon2d for the rest, thus providing both side-channel attack
+/// protection and brute-force cost savings due to time-memory tradeoffs."
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Variant {
+    /// Variant of the Argon2 algorithm that is faster and uses data-depending memory access,
+    /// which makes it suitable for applications with no threats from side-channel timing attackes.
+    /// Do <b><u>not</b></u> use this unless you have a specific reason to.
+    Argon2d = 0,
+
+    /// Variant of the Argon2 algorithm that uses data-independent memory access, which is
+    /// preferred for password hashing and password-based key derivation. Do <b><u>not</b></u> use
+    /// this unless you have a specific reason to.
+    Argon2i = 1,
+
+    /// Default variant of the Argon2 algorithm that works as Argon2i for the first half of the
+    /// first iteration over the memory, and as Argon2d for the rest, thus providing both
+    /// side-channel attack protection and brute-force cost savings due to time-memory tradeoffs.
+    /// Use this unless you have a specific reason not to.
+    Argon2id = 2,
+}
+
+impl Variant {
+    /// `Variant::Argond2d` => `"argon2d"`<br/>
+    /// `Variant::Argond2i` => `"argon2i"`<br/>
+    /// `Variant::Argond2id` => `"argon2id"`
+    pub fn as_str(&self) -> &'static str {
+        match *self {
+            Variant::Argon2d => "argon2d",
+            Variant::Argon2i => "argon2i",
+            Variant::Argon2id => "argon2id",
         }
     }
 }

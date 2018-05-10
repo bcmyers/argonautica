@@ -1,36 +1,15 @@
+use std::fmt;
+
 use failure;
-use void::Void;
+use serde;
 
-use data::read::{Read, ReadPrivate};
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct AdditionalData {
-    bytes: Vec<u8>,
-}
-
-impl Default for AdditionalData {
-    fn default() -> AdditionalData {
-        AdditionalData::none()
-    }
-}
-
-impl AdditionalData {
-    pub(crate) fn none() -> AdditionalData {
-        AdditionalData { bytes: vec![] }
-    }
-}
+use data::{Data, DataPrivate};
 
 impl<'a> From<&'a [u8]> for AdditionalData {
     fn from(bytes: &'a [u8]) -> Self {
         AdditionalData {
             bytes: bytes.to_vec(),
         }
-    }
-}
-
-impl From<Vec<u8>> for AdditionalData {
-    fn from(bytes: Vec<u8>) -> Self {
-        AdditionalData { bytes }
     }
 }
 
@@ -41,9 +20,8 @@ impl<'a> From<&'a str> for AdditionalData {
     }
 }
 
-impl<'a, 'b> From<&'a &'b str> for AdditionalData {
-    fn from(s: &'a &'b str) -> Self {
-        let bytes = s.as_bytes().to_vec();
+impl From<Vec<u8>> for AdditionalData {
+    fn from(bytes: Vec<u8>) -> Self {
         AdditionalData { bytes }
     }
 }
@@ -55,21 +33,64 @@ impl From<String> for AdditionalData {
     }
 }
 
-impl ::std::str::FromStr for AdditionalData {
-    type Err = Void;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = s.as_bytes().to_vec();
-        Ok(AdditionalData { bytes })
+impl<'a> From<&'a Vec<u8>> for AdditionalData {
+    fn from(bytes: &Vec<u8>) -> Self {
+        AdditionalData { bytes: bytes.clone() }
     }
 }
 
-impl Read for AdditionalData {
+impl<'a> From<&'a String> for AdditionalData {
+    fn from(s: &String) -> Self {
+        let bytes = s.as_bytes().to_vec();
+        AdditionalData { bytes }
+    }
+}
+
+impl<'a> From<&'a AdditionalData> for AdditionalData {
+    fn from(additional_data: &AdditionalData) -> Self {
+        additional_data.clone()
+    }
+}
+
+impl Data for AdditionalData {
     fn as_bytes(&self) -> &[u8] {
         &self.bytes
     }
 }
 
-impl ReadPrivate for AdditionalData {
+impl serde::Serialize for AdditionalData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_bytes(self.as_bytes())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for AdditionalData {
+    fn deserialize<D>(deserializer: D) -> Result<AdditionalData, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let visitor = AdditionalDataVisitor;
+        let bytes = deserializer.deserialize_seq(visitor)?;
+        Ok(AdditionalData { bytes })
+    }
+}
+
+/// Type-safe struct representing the raw bytes of your additional data (if any)
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct AdditionalData {
+    bytes: Vec<u8>,
+}
+
+impl AdditionalData {
+    pub(crate) fn none() -> AdditionalData {
+        AdditionalData { bytes: vec![] }
+    }
+}
+
+impl DataPrivate for AdditionalData {
     fn as_mut_bytes(&mut self) -> &mut [u8] {
         &mut self.bytes
     }
@@ -78,5 +99,45 @@ impl ReadPrivate for AdditionalData {
             bail!("Additional data is too long; length in bytes must be less than 2^32 - 1");
         }
         Ok(())
+    }
+}
+
+struct AdditionalDataVisitor;
+
+impl<'de> serde::de::Visitor<'de> for AdditionalDataVisitor {
+    type Value = Vec<u8>;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "bytes")
+    }
+
+    fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(v.to_vec())
+    }
+
+    fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(v)
+    }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        let mut output: Vec<u8> = Vec::new();
+        loop {
+            match seq.next_element()? {
+                Some(value) => {
+                    output.push(value);
+                }
+                None => break,
+            }
+        }
+        Ok(output)
     }
 }

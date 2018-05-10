@@ -8,8 +8,8 @@ use a2::config::{Variant, Version};
 use a2::data::{Salt, SecretKey};
 
 pub const HASH_LENGTH: u32 = 32;
-pub const ITERATIONS: [u32; 6] = [16, 32, 64, 128, 256, 512];
-pub const MEMORY_SIZE: [u32; 6] = [512, 1_024, 2_048, 4_096, 8_192, 16_384];
+pub const ITERATIONS: [u32; 7] = [8, 16, 32, 64, 128, 256, 512];
+pub const MEMORY_SIZE: [u32; 7] = [512, 1_024, 2_048, 4_096, 8_192, 16_384, 32_768];
 pub const PASSWORD: &str = "P@ssw0rd";
 pub const SALT_LENGTH: u32 = 32;
 pub const VARIANT: Variant = Variant::Argon2id;
@@ -23,10 +23,10 @@ fn run() -> Result<(), failure::Error> {
     let salt = Salt::random(SALT_LENGTH)?;
     let secret_key =
         SecretKey::from_base64_encoded_str("t9nGEsDxjWtJYdYeExdB6/HU0vg+rT6czv6HSjVjZng=")?;
-    for threads in (1..num_cpus::get() + 1).filter(|x| *x == 1 || (*x).is_power_of_two()) {
+    for threads in (1..num_cpus::get_physical() + 1).filter(|x| *x == 1 || (*x).is_power_of_two()) {
         for memory_size in &MEMORY_SIZE {
             for iterations in &ITERATIONS {
-                let mut hasher = a2::Hasher::default()?;
+                let mut hasher = a2::Hasher::default();
                 hasher
                     .configure_hash_length(HASH_LENGTH)
                     .configure_iterations(*iterations)

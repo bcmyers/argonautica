@@ -1,14 +1,25 @@
-//! Structs representing data to hash, i.e. `Password`, `Salt`, `SecretKey`,
-//! and `AdditionalData`, plus a trait for reading bytes
-
-pub(crate) mod additional_data;
-pub(crate) mod password;
-pub(crate) mod read;
-pub(crate) mod salt;
-pub(crate) mod secret_key;
+//! Structs representing data to hash (i.e. `Password`, `Salt`, `SecretKey`, and `AdditionalData`)
+//!
+//! All the stucts below can be constructed from `Vec<u8>`, `&[u8]`, `String`, `&str`, as well as
+//! other types, as they all implement several versions of the `From` trait. Some have additional
+//! constructors as well, e.g. `Salt::random(...)`, which produces a `Salt` that will create new
+//! crytographically-secure, random bytes after each call to `Hasher::hash()` or `Hasher::hash_raw()`.
+//!
+//! Additionall, all the structs below implement the `Serialize` and `Deserialize` traits from `serde`,
+//! although `Password` and `SecretKey` will serialize into empty bytes for security reasons.
+//!
+//! Finally, each struct below implements the `Data` trait, which provides read-only access to
+//! the otherwise opaque struct's underlying bytes.
+mod additional_data;
+mod data;
+mod password;
+mod salt;
+mod secret_key;
 
 pub use self::additional_data::AdditionalData;
 pub use self::password::Password;
-pub use self::read::Read;
 pub use self::salt::Salt;
 pub use self::secret_key::SecretKey;
+
+pub use self::data::Data;
+pub(crate) use self::data::DataPrivate;

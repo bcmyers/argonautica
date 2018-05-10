@@ -6,7 +6,7 @@ fn main() {
 }
 
 fn run() -> Result<(), failure::Error> {
-    let mut hasher = a2::Hasher::default()?;
+    let mut hasher = a2::Hasher::default();
     let hash = hasher
         .with_password("P@ssw0rd")
         .with_secret_key("secret")

@@ -28,7 +28,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         .header("include/argon2.h")
         .header("include/encoding.h")
-        .layout_tests(true)
+        .layout_tests(false)
         .rustfmt_bindings(false)
         .generate()
         .expect("failed to generate bindings");

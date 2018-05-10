@@ -24,7 +24,7 @@ fn load_secret_key() -> Result<SecretKey, failure::Error> {
 
 fn run() -> Result<(), failure::Error> {
     let secret_key = load_secret_key()?;
-    let mut hasher = a2::Hasher::default()?;
+    let mut hasher = a2::Hasher::default();
     hasher
         .configure_hash_length(32)
         .configure_iterations(128)
@@ -41,7 +41,7 @@ fn run() -> Result<(), failure::Error> {
 
     let mut dictionary = HashMap::new();
     for password in &["P@ssw0rd", "Hello world!", "123456", "😊"] {
-        let hash = hasher.with_password(password).hash()?;
+        let hash = hasher.with_password(*password).hash()?;
         println!("{}", &hash);
         dictionary.insert(password.to_string(), hash);
     }
