@@ -1,9 +1,9 @@
-use failure;
 use scopeguard;
 
-use backend::{encode_c, encode_rust, hash_raw_c, hash_raw_rust};
+use backend::{encode_rust, hash_raw_c, hash_raw_rust};
 use config::{Backend, HasherConfig, Variant, Version};
 use data::{AdditionalData, Password, DataPrivate, Salt, SecretKey};
+use error::Error;
 use ffi;
 use output::HashRaw;
 
@@ -41,7 +41,9 @@ impl Hasher {
     /// it takes to hash a password is approximately 500 milliseconds</b>. There is a script
     /// in the examples directory that will show you the various configuration options for your
     /// machine that produce hashing times between 375 and 625 milliseconds (Don't forget to run
-    /// it with the `--release` flag)
+    /// it with the `--release` flag).
+    ///
+    /// Here are the default configuration options:
     /// * `backend`: `Backend::C`
     /// * `hash_length`: 32 bytes
     /// * `iterations`: 128
@@ -124,19 +126,16 @@ impl Hasher {
     /// it will all the data you would like it to hash (e.g. a `Password` and a `SecretKey`), call
     /// this method in order to produce an encoded `String` representing the hash, which is
     /// safe to store in a database and against which you can verify raw passwords later
-    pub fn hash(&mut self) -> Result<String, failure::Error> {
+    pub fn hash(&mut self) -> Result<String, Error> {
         let hash_raw = self.hash_raw()?;
-        let hash = match self.config().backend() {
-            Backend::C => encode_c(&hash_raw)?,
-            Backend::Rust => encode_rust(&hash_raw),
-        };
+        let hash = encode_rust(&hash_raw);
         Ok(hash)
     }
     /// Like the `hash` method, but instead of producing an encoded `String` representing the hash,
     /// produces a `HashRaw` struct that contains all the component parts of the string-encoded
     /// version, including the raw hash bytes and the raw salt bytes. In general, you should
     /// prefer to use the `hash` method instead of this method
-    pub fn hash_raw(&mut self) -> Result<HashRaw, failure::Error> {
+    pub fn hash_raw(&mut self) -> Result<HashRaw, Error> {
         // ensure password and/or secret_key clearing code will run
         let mut hasher = scopeguard::guard(self, |hasher| {
             if hasher.config().password_clearing() {
@@ -296,7 +295,7 @@ impl Hasher {
     {
         self.secret_key = secret_key.into();
     }
-    pub(crate) fn validate(&self) -> Result<(), failure::Error> {
+    pub(crate) fn validate(&self) -> Result<(), Error> {
         self.config.validate()?;
         self.additional_data.validate(None)?;
         self.password.validate(None)?;

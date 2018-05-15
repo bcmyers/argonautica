@@ -1,5 +1,6 @@
 use base64;
-use failure;
+
+use error::{Error, ErrorKind};
 
 /// Trait implemented by `AdditionalData`, `Password`, `Salt`, and `SecretKey` that gives you
 /// read-only access their underlying bytes
@@ -8,8 +9,10 @@ pub trait Data {
     fn as_bytes(&self) -> &[u8];
 
     /// Read-only access to the struct's underlying bytes as a `&str` if those bytes are valid utf-8
-    fn as_str(&self) -> Result<&str, failure::Error> {
-        Ok(::std::str::from_utf8(self.as_bytes())?)
+    fn as_str(&self) -> Result<&str, Error> {
+        let bytes = self.as_bytes();
+        let s = ::std::str::from_utf8(bytes).map_err(|_| ErrorKind::InvalidUtf8)?;
+        Ok(s)
     }
 
     /// Read-only access to the struct's underlying bytes as as a base64-encoded string using
@@ -26,7 +29,7 @@ pub trait Data {
 
 pub(crate) trait DataPrivate: Data {
     fn as_mut_bytes(&mut self) -> &mut [u8];
-    fn validate(&self, extra: Option<bool>) -> Result<(), failure::Error>;
+    fn validate(&self, extra: Option<bool>) -> Result<(), Error>;
 
     fn as_ptr(&self) -> *const u8 {
         let ptr: *const u8 = match self.as_bytes().len() {

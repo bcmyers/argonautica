@@ -1,12 +1,12 @@
 use base64;
-use failure;
 
 use config::{Variant, Version};
+use error::{Error, ErrorKind};
 use output::HashRaw;
 
-pub(crate) fn decode_rust(hash: &str) -> Result<HashRaw, failure::Error> {
-    let (rest, intermediate) = parse_hash(hash).map_err(|e| format_err!("{:?}", e))?;
-    let raw_hash_bytes = base64::decode_config(rest, base64::STANDARD_NO_PAD)?;
+pub(crate) fn decode_rust(hash: &str) -> Result<HashRaw, Error> {
+    let (rest, intermediate) = parse_hash(hash).map_err(|_| ErrorKind::HashInvalid)?;
+    let raw_hash_bytes = base64::decode_config(rest, base64::STANDARD_NO_PAD).map_err(|_| ErrorKind::HashInvalid)?;
     let hash_raw = HashRaw::new(
         /* iterations */ intermediate.iterations,
         /* lanes */ intermediate.lanes,

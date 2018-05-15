@@ -1,8 +1,7 @@
 use std::str::FromStr;
 
-use failure;
-
 use config::defaults::DEFAULT_VARIANT;
+use error::{Error, ErrorKind};
 
 impl Default for Variant {
     /// `Variant::Argon2id`
@@ -13,7 +12,7 @@ impl Default for Variant {
 
 impl FromStr for Variant {
     ///
-    type Err = failure::Error;
+    type Err = Error;
 
     /// `"argon2d"` => `Ok(Variant::Argon2d)`<br/>
     /// `"argon2i"` => `Ok(Variant::Argon2i)`<br/>
@@ -24,7 +23,7 @@ impl FromStr for Variant {
             "argon2d" => Ok(Variant::Argon2d),
             "argon2i" => Ok(Variant::Argon2i),
             "argon2id" => Ok(Variant::Argon2id),
-            _ => bail!("TODO: failed to parse Variant from &str"),
+            _ => Err(ErrorKind::ParseVariant.into()),
         }
     }
 }

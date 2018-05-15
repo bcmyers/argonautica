@@ -1,22 +1,16 @@
 use std::str::FromStr;
 
-use failure;
-
-use backend::{decode_c, decode_rust, encode_c, encode_rust};
-use config::{Backend, Variant, Version};
-use config::defaults::DEFAULT_BACKEND;
+use backend::{decode_rust, encode_rust};
+use config::{Variant, Version};
+use error::Error;
 
 impl FromStr for HashRaw {
     ///
-    type Err = failure::Error;
+    type Err = Error;
 
     /// Take a regular string-encoded hash and converts it into an instance of `HashRaw`
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let hash_raw = match DEFAULT_BACKEND {
-            Backend::C => decode_c(s)?,
-            Backend::Rust => decode_rust(s)?,
-        };
-        Ok(hash_raw)
+        Ok(decode_rust(s)?)
     }
 }
 
@@ -37,12 +31,8 @@ pub struct HashRaw {
 
 impl HashRaw {
     /// Converts the `HashRaw` to a string-encoded hash
-    pub fn to_hash(&self) -> Result<String, failure::Error> {
-        let hash = match DEFAULT_BACKEND {
-            Backend::C => encode_c(self)?,
-            Backend::Rust => encode_rust(self),
-        };
-        Ok(hash)
+    pub fn to_hash(&self) -> String {
+        encode_rust(self)
     }
     /// Iterations configuration used to create this hash
     pub fn iterations(&self) -> u32 {

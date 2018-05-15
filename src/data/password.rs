@@ -1,7 +1,7 @@
-use failure;
 use serde;
 
 use data::{Data, DataPrivate};
+use error::{Error, ErrorKind};
 
 impl<'a> From<&'a [u8]> for Password {
     fn from(bytes: &'a [u8]) -> Self {
@@ -81,12 +81,12 @@ impl DataPrivate for Password {
     fn as_mut_bytes(&mut self) -> &mut [u8] {
         &mut self.bytes
     }
-    fn validate(&self, _extra: Option<bool>) -> Result<(), failure::Error> {
+    fn validate(&self, _extra: Option<bool>) -> Result<(), Error> {
         if self.bytes.is_empty() {
-            bail!("Password cannot be empty");
+            return Err(ErrorKind::PasswordTooShort.into());
         }
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            bail!("Password is too long; length in bytes must be less than 2^32 - 1");
+            return Err(ErrorKind::PasswordTooLong.into());
         }
         Ok(())
     }

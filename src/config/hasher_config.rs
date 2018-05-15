@@ -1,11 +1,10 @@
-use failure;
-
 use config::defaults::{
     DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES, DEFAULT_MEMORY_SIZE,
     DEFAULT_OPT_OUT_OF_RANDOM_SALT, DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING,
     DEFAULT_SECRET_KEY_CLEARING, DEFAULT_THREADS, DEFAULT_VERSION,
 };
 use config::{Backend, Flags, Variant, Version};
+use error::{Error, ErrorKind};
 
 const PANIC_WARNING: &str = "Your program will panic at runtime if you use this configuration";
 
@@ -154,7 +153,7 @@ impl HasherConfig {
         }
         self.version = version;
     }
-    pub(crate) fn validate(&self) -> Result<(), failure::Error> {
+    pub(crate) fn validate(&self) -> Result<(), Error> {
         validate_backend(self.backend)?;
         validate_hash_length(self.hash_length)?;
         validate_iterations(self.iterations)?;
@@ -165,54 +164,54 @@ impl HasherConfig {
     }
 }
 
-fn validate_backend(backend: Backend) -> Result<(), failure::Error> {
+fn validate_backend(backend: Backend) -> Result<(), Error> {
     match backend {
         Backend::C => (),
-        Backend::Rust => bail!("Rust backend is not yet supported. Please use the C backend"),
+        Backend::Rust => return Err(ErrorKind::BackendUnsupported.into()),
     }
     Ok(())
 }
 
-fn validate_hash_length(hash_length: u32) -> Result<(), failure::Error> {
+fn validate_hash_length(hash_length: u32) -> Result<(), Error> {
     if hash_length < 4 {
-        bail!("Hash length too short. Hash length must be greater than 3")
+        return Err(ErrorKind::HashLengthTooShort.into());
     }
     Ok(())
 }
 
-fn validate_iterations(iterations: u32) -> Result<(), failure::Error> {
+fn validate_iterations(iterations: u32) -> Result<(), Error> {
     if iterations == 0 {
-        bail!("Iterations cannot be zero")
+        return Err(ErrorKind::IterationsTooFew.into());
     }
     Ok(())
 }
 
-fn validate_lanes(lanes: u32) -> Result<(), failure::Error> {
+fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
-        bail!("Lanes cannot be zero")
+        return Err(ErrorKind::LanesTooFew.into());
     }
     if lanes > 0x00ffffff {
-        bail!("Too many lanes. Lanes must be less than 2^24")
+        return Err(ErrorKind::LanesTooMany.into());
     }
     Ok(())
 }
 
-fn validate_memory_size(lanes: u32, memory_size: u32) -> Result<(), failure::Error> {
+fn validate_memory_size(lanes: u32, memory_size: u32) -> Result<(), Error> {
     if memory_size < 8 * lanes {
-        bail!("Memory size too small. Memory size must be at least 8 times the number of lanes")
+        return Err(ErrorKind::MemorySizeTooSmall.into());
     }
     if !(memory_size.is_power_of_two()) {
-        bail!("Memory size invalid. Memory size must be a power of two")
+        return Err(ErrorKind::MemorySizeInvalid.into());
     }
     Ok(())
 }
 
-fn validate_threads(threads: u32) -> Result<(), failure::Error> {
+fn validate_threads(threads: u32) -> Result<(), Error> {
     if threads == 0 {
-        bail!("Lanes cannot be zero")
+        return Err(ErrorKind::LanesTooFew.into());
     }
     if threads > 0x00ffffff {
-        bail!("Too many threads. Threads must be less than 2^24")
+        return Err(ErrorKind::ThreadsTooMany.into());
     }
     Ok(())
 }

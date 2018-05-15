@@ -1,12 +1,13 @@
+#![cfg(test)]
+
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
-use failure;
-
+use error::{Error, ErrorKind};
 use ffi;
 use output::HashRaw;
 
-pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, failure::Error> {
+pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
     let encoded_len = unsafe {
         ffi::argon2_encodedlen(
             hash_raw.iterations(),
@@ -47,7 +48,7 @@ pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, failure::Error> {
 
     let err = unsafe { ffi::encode_string(encoded_ptr, encoded_len, context_ptr, type_) };
     if err != 0 {
-        bail!("{}", err);
+        return Err(ErrorKind::HashEncoding.into()); // TODO????
     }
 
     let c_str: &CStr = unsafe { CStr::from_ptr(encoded_ptr) };

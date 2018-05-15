@@ -1,7 +1,6 @@
-use failure;
-
 use config::defaults::DEFAULT_SALT_LENGTH;
 use data::{Data, DataPrivate};
+use error::{Error, ErrorKind};
 use utils;
 
 impl Default for Salt {
@@ -98,7 +97,7 @@ impl Salt {
     /// Constructs a "random" `Salt` of length provided that uses a cryptographically secure
     /// random number generator to produce new random bytes for each call to `hash()` or
     /// `hash_raw()` on `Hasher`
-    pub fn random(length: u32) -> Result<Salt, failure::Error> {
+    pub fn random(length: u32) -> Result<Salt, Error> {
         let bytes = utils::generate_random_bytes(length)?;
         Ok(Salt {
             bytes,
@@ -114,17 +113,17 @@ impl DataPrivate for Salt {
     fn as_mut_bytes(&mut self) -> &mut [u8] {
         &mut self.bytes
     }
-    fn validate(&self, extra: Option<bool>) -> Result<(), failure::Error> {
+    fn validate(&self, extra: Option<bool>) -> Result<(), Error> {
         let opt_out_of_random_salt = extra.unwrap();
         let length = self.bytes.len();
         if length < 8 {
-            bail!("Salt is too short; length in bytes must be greater than 8")
+            return Err(ErrorKind::SaltTooShort.into());
         }
         if length >= ::std::u32::MAX as usize {
-            bail!("Salt is too long; length in bytes must be less than 2^32 - 1")
+            return Err(ErrorKind::SaltTooLong.into());
         }
         if !(opt_out_of_random_salt) && !(self.is_random) {
-            bail!("Attempted to use a non-random salt without having opted out of random salt")
+            return Err(ErrorKind::SaltNonRandom.into());
         }
         Ok(())
     }

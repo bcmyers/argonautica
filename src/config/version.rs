@@ -1,8 +1,7 @@
 use std::str::FromStr;
 
-use failure;
-
 use config::defaults::DEFAULT_VERSION;
+use error::{Error, ErrorKind};
 
 impl Default for Version {
     /// `Version::_0x13`
@@ -13,7 +12,7 @@ impl Default for Version {
 
 impl FromStr for Version {
     ///
-    type Err = failure::Error;
+    type Err = Error;
 
     /// `"16"` => `Ok(Version::_0x10)`<br/>
     /// `"19"` => `Ok(Version::_0x13)`<br/>
@@ -22,7 +21,7 @@ impl FromStr for Version {
         match s {
             "16" => Ok(Version::_0x10),
             "19" => Ok(Version::_0x13),
-            _ => bail!("TODO: failed to parse Version from &str"),
+            _ => Err(ErrorKind::ParseVersion.into()),
         }
     }
 }
@@ -50,11 +49,11 @@ impl Version {
     /// `16_u32` => `Ok(Version::_0x10)`<br/>
     /// `19_u32` => `Ok(Version::_0x13)`<br/>
     /// anything else => error
-    pub fn from_u32(x: u32) -> Result<Version, failure::Error> {
+    pub fn from_u32(x: u32) -> Result<Version, Error> {
         match x {
             16 => Ok(Version::_0x10),
             19 => Ok(Version::_0x13),
-            _ => bail!("TODO"),
+            _ => return Err(ErrorKind::ParseVersion.into()),
         }
     }
 }

@@ -113,7 +113,7 @@ fn test_raw_hash_to_hash() {
         .opt_out_of_random_salt();
 
     let hash_raw = hasher.with_password(password).hash_raw().unwrap();
-    let hash1 = hash_raw.to_hash().unwrap();
+    let hash1 = hash_raw.to_hash();
 
     let hash2 = hasher.with_password(password).hash().unwrap();
 

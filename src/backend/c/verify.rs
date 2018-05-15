@@ -1,16 +1,15 @@
 use std::ffi::CString;
 use std::os::raw::c_char;
 
-use failure;
-
-use backend::encode_c;
+use backend::encode_rust;
 use config::Variant;
 use data::DataPrivate;
+use error::{Error, ErrorKind};
 use ffi;
 use output::HashRaw;
 use verifier::{HashEnum, Verifier};
 
-pub(crate) fn verify_c(verifier: &Verifier) -> Result<bool, failure::Error> {
+pub(crate) fn verify_c(verifier: &Verifier) -> Result<bool, Error> {
     let is_valid = match verifier.hash_enum() {
         &HashEnum::Encoded(ref s) => verify_hash(verifier, s)?,
         &HashEnum::Raw(ref hash_raw) => verify_hash_raw(verifier, hash_raw)?,
@@ -18,7 +17,7 @@ pub(crate) fn verify_c(verifier: &Verifier) -> Result<bool, failure::Error> {
     Ok(is_valid)
 }
 
-fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, failure::Error> {
+fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, Error> {
     let max_len = hash.as_bytes().len();
     let mut buffer = vec![0u8; max_len];
     let mut salt = vec![0u8; max_len];
@@ -45,12 +44,12 @@ fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, failure::Error> 
     };
 
     let context_ptr = &mut context as *mut ffi::argon2_context;
-    let hash_cstring = CString::new(hash)?;
+    let hash_cstring: CString = CString::new(hash).map_err(|_| ErrorKind::HashInvalid)?;
     let hash_cstring_ptr = hash_cstring.as_ptr();
-    let (_, variant) = parse_variant(&hash).map_err(|e| format_err!("{:?}", e))?;
+    let (_, variant) = parse_variant(&hash).map_err(|_| ErrorKind::HashInvalid)?;
     let err = unsafe { ffi::decode_string(context_ptr, hash_cstring_ptr, variant as u32) };
     if err != 0 {
-        bail!("Argon2 error: {}", err); // Todo
+        return Err(ErrorKind::HashInvalid.into());
     }
 
     let desired_result_ptr = context.out as *const c_char;
@@ -72,7 +71,7 @@ fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, failure::Error> 
     } else if err == ffi::Argon2_ErrorCodes_ARGON2_VERIFY_MISMATCH {
         false
     } else {
-        bail!("Argon2 error: {}", err); // Todo
+        return Err(ErrorKind::HashInvalid.into());
     };
     Ok(is_valid)
 }
@@ -84,8 +83,8 @@ named!(parse_variant<&str, Variant>, do_parse!(
     (variant)
 ));
 
-fn verify_hash_raw(verifier: &Verifier, hash_raw: &HashRaw) -> Result<bool, failure::Error> {
-    let hash = encode_c(hash_raw)?;
+fn verify_hash_raw(verifier: &Verifier, hash_raw: &HashRaw) -> Result<bool, Error> {
+    let hash = encode_rust(hash_raw);
     let is_valid = verify_hash(verifier, &hash)?;
     Ok(is_valid)
 }

@@ -1,9 +1,9 @@
-use failure;
 use scopeguard;
 
 use backend::{verify_c, verify_rust};
 use config::{Backend, VerifierConfig};
 use data::{AdditionalData, Password, SecretKey};
+use error::Error;
 use output::HashRaw;
 
 impl Default for Verifier {
@@ -66,7 +66,7 @@ impl Verifier {
     /// it will all the data it needs to verify a password (e.g. a string-encoded hash or `HashRaw`,
     /// a `Password` and a `SecretKey`), call this method in order to determine whether the
     /// provided password matches the provided hash
-    pub fn verify(&mut self) -> Result<bool, failure::Error> {
+    pub fn verify(&mut self) -> Result<bool, Error> {
         // TODO: validate?
         let mut verifier = scopeguard::guard(self, |verifier| {
             if verifier.config.password_clearing() {

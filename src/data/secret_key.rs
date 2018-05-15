@@ -1,8 +1,8 @@
 use base64;
-use failure;
 use serde;
 
 use data::{Data, DataPrivate};
+use error::{Error, ErrorKind};
 
 impl<'a> From<&'a [u8]> for SecretKey {
     fn from(bytes: &'a [u8]) -> Self {
@@ -75,15 +75,15 @@ pub struct SecretKey {
 impl SecretKey {
     /// Constructs a `SecretKey` from a base64-encoded `&str` that uses the
     /// [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html)
-    pub fn from_base64_encoded_str(s: &str) -> Result<SecretKey, failure::Error> {
-        let bytes = base64::decode_config(s, base64::STANDARD)?;
+    pub fn from_base64_encoded_str(s: &str) -> Result<SecretKey, Error> {
+        let bytes = base64::decode_config(s, base64::STANDARD).map_err(|_| ErrorKind::InvalidBase64)?;
         Ok(SecretKey { bytes })
     }
     /// Constructs a `SecretKey` from a base64-encoded `&str` that uses a non-standard base64 encoding
     /// (e.g. a [url-safe encoding](https://docs.rs/base64/0.9.1/base64/constant.URL_SAFE.html)),
     /// which the user specifies via the `config` parameter
-    pub fn from_base64_encoded_str_config(s: &str, config: base64::Config) -> Result<SecretKey, failure::Error> {
-        let bytes = base64::decode_config(s, config)?;
+    pub fn from_base64_encoded_str_config(s: &str, config: base64::Config) -> Result<SecretKey, Error> {
+        let bytes = base64::decode_config(s, config).map_err(|_| ErrorKind::InvalidBase64)?;
         Ok(SecretKey { bytes })
     }
 }
@@ -98,13 +98,13 @@ impl DataPrivate for SecretKey {
     fn as_mut_bytes(&mut self) -> &mut [u8] {
         &mut self.bytes
     }
-    fn validate(&self, extra: Option<bool>) -> Result<(), failure::Error> {
+    fn validate(&self, extra: Option<bool>) -> Result<(), Error> {
         let opt_out_of_secret_key = extra.unwrap();
         if !(opt_out_of_secret_key) && self.bytes.is_empty() {
-            bail!("TODO: Trying to hash without a secret key when you have not explicitly opted out of using a secret key")
+            return Err(ErrorKind::SecretKeyMissing.into());
         }
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            bail!("TODO: Secret key too long; must be less than 2^32 - 1 bytes")
+            return Err(ErrorKind::SecretKeyTooLong.into());
         }
         Ok(())
     }
