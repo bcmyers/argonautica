@@ -1,44 +1,80 @@
 use std::fmt;
 
-use failure;
-
 use error::ErrorKind;
 
-impl failure::Fail for Error {
-    fn cause(&self) -> Option<&failure::Fail> {
-        self.inner.cause()
-    }
-
-    fn backtrace(&self) -> Option<&failure::Backtrace> {
-        self.inner.backtrace()
-    }
-}
-
-impl From<ErrorKind> for Error {
-    fn from(kind: ErrorKind) -> Error {
-        Error { inner: failure::Context::new(kind) }
-    }
-}
-
-impl From<failure::Context<ErrorKind>> for Error {
-    fn from(inner: failure::Context<ErrorKind>) -> Error {
-        Error { inner: inner }
+impl fmt::Debug for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if f.alternate() {
+            write!(
+                f,
+                "a2::error::Error {{\n    kind: a2::error::ErrorKind::{:?},\n    display: {:?},\n}}",
+                self.kind,
+                self.display,
+            )
+        } else {
+            write!(
+                f,
+                "a2::error::Error {{ kind: a2::error::ErrorKind::{:?}, display: {:?} }}",
+                self.kind, self.display,
+            )
+        }
     }
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Display::fmt(&self.inner, f)
+        write!(f, "{}", self.display)
     }
 }
 
-#[derive(Debug)]
+/// Struct representing an error, which implements the
+/// [`Fail`](https://docs.rs/failure/0.1.1/failure/trait.Fail.html) trait
+/// from [failure](https://github.com/rust-lang-nursery/failure)
+#[derive(Fail, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Error {
-    inner: failure::Context<ErrorKind>,
+    kind: ErrorKind,
+    display: String,
+}
+
+impl From<ErrorKind> for Error {
+    fn from(kind: ErrorKind) -> Error {
+        Error::new(kind)
+    }
 }
 
 impl Error {
+    /// Creates a new [`Error`](struct.Error.html)
+    pub fn new(kind: ErrorKind) -> Error {
+        let display = format!("{}", &kind);
+        Error { display, kind }
+    }
+    /// Adds additional context to the [`Error`](struct.Error.html). The additional context will be appended to
+    /// the end of the [`Error`](struct.Error.html)'s display string
+    pub fn add_context<S: AsRef<str>>(mut self, context: S) -> Error {
+        self.display = format!("{}: {}", self.kind, context.as_ref());
+        self
+    }
+    /// Gets the [`ErrorKind`](enum.ErrorKind.html) associated with the [`Error`](struct.Error.html)
     pub fn kind(&self) -> ErrorKind {
-        *self.inner.get_context()
+        self.kind
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Error>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Error>();
     }
 }

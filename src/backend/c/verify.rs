@@ -44,12 +44,12 @@ fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, Error> {
     };
 
     let context_ptr = &mut context as *mut ffi::argon2_context;
-    let hash_cstring: CString = CString::new(hash).map_err(|_| ErrorKind::HashInvalid)?;
+    let hash_cstring: CString = CString::new(hash).map_err(|_| ErrorKind::Bug)?; // TODO
     let hash_cstring_ptr = hash_cstring.as_ptr();
-    let (_, variant) = parse_variant(&hash).map_err(|_| ErrorKind::HashInvalid)?;
+    let (_, variant) = parse_variant(&hash).map_err(|_| ErrorKind::Bug)?; // TODO
     let err = unsafe { ffi::decode_string(context_ptr, hash_cstring_ptr, variant as u32) };
     if err != 0 {
-        return Err(ErrorKind::HashInvalid.into());
+        return Err(ErrorKind::Bug.into()); // TODO
     }
 
     let desired_result_ptr = context.out as *const c_char;
@@ -71,7 +71,7 @@ fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, Error> {
     } else if err == ffi::Argon2_ErrorCodes_ARGON2_VERIFY_MISMATCH {
         false
     } else {
-        return Err(ErrorKind::HashInvalid.into());
+        return Err(ErrorKind::Bug.into()); // TODO
     };
     Ok(is_valid)
 }

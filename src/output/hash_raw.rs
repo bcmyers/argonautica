@@ -14,11 +14,14 @@ impl FromStr for HashRaw {
     }
 }
 
-/// Struct representing raw hash output. If you use the regular `hash` method on `Hasher`, you won't have to use this.
+/// Struct representing raw hash output. If you use the regular [`hash`](../struct.Hasher.html#method.hash)
+/// method on [`Hasher`](../struct.Hasher.html), you won't have to use this.
 /// If, however, you prefer to see the raw bytes behind the hash, you can obtain an instance of
-/// this struct with the `hash_raw` method on `Hasher`
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+/// this struct with the [`hash_raw`](../struct.Hasher.html#method.hash_raw) method on
+/// [`Hasher`](../struct.Hasher.html)
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct HashRaw {
     iterations: u32,
     lanes: u32,
@@ -83,5 +86,22 @@ impl HashRaw {
             variant,
             version,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<HashRaw>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<HashRaw>();
     }
 }

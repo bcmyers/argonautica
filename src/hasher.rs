@@ -1,14 +1,14 @@
 use scopeguard;
 
-use backend::{encode_rust, hash_raw_c, hash_raw_rust};
+use backend::{encode_rust, hash_raw_c};
 use config::{Backend, HasherConfig, Variant, Version};
-use data::{AdditionalData, Password, DataPrivate, Salt, SecretKey};
-use error::Error;
+use data::{AdditionalData, DataPrivate, Password, Salt, SecretKey};
+use error::{Error, ErrorKind};
 use ffi;
 use output::HashRaw;
 
 impl Default for Hasher {
-    /// Same as the `new` method
+    /// Same as the [`new`](struct.Hasher.html#method.new) method
     fn default() -> Hasher {
         Hasher {
             additional_data: AdditionalData::none(),
@@ -20,21 +20,22 @@ impl Default for Hasher {
     }
 }
 
-/// One of the two main structs. Use it to turn passwords into hashes that are safe to store in a database
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+/// <b><u>One of the two main structs.</u></b> Use it to turn passwords into hashes that are safe to store in a database
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Hasher {
     additional_data: AdditionalData,
     config: HasherConfig,
-    #[serde(skip_serializing)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     password: Password,
     salt: Salt,
-    #[serde(skip_serializing)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     secret_key: SecretKey,
 }
 
 impl Hasher {
-    /// Creates a new `Hasher` with sensible default configuration options for an early-2014 MacBook Air.
+    /// Creates a new [`Hasher`](struct.Hasher.html) with sensible default configuration options for an early-2014 MacBook Air.
     /// <b>Note: If you are using this library to hash user passwords for storage in a database,
     /// it is recommended that you adjust these settings for your machine
     /// (primarily `iterations`, `memory_size`, `lanes` and/or `threads`) until the time
@@ -46,7 +47,7 @@ impl Hasher {
     /// Here are the default configuration options:
     /// * `backend`: `Backend::C`
     /// * `hash_length`: 32 bytes
-    /// * `iterations`: 128
+    /// * `iterations`: 192
     /// * `lanes`: the number of physical cores on your machine
     /// * `memory_size`: 4096 kibibytes
     /// * `opt_out_of_random_salt`: false
@@ -73,7 +74,7 @@ impl Hasher {
         self.config.set_hash_length(hash_length);
         self
     }
-    /// Allows you to configure `Hasher` to use a custom number of iterations. The default is 128.
+    /// Allows you to configure `Hasher` to use a custom number of iterations. The default is 192.
     pub fn configure_iterations(&mut self, iterations: u32) -> &mut Hasher {
         self.config.set_iterations(iterations);
         self
@@ -158,7 +159,7 @@ impl Hasher {
         // calculate hash_raw
         let hash_raw = match hasher.config().backend() {
             Backend::C => hash_raw_c(&mut hasher)?,
-            Backend::Rust => hash_raw_rust(&mut hasher)?,
+            Backend::Rust => return Err(ErrorKind::BackendUnsupportedError.into()),
         };
 
         Ok(hash_raw)
@@ -304,5 +305,22 @@ impl Hasher {
         self.secret_key
             .validate(Some(self.config.opt_out_of_secret_key()))?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Hasher>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Hasher>();
     }
 }

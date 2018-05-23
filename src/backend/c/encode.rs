@@ -48,7 +48,7 @@ pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
 
     let err = unsafe { ffi::encode_string(encoded_ptr, encoded_len, context_ptr, type_) };
     if err != 0 {
-        return Err(ErrorKind::HashEncoding.into()); // TODO????
+        return Err(ErrorKind::HashEncodingError.into()); // TODO????
     }
 
     let c_str: &CStr = unsafe { CStr::from_ptr(encoded_ptr) };

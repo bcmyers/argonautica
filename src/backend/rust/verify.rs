@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use error::Error;
 use verifier::Verifier;
 

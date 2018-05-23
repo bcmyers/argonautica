@@ -4,7 +4,7 @@ use config::defaults::DEFAULT_VERSION;
 use error::{Error, ErrorKind};
 
 impl Default for Version {
-    /// `Version::_0x13`
+    /// Returns [`Version::_0x13`](enum.Version.html#variant._0x13)
     fn default() -> Version {
         DEFAULT_VERSION
     }
@@ -14,21 +14,25 @@ impl FromStr for Version {
     ///
     type Err = Error;
 
-    /// `"16"` => `Ok(Version::_0x10)`<br/>
-    /// `"19"` => `Ok(Version::_0x13)`<br/>
-    /// anything else   => error
+    /// Performs the following mapping:
+    /// * `"16"` => `Ok(Version::_0x10)`<br/>
+    /// * `"19"` => `Ok(Version::_0x13)`<br/>
+    /// * anything else => an error
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "16" => Ok(Version::_0x10),
             "19" => Ok(Version::_0x13),
-            _ => Err(ErrorKind::ParseVersion.into()),
+            _ => Err(ErrorKind::VersionParseError.into()),
         }
     }
 }
 
-/// Enum repressenting the choice between versions of the Argon2 algorithm (`0x10` and `0x13`)
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+/// Enum repressenting the various versions of the Argon2 algorithm (
+/// [`0x10`](enum.Version.html#variant._0x10) and
+/// [`0x13`](enum.Version.html#variant._0x13))
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum Version {
     /// An outdated version of the Argon2 algorithm. Do <b><u>not</b></u> use this unless you have a specific reason to.
     _0x10 = 0x10,
@@ -37,8 +41,9 @@ pub enum Version {
 }
 
 impl Version {
-    /// `Version::_0x10` => `"16"`<br/>
-    /// `Version::_0x13` => `"19"`
+    /// Performs the following mapping:
+    /// * `Version::_0x10` => `"16"`<br/>
+    /// * `Version::_0x13` => `"19"`
     pub fn as_str(&self) -> &'static str {
         match *self {
             Version::_0x10 => "16",
@@ -46,14 +51,32 @@ impl Version {
         }
     }
 
-    /// `16_u32` => `Ok(Version::_0x10)`<br/>
-    /// `19_u32` => `Ok(Version::_0x13)`<br/>
-    /// anything else => error
+    /// Performs the following mapping:
+    /// * `16_u32` => `Ok(Version::_0x10)`<br/>
+    /// * `19_u32` => `Ok(Version::_0x13)`<br/>
+    /// * anything else => an error
     pub fn from_u32(x: u32) -> Result<Version, Error> {
         match x {
             16 => Ok(Version::_0x10),
             19 => Ok(Version::_0x13),
-            _ => return Err(ErrorKind::ParseVersion.into()),
+            _ => return Err(ErrorKind::VersionParseError.into()),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Version>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Version>();
     }
 }

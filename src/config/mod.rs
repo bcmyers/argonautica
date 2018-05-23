@@ -1,4 +1,5 @@
-//! Enums and default constants for Argon2 configuration options (e.g. `hash_length`, `Variant`, `Version`, etc.)
+//! Contains enums and defaults for Argon2 configuration options (e.g. `hash_length`,
+//! [`Variant`](config/enum.Variant.html), [`Version`](config/enum.Version.html), etc.)
 mod backend;
 pub(crate) mod defaults;
 mod flags;

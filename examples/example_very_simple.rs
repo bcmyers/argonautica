@@ -10,10 +10,10 @@ fn main() {
     println!("{}", &hash);
 
     let hash = "\
-        $argon2id$v=19$m=4096,t=128,p=2\
-        $/q7MXPB7VqmB1iRQvgg6g1Vz5Rr76qISATkCGafVnLU\
-        $039phOrF/E5yzN67B2aCbXhRAcNMM1yKhhD8wtDMciY\
-    ";
+                $argon2id$v=19$m=4096,t=128,p=2\
+                $/q7MXPB7VqmB1iRQvgg6g1Vz5Rr76qISATkCGafVnLU\
+                $039phOrF/E5yzN67B2aCbXhRAcNMM1yKhhD8wtDMciY\
+                ";
     let mut verifier = a2::Verifier::default();
     let is_valid = verifier
         .with_hash(hash)

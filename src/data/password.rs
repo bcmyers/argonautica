@@ -1,3 +1,4 @@
+#[cfg(feature = "serde")]
 use serde;
 
 use data::{Data, DataPrivate};
@@ -33,7 +34,9 @@ impl From<String> for Password {
 
 impl<'a> From<&'a Vec<u8>> for Password {
     fn from(bytes: &Vec<u8>) -> Self {
-        Password { bytes: bytes.clone() }
+        Password {
+            bytes: bytes.clone(),
+        }
     }
 }
 
@@ -56,6 +59,7 @@ impl Data for Password {
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for Password {
     fn deserialize<D>(_deserializer: D) -> Result<Password, D::Error>
     where
@@ -83,11 +87,28 @@ impl DataPrivate for Password {
     }
     fn validate(&self, _extra: Option<bool>) -> Result<(), Error> {
         if self.bytes.is_empty() {
-            return Err(ErrorKind::PasswordTooShort.into());
+            return Err(ErrorKind::PasswordTooShortError.into());
         }
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::PasswordTooLong.into());
+            return Err(ErrorKind::PasswordTooLongError.into());
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Password>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Password>();
     }
 }

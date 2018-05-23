@@ -1,4 +1,8 @@
-//! Structs representing data to hash (i.e. `Password`, `Salt`, `SecretKey`, and `AdditionalData`)
+//! Contains structs representing data to hash (i.e.
+//! [`Password`](data/struct.Password.html),
+//! [`Salt`](data/struct.Salt.html),
+//! [`SecretKey`](data/struct.SecretKey.html), and
+//! [`AdditionalData`](data/struct.AdditionalData.html))
 //!
 //! All the stucts below can be constructed from `Vec<u8>`, `&[u8]`, `String`, `&str`, as well as
 //! other types, as they all implement several versions of the `From` trait. Some have additional

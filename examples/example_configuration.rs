@@ -57,7 +57,7 @@ fn main() {
         .opt_out_of_random_salt()
         // 👆 If you wish to use a non-random salt, you must explicity opt out by calling this method
         .opt_out_of_secret_key();
-        // 👆 If you wish to not use a secret key, you must explicity opt out by calling this method
+    // 👆 If you wish to not use a secret key, you must explicity opt out by calling this method
 
     let hash = hasher
         .with_password("P@ssw0rd")
@@ -65,7 +65,7 @@ fn main() {
         // 👆 A non-random salt, which is a bad idea, but possible
         .hash()
         .unwrap();
-        // 👆 Notice we did not include a secret key, which is also a bad idea, but possible
+    // 👆 Notice we did not include a secret key, which is also a bad idea, but possible
 
     println!("{}", &hash);
     // 👆 prints $argon2id$v=19$m=8192,t=256,p=2$c29tZXNhbHQ$TyX+9AspmkeMGLJRQdJozQ

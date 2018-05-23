@@ -1,8 +1,11 @@
 use config::defaults::{DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING};
 use config::Backend;
 
-/// Read-only `Verifier` configuration. Can be obtained by calling `config()` on an instance of `Verifier`
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+/// Read-only configuration for [`Verifier`](../struct.Verifier.html). Can be obtained by calling
+/// the [`config`](../struct.Verifier.html#method.config) method on an instance of [`Verifier`](../struct.Verifier.html)
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct VerifierConfig {
     backend: Backend,
     password_clearing: bool,
@@ -37,5 +40,22 @@ impl VerifierConfig {
     }
     pub(crate) fn set_secret_key_clearing(&mut self, boolean: bool) {
         self.secret_key_clearing = boolean;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<VerifierConfig>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<VerifierConfig>();
     }
 }

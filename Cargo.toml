@@ -1,13 +1,13 @@
 [package]
 name = "a2"
-version = "0.1.0"
-authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
+version = "0.1.0" # remember to update html_root_url
 
+authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
 categories = ["Algorithms", "API bindings", "Authentication", "Cryptography"]
-description = "Idiomatic Argon2 password hashing"
-documentation = "httpss://docs.rs/a2"
+description = "Argon2 password hashing"
+documentation = "https://docs.rs/a2"
 homepage = "https://github.com/bcmyers/a2"
-keywords = ["argon2", "argon2i", "argon2id", "argon2d", "crypto", "hash", "password"]
+keywords = ["argon2", "argon2d", "argon2i", "argon2id", "crypto", "cryptography", "hash", "hashing", "password", "passwords", "security"]
 license = "MIT"
 publish = false
 readme = "README.md"
@@ -16,29 +16,35 @@ repository = "https://github.com/bcmyers/a2"
 build = "build.rs"
 links = "argon2"
 
+[features]
+development = ["bindgen", "blake2-rfc"]
+
 [dependencies]
 base64 = "0.9"
-bindgen = "0.35"
+bindgen = { version = "0.37", optional = true }
 bitflags = "1.0"
-# blake2-rfc = "0.2"
+blake2-rfc = { version = "0.2", optional = true }
 failure = "0.1"
 lazy_static = "1.0"
 log = "0.4"
 nom = "4.0"
 num_cpus = "1.8"
-rand = "0.4"
+rand = "0.5"
 scopeguard = "0.3"
-serde = "1.0"
-serde_derive = "1.0"
+serde = { version = "1.0", optional = true, features = ["derive"] }
 
 [build-dependencies]
-bindgen = "0.35"
+bindgen = "0.37"
 cc = { version = "1.0", features = ["parallel"] }
 
 [dev-dependencies]
-dotenv = "0.11"
-env_logger = "0.5"
+criterion = "0.2"
+dotenv = "0.12"
 serde_json = "1.0"
+
+[[bench]]
+name = "benches"
+harness = false
 
 [badges]
 travis-ci = { repository = "bcmyers/a2", branch = "master" }

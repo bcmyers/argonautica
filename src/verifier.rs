@@ -1,9 +1,9 @@
 use scopeguard;
 
-use backend::{verify_c, verify_rust};
+use backend::verify_c;
 use config::{Backend, VerifierConfig};
 use data::{AdditionalData, Password, SecretKey};
-use error::Error;
+use error::{Error, ErrorKind};
 use output::HashRaw;
 
 impl Default for Verifier {
@@ -19,16 +19,17 @@ impl Default for Verifier {
     }
 }
 
-/// One of the two main structs. Use it to verify passwords against hashes
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+/// <b><u>One of the two main structs.</u></b> Use it to verify passwords against hashes
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Verifier {
     additional_data: AdditionalData,
     config: VerifierConfig,
     hash_enum: HashEnum,
-    #[serde(skip_serializing)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     password: Password,
-    #[serde(skip_serializing)]
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     secret_key: SecretKey,
 }
 
@@ -79,7 +80,7 @@ impl Verifier {
 
         let is_valid = match verifier.config.backend() {
             Backend::C => verify_c(&mut verifier)?,
-            Backend::Rust => verify_rust(&mut verifier)?,
+            Backend::Rust => return Err(ErrorKind::BackendUnsupportedError.into()),
         };
 
         Ok(is_valid)
@@ -169,8 +170,9 @@ impl Verifier {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub(crate) enum HashEnum {
     Raw(HashRaw),
     Encoded(String),
@@ -179,5 +181,22 @@ pub(crate) enum HashEnum {
 impl HashEnum {
     fn none() -> HashEnum {
         HashEnum::Encoded("".to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Verifier>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Verifier>();
     }
 }

@@ -1,134 +1,118 @@
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Fail)]
+/// Enum representing the various kinds of errors
+#[derive(Fail, Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum ErrorKind {
-    #[fail(display = "Additional data too long. Length in bytes must be less than 2^32.")]
-    AdditionalDataTooLong,
+    /// Additional data too long. Length in bytes must be less than 2^32
+    #[fail(display = "Additional data too long. Length in bytes must be less than 2^32")]
+    AdditionalDataTooLongError,
 
-    #[fail(display = "Rust backend not yet supported. Please use the C backend.")]
-    BackendUnsupported,
+    /// Rust backend not yet supported. Please use the C backend
+    #[fail(display = "Rust backend not yet supported. Please use the C backend")]
+    BackendUnsupportedError,
 
-    #[fail(display = "A fatal error occurred: code {}. This is an error with \
-                      the a2 crate and should not happen. Please file an issue.",
-           _0)]
-    Fatal(i32),
+    /// This is a bug in the a2 crate and should not occur. Please file an issue
+    #[fail(display = "This is a bug in the a2 crate and should not occur. Please file an issue")]
+    Bug,
 
-    #[fail(display = "Hash encoding error.")]
-    HashEncoding,
+    /// Failed to decode hash. Hash invalid
+    #[fail(display = "Failed to decode hash. Hash invalid")]
+    HashDecodingError,
 
-    #[fail(display = "Hash invalid.")]
-    HashInvalid,
+    /// Failed to encode into hash
+    #[fail(display = "Failed to encode into hash")]
+    HashEncodingError,
 
+    /// Hash length too short. Hash length must be at least 4
     #[fail(display = "Hash length too short. Hash length must be at least 4")]
-    HashLengthTooShort,
+    HashLengthTooShortError,
 
-    #[fail(display = "Invalid base64.")]
-    InvalidBase64,
+    /// Failed to decode base64. Invalid base64
+    #[fail(display = "Failed to decode base64. Invalid base64")]
+    Base64DecodingError,
 
-    #[fail(display = "Invalid utf-8.")]
-    InvalidUtf8,
+    /// Invalid utf-8
+    #[fail(display = "Invalid utf-8")]
+    InvalidUtf8Error,
 
-    #[fail(display = "Too few iterations. Iterations must be greater than 0.")]
-    IterationsTooFew,
+    /// Too few iterations. Iterations must be greater than 0
+    #[fail(display = "Too few iterations. Iterations must be greater than 0")]
+    IterationsTooFewError,
 
-    #[fail(display = "Too few lanes. Lanes must be greater than 0.")]
-    LanesTooFew,
+    /// Too few lanes. Lanes must be greater than 0
+    #[fail(display = "Too few lanes. Lanes must be greater than 0")]
+    LanesTooFewError,
 
-    #[fail(display = "Too many lanes. Lanes must be less than 2^24.")]
-    LanesTooMany,
+    /// Too many lanes. Lanes must be less than 2^24
+    #[fail(display = "Too many lanes. Lanes must be less than 2^24")]
+    LanesTooManyError,
 
-    #[fail(display = "Invalid memory size. Memory size must be a power of two.")]
-    MemorySizeInvalid,
+    /// Invalid memory size. Memory size must be a power of two
+    #[fail(display = "Invalid memory size. Memory size must be a power of two")]
+    MemorySizeInvalidError,
 
-    #[fail(display = "Memory size too small. Memory size must be at least 8 times the number of lanes.")]
-    MemorySizeTooSmall,
+    /// Memory size too small. Memory size must be at least 8 times the number of lanes
+    #[fail(display = "Memory size too small. Memory size must be at least 8 times the number of lanes")]
+    MemorySizeTooSmallError,
 
-    #[fail(display = "Failed to create random number generator. Not enough OS entropy.")]
-    OsRng,
+    /// Failed to access OS random number generator
+    #[fail(display = "Failed to access OS random number generator")]
+    OsRngError,
 
-    #[fail(display = "Failed to parse Variant.")]
-    ParseVariant,
+    /// Failed to parse into Variant
+    #[fail(display = "Failed to parse into Variant")]
+    VariantParseError,
 
-    #[fail(display = "Failed to parse Version.")]
-    ParseVersion,
+    /// Failed to parse into Version
+    #[fail(display = "Failed to parse into Version")]
+    VersionParseError,
 
-    #[fail(display = "Password too short. Length in bytes must be greater than 0.")]
-    PasswordTooShort,
+    /// Password too short. Length in bytes must be greater than 0
+    #[fail(display = "Password too short. Length in bytes must be greater than 0")]
+    PasswordTooShortError,
 
-    #[fail(display = "Password too long. Length in bytes must be less than 2^32.")]
-    PasswordTooLong,
+    /// Password too long. Length in bytes must be less than 2^32
+    #[fail(display = "Password too long. Length in bytes must be less than 2^32")]
+    PasswordTooLongError,
 
-    #[fail(display = "Attempted to use a non-random salt without having opted out of random salt.")]
-    SaltNonRandom,
+    /// Attempted to use a non-random salt without having opted out of random salt
+    #[fail(display = "Attempted to use a non-random salt without having opted out of random salt")]
+    SaltNonRandomError,
 
-    #[fail(display = "Salt too short. Length in bytes must be at least 8.")]
-    SaltTooShort,
+    /// Salt too short. Length in bytes must be at least 8
+    #[fail(display = "Salt too short. Length in bytes must be at least 8")]
+    SaltTooShortError,
 
-    #[fail(display = "Salt too long. Length in bytes must be less than 2^32.")]
-    SaltTooLong,
+    /// Salt too long. Length in bytes must be less than 2^32
+    #[fail(display = "Salt too long. Length in bytes must be less than 2^32")]
+    SaltTooLongError,
 
-    #[fail(display = "Trying to hash without a secret key when you have not explicitly opted out of using a secret key.")]
-    SecretKeyMissing,
+    /// Trying to hash without a secret key when you have not explicitly opted out of using a secret key
+    #[fail(display = "Trying to hash without a secret key when you have not explicitly opted out of using a secret key")]
+    SecretKeyMissingError,
 
-    #[fail(display = "Secret key too long. Length in bytes must be less than 2^32.")]
-    SecretKeyTooLong,
+    /// Secret key too long. Length in bytes must be less than 2^32
+    #[fail(display = "Secret key too long. Length in bytes must be less than 2^32")]
+    SecretKeyTooLongError,
 
-    #[fail(display = "Too many threads. Threads must be less than 2^24.")]
-    ThreadsTooMany,
+    /// Too many threads. Threads must be less than 2^24
+    #[fail(display = "Too many threads. Threads must be less than 2^24")]
+    ThreadsTooManyError,
 }
 
-// ARGON2_OK = 0,
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-// ARGON2_OUTPUT_PTR_NULL = -1,
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<ErrorKind>();
+    }
 
-// ARGON2_OUTPUT_TOO_SHORT = -2,
-// ARGON2_OUTPUT_TOO_LONG = -3,
-
-// ARGON2_PWD_TOO_SHORT = -4,
-// ARGON2_PWD_TOO_LONG = -5,
-
-// ARGON2_SALT_TOO_SHORT = -6,
-// ARGON2_SALT_TOO_LONG = -7,
-
-// ARGON2_AD_TOO_SHORT = -8,
-// ARGON2_AD_TOO_LONG = -9,
-
-// ARGON2_SECRET_TOO_SHORT = -10,
-// ARGON2_SECRET_TOO_LONG = -11,
-
-// ARGON2_TIME_TOO_SMALL = -12,
-// ARGON2_TIME_TOO_LARGE = -13,
-
-// ARGON2_MEMORY_TOO_LITTLE = -14,
-// ARGON2_MEMORY_TOO_MUCH = -15,
-
-// ARGON2_LANES_TOO_FEW = -16,
-// ARGON2_LANES_TOO_MANY = -17,
-
-// ARGON2_PWD_PTR_MISMATCH = -18,    /* NULL ptr with non-zero length */
-// ARGON2_SALT_PTR_MISMATCH = -19,   /* NULL ptr with non-zero length */
-// ARGON2_SECRET_PTR_MISMATCH = -20, /* NULL ptr with non-zero length */
-// ARGON2_AD_PTR_MISMATCH = -21,     /* NULL ptr with non-zero length */
-
-// ARGON2_MEMORY_ALLOCATION_ERROR = -22,
-
-// ARGON2_FREE_MEMORY_CBK_NULL = -23,
-// ARGON2_ALLOCATE_MEMORY_CBK_NULL = -24,
-
-// ARGON2_INCORRECT_PARAMETER = -25,
-// ARGON2_INCORRECT_TYPE = -26,
-
-// ARGON2_OUT_PTR_MISMATCH = -27,
-
-// ARGON2_THREADS_TOO_FEW = -28,
-// ARGON2_THREADS_TOO_MANY = -29,
-
-// ARGON2_MISSING_ARGS = -30,
-
-// ARGON2_ENCODING_FAIL = -31,
-
-// ARGON2_DECODING_FAIL = -32,
-
-// ARGON2_THREAD_FAIL = -33,
-
-// ARGON2_DECODING_LENGTH_FAIL = -34,
-
-// ARGON2_VERIFY_MISMATCH = -35
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<ErrorKind>();
+    }
+}

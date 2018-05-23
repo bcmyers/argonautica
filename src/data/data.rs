@@ -9,9 +9,9 @@ pub trait Data {
     fn as_bytes(&self) -> &[u8];
 
     /// Read-only access to the struct's underlying bytes as a `&str` if those bytes are valid utf-8
-    fn as_str(&self) -> Result<&str, Error> {
+    fn to_str(&self) -> Result<&str, Error> {
         let bytes = self.as_bytes();
-        let s = ::std::str::from_utf8(bytes).map_err(|_| ErrorKind::InvalidUtf8)?;
+        let s = ::std::str::from_utf8(bytes).map_err(|_| ErrorKind::InvalidUtf8Error)?;
         Ok(s)
     }
 

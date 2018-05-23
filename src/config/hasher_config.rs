@@ -1,16 +1,17 @@
-use config::defaults::{
-    DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES, DEFAULT_MEMORY_SIZE,
-    DEFAULT_OPT_OUT_OF_RANDOM_SALT, DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING,
-    DEFAULT_SECRET_KEY_CLEARING, DEFAULT_THREADS, DEFAULT_VERSION,
-};
+use config::defaults::{DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES,
+                       DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_RANDOM_SALT,
+                       DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING,
+                       DEFAULT_SECRET_KEY_CLEARING, DEFAULT_THREADS, DEFAULT_VERSION};
 use config::{Backend, Flags, Variant, Version};
 use error::{Error, ErrorKind};
 
 const PANIC_WARNING: &str = "Your program will panic at runtime if you use this configuration";
 
-/// Read-only `Hasher` configuration. Can be obtained by calling `config()` on an instance of `Hasher`
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+/// Read-only configuration for [`Hasher`](../struct.Hasher.html). Can be obtained by calling
+/// the [`config`](../struct.Hasher.html#method.config) method on an instance of [`Hasher`](../struct.Hasher.html)
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct HasherConfig {
     backend: Backend,
     hash_length: u32,
@@ -167,51 +168,68 @@ impl HasherConfig {
 fn validate_backend(backend: Backend) -> Result<(), Error> {
     match backend {
         Backend::C => (),
-        Backend::Rust => return Err(ErrorKind::BackendUnsupported.into()),
+        Backend::Rust => return Err(ErrorKind::BackendUnsupportedError.into()),
     }
     Ok(())
 }
 
 fn validate_hash_length(hash_length: u32) -> Result<(), Error> {
     if hash_length < 4 {
-        return Err(ErrorKind::HashLengthTooShort.into());
+        return Err(ErrorKind::HashLengthTooShortError.into());
     }
     Ok(())
 }
 
 fn validate_iterations(iterations: u32) -> Result<(), Error> {
     if iterations == 0 {
-        return Err(ErrorKind::IterationsTooFew.into());
+        return Err(ErrorKind::IterationsTooFewError.into());
     }
     Ok(())
 }
 
 fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
-        return Err(ErrorKind::LanesTooFew.into());
+        return Err(ErrorKind::LanesTooFewError.into());
     }
     if lanes > 0x00ffffff {
-        return Err(ErrorKind::LanesTooMany.into());
+        return Err(ErrorKind::LanesTooManyError.into());
     }
     Ok(())
 }
 
 fn validate_memory_size(lanes: u32, memory_size: u32) -> Result<(), Error> {
     if memory_size < 8 * lanes {
-        return Err(ErrorKind::MemorySizeTooSmall.into());
+        return Err(ErrorKind::MemorySizeTooSmallError.into());
     }
     if !(memory_size.is_power_of_two()) {
-        return Err(ErrorKind::MemorySizeInvalid.into());
+        return Err(ErrorKind::MemorySizeInvalidError.into());
     }
     Ok(())
 }
 
 fn validate_threads(threads: u32) -> Result<(), Error> {
     if threads == 0 {
-        return Err(ErrorKind::LanesTooFew.into());
+        return Err(ErrorKind::LanesTooFewError.into());
     }
     if threads > 0x00ffffff {
-        return Err(ErrorKind::ThreadsTooMany.into());
+        return Err(ErrorKind::ThreadsTooManyError.into());
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<HasherConfig>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<HasherConfig>();
+    }
 }

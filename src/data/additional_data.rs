@@ -1,5 +1,7 @@
+#[cfg(feature = "serde")]
 use std::fmt;
 
+#[cfg(feature = "serde")]
 use serde;
 
 use data::{Data, DataPrivate};
@@ -35,7 +37,9 @@ impl From<String> for AdditionalData {
 
 impl<'a> From<&'a Vec<u8>> for AdditionalData {
     fn from(bytes: &Vec<u8>) -> Self {
-        AdditionalData { bytes: bytes.clone() }
+        AdditionalData {
+            bytes: bytes.clone(),
+        }
     }
 }
 
@@ -58,6 +62,7 @@ impl Data for AdditionalData {
     }
 }
 
+#[cfg(feature = "serde")]
 impl serde::Serialize for AdditionalData {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -67,6 +72,7 @@ impl serde::Serialize for AdditionalData {
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for AdditionalData {
     fn deserialize<D>(deserializer: D) -> Result<AdditionalData, D::Error>
     where
@@ -96,14 +102,16 @@ impl DataPrivate for AdditionalData {
     }
     fn validate(&self, _extra: Option<bool>) -> Result<(), Error> {
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::AdditionalDataTooLong.into());
+            return Err(ErrorKind::AdditionalDataTooLongError.into());
         }
         Ok(())
     }
 }
 
+#[cfg(feature = "serde")]
 struct AdditionalDataVisitor;
 
+#[cfg(feature = "serde")]
 impl<'de> serde::de::Visitor<'de> for AdditionalDataVisitor {
     type Value = Vec<u8>;
 
@@ -139,5 +147,22 @@ impl<'de> serde::de::Visitor<'de> for AdditionalDataVisitor {
             }
         }
         Ok(output)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<AdditionalData>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<AdditionalData>();
     }
 }

@@ -5,13 +5,10 @@ mod rust;
 pub(crate) use self::c::decode_c;
 #[cfg(test)]
 pub(crate) use self::c::encode_c;
-
 pub(crate) use self::c::hash_raw_c;
 pub(crate) use self::c::verify_c;
 pub(crate) use self::rust::decode_rust;
 pub(crate) use self::rust::encode_rust;
-pub(crate) use self::rust::hash_raw_rust;
-pub(crate) use self::rust::verify_rust;
 
 #[cfg(test)]
 mod tests {

@@ -57,7 +57,7 @@ impl<'a> From<&'a Vec<u8>> for Salt {
     fn from(bytes: &Vec<u8>) -> Self {
         Salt {
             bytes: bytes.clone(),
-            is_random: false
+            is_random: false,
         }
     }
 }
@@ -86,8 +86,9 @@ impl Data for Salt {
 
 /// Type-safe struct representing the raw bytes of your salt,</br>
 /// as well as an indicator for whether or not a new random salt should be generated after each hash (the default)
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Salt {
     bytes: Vec<u8>,
     is_random: bool,
@@ -117,14 +118,31 @@ impl DataPrivate for Salt {
         let opt_out_of_random_salt = extra.unwrap();
         let length = self.bytes.len();
         if length < 8 {
-            return Err(ErrorKind::SaltTooShort.into());
+            return Err(ErrorKind::SaltTooShortError.into());
         }
         if length >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::SaltTooLong.into());
+            return Err(ErrorKind::SaltTooLongError.into());
         }
         if !(opt_out_of_random_salt) && !(self.is_random) {
-            return Err(ErrorKind::SaltNonRandom.into());
+            return Err(ErrorKind::SaltNonRandomError.into());
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Salt>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Salt>();
     }
 }

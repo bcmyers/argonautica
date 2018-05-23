@@ -4,7 +4,7 @@ use config::defaults::DEFAULT_VARIANT;
 use error::{Error, ErrorKind};
 
 impl Default for Variant {
-    /// `Variant::Argon2id`
+    /// Returns [`Variant::Argon2id`](enum.Variant.html#variant.Argon2id)
     fn default() -> Variant {
         DEFAULT_VARIANT
     }
@@ -14,22 +14,25 @@ impl FromStr for Variant {
     ///
     type Err = Error;
 
-    /// `"argon2d"` => `Ok(Variant::Argon2d)`<br/>
-    /// `"argon2i"` => `Ok(Variant::Argon2i)`<br/>
-    /// `"argon2id"` => `Ok(Variant::Argon2id)`<br/>
-    /// anything else => error
+    /// Performs the following mapping:
+    /// * `"argon2d"` => `Ok(Variant::Argon2d)`<br/>
+    /// * `"argon2i"` => `Ok(Variant::Argon2i)`<br/>
+    /// * `"argon2id"` => `Ok(Variant::Argon2id)`<br/>
+    /// * anything else => an error
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "argon2d" => Ok(Variant::Argon2d),
             "argon2i" => Ok(Variant::Argon2i),
             "argon2id" => Ok(Variant::Argon2id),
-            _ => Err(ErrorKind::ParseVariant.into()),
+            _ => Err(ErrorKind::VariantParseError.into()),
         }
     }
 }
 
-/// Enum repressenting the choice between variants of the Argon2 algorithm (`Argon2d`, `Argon2i`,
-/// and `Argon2id`).
+/// Enum repressenting the various variants of the Argon2 algorithm (
+/// [`Argon2d`](enum.Variant.html#variant.Argon2d),
+/// [`Argon2i`](enum.Variant.html#variant.Argon2i), and
+/// [`Argon2id`](enum.Variant.html#variant.Argon2id)).
 ///
 /// According to the [latest (as of 5/18) Argon2 RFC](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03) ...
 /// "Argon2 has one primary variant: Argon2id, and two supplementary
@@ -40,8 +43,9 @@ impl FromStr for Variant {
 /// Argon2id works as Argon2i for the first half of the first iteration over the memory,
 /// and as Argon2d for the rest, thus providing both side-channel attack
 /// protection and brute-force cost savings due to time-memory tradeoffs."
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum Variant {
     /// Variant of the Argon2 algorithm that is faster and uses data-depending memory access,
     /// which makes it suitable for applications with no threats from side-channel timing attackes.
@@ -61,14 +65,32 @@ pub enum Variant {
 }
 
 impl Variant {
-    /// `Variant::Argond2d` => `"argon2d"`<br/>
-    /// `Variant::Argond2i` => `"argon2i"`<br/>
-    /// `Variant::Argond2id` => `"argon2id"`
+    /// Performs the following mapping:
+    /// * `Variant::Argond2d` => `"argon2d"`<br/>
+    /// * `Variant::Argond2i` => `"argon2i"`<br/>
+    /// * `Variant::Argond2id` => `"argon2id"`
     pub fn as_str(&self) -> &'static str {
         match *self {
             Variant::Argon2d => "argon2d",
             Variant::Argon2i => "argon2i",
             Variant::Argon2id => "argon2id",
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Variant>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Variant>();
     }
 }

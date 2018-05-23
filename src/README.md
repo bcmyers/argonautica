@@ -1,6 +1,4 @@
-# a2
-
-### Overview
+## Overview
 
 `a2` is a Rust crate for hashing passwords using the cryptographically-secure
 [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03),
@@ -9,6 +7,7 @@ comparable to other secure hashing algorithms such as [bcrypt](https://en.wikipe
 and [scrypt](https://en.wikipedia.org/wiki/Scrypt).
 
 `a2` was designed:
+
 * to be easy to use,
 * to have robust, beginner-friendly documentation,
 * to use sensible defaults, and
@@ -19,10 +18,11 @@ That said, `a2` is also feature-complete, meaning you should be able to to anyth
 with `a2` that you can do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2)
 of Argon2.
 
-### Hashing
+## Hashing
 
-Hashing passwords with `a2` is simple.  Just instantiate a default [`Hasher`](struct.Hasher.html), provide it
+Hashing passwords with `a2` is simple. Just instantiate a default [`Hasher`](struct.Hasher.html), provide it
 with a password and a secret key, and then call the [`hash`](struct.Hasher.html#method.hash) method.
+
 ```rust
 extern crate a2;
 
@@ -41,15 +41,16 @@ fn main() {
     // 👆 prints a hash, which will be random since the default Hasher uses a random salt
 }
 ```
-### Verifying
+
+## Verifying
 
 Verifying passwords against a hash is equally as simple. Just instantiate a
 default [`Verifier`](struct.Verifier.html), provide it with the password and the hash you would like to compare,
 provide it with the secret key that was used to create the hash, and then call the [`verify`](struct.Verifier.html#method.verify)
 method.
+
 ```rust
 extern crate a2;
-
 fn main() {
     let mut verifier = a2::Verifier::default();
     let is_valid = verifier
@@ -70,7 +71,8 @@ fn main() {
     // 👆 prints true
 }
 ```
-### Configuration
+
+## Configuration
 
 The default configurations for [`Hasher`](struct.Hasher.html) and [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for
 the general use-case of hashing passwords for storage in a database, but if you want to use
@@ -79,6 +81,7 @@ the general use-case of hashing passwords for storage in a database, but if you 
 
 Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom configuration options. It provides
 color on each of the options.
+
 ```rust
 extern crate a2;
 
@@ -194,13 +197,15 @@ fn main() {
     // 👆 prints $argon2id$v=19$m=8192,t=256,p=2$c29tZXNhbHQ$TyX+9AspmkeMGLJRQdJozQ
 }
 ```
-### Installation
+
+## Installation
 
 `a2` should be relatively straightforward to include in your Rust project:
+
 * Include `extern crate a2;` in your code (typically in either `lib.rs` or `main.rs`)
 * Include the following in the `[dependencies]` section of your `Cargo.toml`:
-    * `a2 = "0.1.0"`, <b>or</b>
-    * `a2 = { version = "0.1.0", features = ["serde"] }`</br>
+  * `a2 = "0.1.0"`, <b>or</b>
+  * `a2 = { version = "0.1.0", features = ["serde"] }`</br>
     (The optional serde feature allows you to serialize or deserialize structs and
     enums from `a2` using the [serde](https://github.com/serde-rs/serde) ecosystem).
 
@@ -215,13 +220,13 @@ for me (so if anyone wants to help out in this area, that would be much apprecia
 `a2` was built using stable Rust 1.25.0 and most likely works on earlier versions
 of Rust as well, but I'm not currently aware of how far back it will go.
 
-### Miscellaneous
+## Miscellaneous
 
 If you clone the [a2 repository](https://github.com/bcmyers/a2) and would like to run the tests, you must
 run the tests with `cargo test --features serde` or `cargo test --all-features`,
 since some of the tests depend on serde
 
-### Alternatives
+## Alternatives
 
 If `a2` isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
 include [argon2rs](https://github.com/bryant/argon2rs) and [rust-argon2](https://github.com/sru-systems/rust-argon2).
@@ -234,5 +239,3 @@ For what it's worth, besides API differences, one thing `a2` focuses on relative
 libraries is the ability to easily create hashes using a secret key. Your mileage may vary,
 but the crate's author found it somewhat difficult to create hashes using a secret key when
 experimenting with alternative Rust libraries.
-
-License: MIT
