@@ -200,8 +200,12 @@ fn test_serialization() {
 
 #[test]
 fn test_asdf() {
-    use rand::{Rng, SeedableRng, StdRng};
-    let seed: &[_] = &[1, 2, 3, 4];
+    use rand::{RngCore, SeedableRng, StdRng};
+    let mut seed = [0u8; 32];
+    seed[0] = 1;
+    seed[1] = 2;
+    seed[2] = 3;
+    seed[3] = 4;
     let mut rng: StdRng = SeedableRng::from_seed(seed);
     let mut password = vec![0u8; 12];
     for _ in 0..1_000 {

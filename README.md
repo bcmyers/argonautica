@@ -26,7 +26,7 @@ with a password and a secret key, and then call the [`hash`](struct.Hasher.html#
 ```rust
 extern crate a2;
 
-fn main() {
+fn main() -> Result<(), a2::Error> {
     let mut hasher = a2::Hasher::default();
     let hash = hasher
         .with_password("P@ssw0rd")
@@ -35,10 +35,10 @@ fn main() {
             an environment variable instead of in code, \
             but this is just an example\
         ")
-        .hash()
-        .unwrap();
+        .hash()?;
     println!("{}", &hash);
     // 👆 prints a hash, which will be random since the default Hasher uses a random salt
+    Ok(())
 }
 ```
 ### Verifying
@@ -50,7 +50,7 @@ method.
 ```rust
 extern crate a2;
 
-fn main() {
+fn main() -> Result<(), a2::Error> {
     let mut verifier = a2::Verifier::default();
     let is_valid = verifier
         .with_hash("\
@@ -64,10 +64,10 @@ fn main() {
             an environment variable instead of in code, \
             but this is just an example\
         ")
-        .verify()
-        .unwrap();
+        .verify()?;
     println!("{}", is_valid);
     // 👆 prints true
+    Ok(())
 }
 ```
 ### Configuration
@@ -84,7 +84,7 @@ extern crate a2;
 
 use a2::config::{Backend, Variant, Version};
 
-fn main() {
+fn main() -> Result<(), a2::Error> {
     let mut hasher = a2::Hasher::default();
     hasher
         .configure_backend(Backend::C)
@@ -185,13 +185,13 @@ fn main() {
         .with_salt("somesalt")
         // 👆 A non-random salt, which is a bad idea, but possible
         // because we configured this Hasher with opt_out_of_random_salt
-        .hash()
-        .unwrap();
+        .hash()?;
         // 👆 Notice we did not include a secret key, which is also a bad idea, but possible
         // because we configured this Hasher with opt_out_of_secret_key
 
     println!("{}", &hash);
     // 👆 prints $argon2id$v=19$m=8192,t=256,p=2$c29tZXNhbHQ$TyX+9AspmkeMGLJRQdJozQ
+    Ok(())
 }
 ```
 ### Installation

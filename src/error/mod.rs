@@ -1,4 +1,4 @@
-//! Contains [`Error`](error/struct.Error.html) struct and [`ErrorKind`](error/enum.ErrorKind.html) enum
+//! Contains [`Error`](error/struct.Error.html) struct, [`ErrorKind`](error/enum.ErrorKind.html) enum, and [`Result`](error/type.Result.html) type
 mod error;
 mod error_kind;
 
