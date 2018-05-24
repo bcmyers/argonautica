@@ -37,9 +37,9 @@ fn main() -> Result<(), a2::Error> {
                 let now = Instant::now();
                 let _ = hasher.with_password(PASSWORD).hash()?;
                 let elapsed = now.elapsed();
-                let millis = elapsed.as_secs() as f32 * 1_000_f32
-                    + elapsed.subsec_nanos() as f32 / 1_000_000_f32;
-                if millis > 375_f32 && millis < 625_f32 {
+                let millis = elapsed.as_secs() as f32 * 1_000.0
+                    + elapsed.subsec_nanos() as f32 / 1_000_000.0;
+                if millis > 375.0 && millis < 625.0 {
                     println!(
                         "👍  threads: {}, memory_size: {}, iterations: {}, millis: {:.0}",
                         threads, memory_size, iterations, millis,

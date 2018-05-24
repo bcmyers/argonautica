@@ -1,3 +1,4 @@
+/// Toy example of an actix-web server that has endpoints for hashing and verifying passwords
 extern crate a2;
 extern crate actix_web;
 extern crate dotenv;
@@ -26,8 +27,12 @@ use futures::Future;
 use futures_cpupool::CpuPool;
 use futures_timer::Delay;
 
+// This will be used for the register and verify routes. We want these routes to take a
+// at least a minimum amount of time to load since we don't want to give potential attackers
+// any insight into what our code does with invalid inputs
 const MINIMUM_DURATION_IN_MILLIS: u64 = 400;
 
+// Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey, failure::Error> {
     let dotenv_path = env::current_dir()?.join("examples").join("example.env");
     dotenv::from_path(&dotenv_path).map_err(|e| format_err!("{}", e))?;
@@ -37,32 +42,40 @@ fn load_secret_key() -> Result<SecretKey, failure::Error> {
     )?)
 }
 
+// "Global" state that will be passed to every call to a handler. Here we include the "database",
+// which for example purposes is just a HashMap (but in real life would probably be Postgres
+// or something of the sort), as well as instances of our Hasher and Verifier, which we "preload"
+// with our secret key
 struct State {
-    cpu_pool: CpuPool,
     database: Arc<Mutex<HashMap<String, String>>>,
     hasher: Hasher,
     verifier: Verifier,
 }
 
 impl State {
+    // Since actix-web uses futures extensively, let's have the Hasher and Verifier
+    // share a common CpuPool.  In addition, as mentioned above, we "preload" the Hasher and
+    // Verifier with our secret key; so we only have to do this once (at creation of the
+    // server in 'main')
     fn new(secret_key: SecretKey) -> State {
+        let cpu_pool = CpuPool::new(4);
         State {
-            cpu_pool: CpuPool::new(4),
             database: Arc::new(Mutex::new(HashMap::new())),
             hasher: {
                 let mut hasher = Hasher::default();
-                hasher.with_secret_key(&secret_key);
+                hasher
+                    .configure_cpu_pool(cpu_pool.clone())
+                    .with_secret_key(&secret_key);
                 hasher
             },
             verifier: {
                 let mut verifier = Verifier::default();
-                verifier.with_secret_key(&secret_key);
+                verifier
+                    .configure_cpu_pool(cpu_pool)
+                    .with_secret_key(&secret_key);
                 verifier
             },
         }
-    }
-    fn cpu_pool(&self) -> CpuPool {
-        self.cpu_pool.clone()
     }
     fn database_ptr(&self) -> Arc<Mutex<HashMap<String, String>>> {
         self.database.clone()
@@ -75,17 +88,22 @@ impl State {
     }
 }
 
+// Handler for the "/database" route. This just returns a copy of the "database" (in json)
+// In real life, you would obviously restrict access to this route to admins only
+// or something of the sort, but in this example the routes is open to anyone
 fn database(req: HttpRequest<State>) -> HttpResponse {
     let database_ptr = req.state().database_ptr();
     let database = {
         match database_ptr.lock() {
-            Ok(database) => (*database).clone(),
+            Ok(database) => database,
             Err(_) => return HttpResponse::InternalServerError().finish(),
         }
     };
-    HttpResponse::Ok().json(database)
+    HttpResponse::Ok().json(&*database)
 }
 
+// Struct representing the json object clients will need to provide when making
+// a POST request to the "/register" route
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct RegisterRequest {
@@ -93,39 +111,47 @@ struct RegisterRequest {
     password: String,
 }
 
+// Handler for the "/register" route. First we parse the client-provided json.
+// Then we hash the password they provided using a2.  Next we add the email they
+// provided and the hash to our "database". Finally, if all worked correctly, we
+// return an empty 201 Created response. Note that we would like to
+// ensure that calling this route always takes at least a minimum amount of time
+// (to prevent attackers from gaining insight into our code); so at the end, we also
+// delay before returning if the function has taken less than the minimum required amount
+// of time.
 fn register(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = Error>> {
     let start = Instant::now();
-    let cpu_pool = req.state().cpu_pool();
     let database_ptr = req.state().database_ptr();
     let mut hasher = req.state().hasher();
     req.json()
-        .from_err()
+        .map_err(|e| e.into())
         .and_then(move |register_request: RegisterRequest| {
-            cpu_pool.spawn_fn(move || {
-                let hash = hasher.with_password(&register_request.password).hash()?;
-                Ok::<_, failure::Error>((hash, register_request))
-            })
+            hasher
+                .with_password(&register_request.password)
+                .hash_non_blocking()
+                .map_err(|e| e.into())
+                // Futures are kind finicky; so let's map the result of our
+                // call to hasher_non_blocking (which, if successful, is just a String)
+                // to a tuple that includes both the resulting String and the original
+                // RegisterRequest. This is needed for us to be able to access
+                // the RegisterRequest in the next and_then block
+                .map(|hash| (hash, register_request))
         })
         .and_then(move |(hash, register_request)| {
             let mut database = database_ptr.lock().map_err(|e| format_err!("{}", e))?;
             (*database).insert(register_request.email, hash);
-            Ok(())
+            Ok::<_, failure::Error>(())
         })
         .then(move |result1| {
-            let duration = match Duration::from_millis(MINIMUM_DURATION_IN_MILLIS)
+            let duration = Duration::from_millis(MINIMUM_DURATION_IN_MILLIS)
                 .checked_sub(start.elapsed())
-            {
-                Some(duration) => duration,
-                None => Duration::from_millis(0),
-            };
+                .unwrap_or_else(|| Duration::from_millis(0));
             Delay::new(duration).then(move |result2| {
-                match result2 {
-                    Ok(_) => (),
-                    Err(_) => return Ok(HttpResponse::InternalServerError().finish()),
+                if result1.is_err() {
+                    return Ok(HttpResponse::BadRequest().finish());
                 }
-                match result1 {
-                    Ok(_) => (),
-                    Err(_) => return Ok(HttpResponse::BadRequest().finish()),
+                if result2.is_err() {
+                    return Ok(HttpResponse::InternalServerError().finish());
                 }
                 Ok(HttpResponse::Created().finish())
             })
@@ -133,6 +159,8 @@ fn register(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = 
         .responder()
 }
 
+// Struct representing the json object clients will need to provide when making
+// a POST request to the "/verify" route
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct VerifyRequest {
@@ -140,13 +168,20 @@ struct VerifyRequest {
     password: String,
 }
 
+// Handler for the "/verify" routes. First we parse the client-provided json.
+// Then we look up the client's hash in the "database" using the email they provided.
+// Next we verify the password they provided against the hash we pulled from the
+// "database". Finally, if all worked correctly, we return an empty 200 OK response
+// to indicate that the password provided did indeed match the hash in our "database".
+// As with the "/register" method above, we would like to ensure that calling this route
+// always takes at least a minimum amount of time (to prevent attackers from gaining insight
+// into our code); so we use the same trick with the `futures_timer` crate to ensure that here.
 fn verify(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = Error>> {
     let start = Instant::now();
-    let cpu_pool = req.state().cpu_pool();
     let database_ptr = req.state().database_ptr();
     let mut verifier = req.state().verifier();
     req.json()
-        .from_err()
+        .map_err(|e| e.into())
         .and_then(move |verify_request: VerifyRequest| {
             let hash = {
                 let database = database_ptr.lock().map_err(|e| format_err!("{}", e))?;
@@ -158,25 +193,19 @@ fn verify(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = Er
             Ok::<_, failure::Error>((hash, verify_request))
         })
         .and_then(move |(hash, verify_request)| {
-            cpu_pool.spawn_fn(move || {
-                let is_valid = verifier
-                    .with_hash(&hash)
-                    .with_password(&verify_request.password)
-                    .verify()?;
-                Ok::<_, failure::Error>(is_valid)
-            })
+            verifier
+                .with_hash(&hash)
+                .with_password(&verify_request.password)
+                .verify_non_blocking()
+                .map_err(|e| e.into())
         })
         .then(move |result1| {
-            let duration = match Duration::from_millis(MINIMUM_DURATION_IN_MILLIS)
+            let duration = Duration::from_millis(MINIMUM_DURATION_IN_MILLIS)
                 .checked_sub(start.elapsed())
-            {
-                Some(duration) => duration,
-                None => Duration::from_millis(0),
-            };
+                .unwrap_or_else(|| Duration::from_millis(0));
             Delay::new(duration).then(move |result2| {
-                match result2 {
-                    Ok(_) => (),
-                    Err(_) => return Ok(HttpResponse::InternalServerError().finish()),
+                if result2.is_err() {
+                    return Ok(HttpResponse::InternalServerError().finish());
                 }
                 let is_valid = match result1 {
                     Ok(is_valid) => is_valid,
@@ -191,6 +220,8 @@ fn verify(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = Er
         .responder()
 }
 
+// Main function to kick off the server and provide a small logging middleware
+// that will print to stdout the amount of time that each request took to process
 fn main() -> Result<(), failure::Error> {
     env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();

@@ -13,6 +13,10 @@ pub(crate) fn verify_c(verifier: &Verifier) -> Result<bool, Error> {
     let is_valid = match verifier.hash_enum() {
         &HashEnum::Encoded(ref s) => verify_hash(verifier, s)?,
         &HashEnum::Raw(ref hash_raw) => verify_hash_raw(verifier, hash_raw)?,
+        &HashEnum::None => {
+            return Err(Error::new(ErrorKind::Bug)
+                .add_context("Attempting to verify without a hash. This should be unreachable"))
+        }
     };
     Ok(is_valid)
 }
@@ -49,7 +53,10 @@ fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, Error> {
     let (_, variant) = parse_variant(&hash).map_err(|_| ErrorKind::Bug)?; // TODO
     let err = unsafe { ffi::decode_string(context_ptr, hash_cstring_ptr, variant as u32) };
     if err != 0 {
-        return Err(ErrorKind::Bug.into()); // TODO
+        return Err(Error::new(ErrorKind::Bug).add_context(format!(
+            "Unhandled error from C code: {}. This should be unreachable",
+            err
+        ))); // TODO
     }
 
     let desired_result_ptr = context.out as *const c_char;
@@ -71,7 +78,10 @@ fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, Error> {
     } else if err == ffi::Argon2_ErrorCodes_ARGON2_VERIFY_MISMATCH {
         false
     } else {
-        return Err(ErrorKind::Bug.into()); // TODO
+        return Err(Error::new(ErrorKind::Bug).add_context(format!(
+            "Unhandled error from C code: {}. This should be unreachable",
+            err
+        ))); // TODO
     };
     Ok(is_valid)
 }

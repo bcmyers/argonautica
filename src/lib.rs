@@ -70,7 +70,7 @@
 //! ## Configuration
 //!
 //! The default configurations for [`Hasher`](struct.Hasher.html) and [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for
-//! the general use-case of hashing passwords for storage in a database, but if you want to use
+//! the general use-case of hashing passwords for storage in a website database, but if you want to use
 //! `a2` for a different use-case or if you just disagree with the chosen defaults, customizing
 //! `a2` to meet your needs should hopefully as easy and as intuitive as using the defaults.
 //!
@@ -78,6 +78,7 @@
 //! color on each of the options.
 //! ```
 //! extern crate a2;
+//! extern crate futures_cpupool;
 //!
 //! use a2::config::{Backend, Variant, Version};
 //!
@@ -89,8 +90,22 @@
 //!         // of the underlying Argon2 algorithm). Currently only the C backend is supported,
 //!         // which uses the cannonical Argon2 library written in C to actually do the work.
 //!         // In the future hopefully a Rust backend will also be supported, but, for the
-//!         // moment, you must use Backend::C, which is the default. Using Backend::Rust will,
-//!         // for the moment, result in an error.
+//!         // moment, you must use Backend::C, which is the default. Using Backend::Rust will
+//!         // result in an error (again, for the moment).
+//!         .configure_cpu_pool(futures_cpupool::CpuPool::new(2))
+//!         // 👆 There are two non-blocking methods on `Hasher` that perform computation on
+//!         // a separate thread and return a `Future` instead of a `Result` (`hash_non_blocking`
+//!         // and `hash_raw_non_blocking`). These methods allows `a2` to play nice with
+//!         // futures-heavy code, but need a `CpuPool` in order to work. The blocking
+//!         // methods `hash` and `hash_raw` do not use a 'CpuPool'; so if you are using only
+//!         // these blocking methods you can ignore this configuration entirely. If, however,
+//!         // you are using the non-blocking methods and would like to provide your own `CpuPool`
+//!         // instead of using the default, which is `CpuPool::new(num_cpus::get_physical())`,
+//!         // you can configure your `Hasher` with a custom `CpuPool` using this method. This
+//!         // might be useful if, for example, you are writing code in an environment which
+//!         // makes heavy use of futures, the code you are writing uses both a `Hasher` and
+//!         // a `Verifier`, and you would like both of them to share the same underlying
+//!         // `CpuPool`.
 //!         .configure_hash_length(32)
 //!         // 👆 The hash length in bytes is configurable. The default is 32. This is probably
 //!         // a good number to use. 16 is also probably fine. You probably shouldn't go below 16
@@ -209,7 +224,7 @@
 //! I'll try to look into it, but to be honest, compiling C programs is not really an area of expertise
 //! for me (so if anyone wants to help out in this area, that would be much appreciated!).
 //!
-//! `a2` requires stable Rust 1.26.0 or greater.
+//! `a2` runs on stable Rust and requires Rust version 1.26.0 or greater.
 //!
 //! ## Alternatives
 //!

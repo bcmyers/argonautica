@@ -5,7 +5,7 @@ use scopeguard;
 
 use backend::verify_c;
 use config::{Backend, VerifierConfig};
-use data::{AdditionalData, Password, SecretKey};
+use data::{AdditionalData, DataPrivate, Password, SecretKey};
 use error::{Error, ErrorKind};
 use output::HashRaw;
 
@@ -16,7 +16,7 @@ impl Default for Verifier {
             additional_data: AdditionalData::none(),
             config: VerifierConfig::default(),
             cpu_pool: CpuPool::new(num_cpus::get_physical()), // TODO: move to Config?
-            hash_enum: HashEnum::none(),
+            hash_enum: HashEnum::default(),
             password: Password::none(),
             secret_key: SecretKey::none(),
         }
@@ -43,6 +43,7 @@ pub struct Verifier {
 impl Verifier {
     /// Creates a new [`Verifier`](struct.Verifier.html) with sensible defaults:
     /// * `backend`: [`Backend::C`](config/enum.Backend.html#variant.C)
+    /// * `cpu_pool`: `CpuPool::new(num_cpus::get_physical())`
     /// * `password_clearing`: `true`
     /// * `secret_key_clearing`: `false`
     pub fn new() -> Verifier {
@@ -54,6 +55,17 @@ impl Verifier {
     /// [`Verifier`](struct.Verifier.html) <i>with</i> [`Backend::Rust`](config/enum.Backend.html#variant.Rust)<i>, it will panic at runtime</i>
     pub fn configure_backend(&mut self, backend: Backend) -> &mut Verifier {
         self.config.set_backend(backend);
+        self
+    }
+    /// The non-blocking method on [`Verifier`](struct.Verifier.html)
+    /// ([`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking))
+    /// uses a [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
+    /// in order to push work off onto another thread. This method
+    /// allows you to provide your own [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
+    /// instead of using the default, which is `CpuPool::new(num_cpus::get_physical())`. Note:
+    /// The cpu pool is only used for the non-blocking method mentioned above.
+    pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Verifier {
+        self.cpu_pool = cpu_pool;
         self
     }
     /// Allows you to configure [`Verifier`](struct.Verifier.html) to erase the password bytes after each call to [`verify`](struct.Verifier.html#method.verify).
@@ -74,7 +86,7 @@ impl Verifier {
     /// a [`Password`](data/struct.Password.html) and a [`SecretKey`](data/struct.SecretKey.html)), call this method in order to determine whether the
     /// provided password matches the provided hash
     pub fn verify(&mut self) -> Result<bool, Error> {
-        // TODO: validate?
+        // ensure password and/or secret_key clearing code will run
         let mut verifier = scopeguard::guard(self, |verifier| {
             if verifier.config.password_clearing() {
                 verifier.password = Password::none();
@@ -84,6 +96,10 @@ impl Verifier {
             }
         });
 
+        // validate inputs
+        verifier.validate()?;
+
+        // calculate is_valid
         let is_valid = match verifier.config.backend() {
             Backend::C => verify_c(&mut verifier)?,
             Backend::Rust => return Err(ErrorKind::BackendUnsupportedError.into()),
@@ -147,13 +163,17 @@ impl Verifier {
     pub fn config(&self) -> &VerifierConfig {
         &self.config
     }
+    /// Access to the [`Verifier`](struct.Verifier.html)'s [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
+    pub fn cpu_pool(&self) -> CpuPool {
+        self.cpu_pool.clone()
+    }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s string-encoded hash, if any. If you never provided a
-    /// string-encoded hash or a [`RawHash`](output/struct.HashRaw.html), this will return `Some("")`. If you provided a [`RawHash`](output/struct.HashRaw.html)
-    /// but not a string-encoded hash, this will return `None`.
+    /// string-encoded hash, this will return `None`.
     pub fn hash(&self) -> Option<&str> {
         match self.hash_enum {
             HashEnum::Encoded(ref s) => Some(s),
             HashEnum::Raw(_) => None,
+            HashEnum::None => None,
         }
     }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s [`RawHash`](output/struct.HashRaw.html), if any. If you never provided a
@@ -162,6 +182,7 @@ impl Verifier {
         match self.hash_enum {
             HashEnum::Encoded(_) => None,
             HashEnum::Raw(ref hash_raw) => Some(hash_raw),
+            HashEnum::None => None,
         }
     }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s [`Password`](data/struct.Password.html). If you never provided a [`Password`](data/struct.Password.html),
@@ -182,6 +203,15 @@ impl Verifier {
     pub(crate) fn hash_enum(&self) -> &HashEnum {
         &self.hash_enum
     }
+    pub(crate) fn validate(&self) -> Result<(), Error> {
+        match self.hash_enum {
+            HashEnum::None => return Err(ErrorKind::HashNoneError.into()),
+            _ => (),
+        }
+        self.password.validate(None)?;
+        self.secret_key.validate(Some(true))?;
+        Ok(())
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -190,11 +220,12 @@ impl Verifier {
 pub(crate) enum HashEnum {
     Raw(HashRaw),
     Encoded(String),
+    None,
 }
 
-impl HashEnum {
-    fn none() -> HashEnum {
-        HashEnum::Encoded("".to_string())
+impl Default for HashEnum {
+    fn default() -> HashEnum {
+        HashEnum::None
     }
 }
 

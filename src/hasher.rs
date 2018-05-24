@@ -55,16 +55,17 @@ impl Hasher {
     ///
     /// Here are the default configuration options:
     /// * `backend`: [`Backend::C`](config/enum.Backend.html#variant.C)
+    /// * `cpu_pool`: `CpuPool::new(num_cpus::get_physical())`
     /// * `hash_length`: `32` bytes
     /// * `iterations`: `128`
-    /// * `lanes`: the number of physical cores on your machine
+    /// * `lanes`: `num_cpus::get_physical()`
     /// * `memory_size`: `4096` kibibytes
     /// * `opt_out_of_random_salt`: `false`
     /// * `opt_out_of_secret_key`: `false`
     /// * `password_clearing`: `true`
-    /// * `salt`: random [`Salt`](data/struct.Salt.html) of length 32 bytes that renews with every call to [`hash`](struct.Hasher.html#method.hash) or [`hash_raw`](struct.Hasher.html#method.hash_raw)
+    /// * `salt`: random [`Salt`](data/struct.Salt.html) of length 32 bytes that renews with every hash
     /// * `secret_key_clearing`: `false`
-    /// * `threads`: the number of physical cores on your machine
+    /// * `threads`: `num_cpus::get_physical()`
     /// * `variant`: [`Variant::Argon2id`](config/enum.Variant.html#variant.Argon2id)
     /// * `version`: [`Version::_0x13`](config/enum.Verion.html#variant._0x13)
     pub fn new() -> Hasher {
@@ -76,6 +77,18 @@ impl Hasher {
     /// [`Hasher`](struct.Hasher.html) <i>with</i> [`Backend::Rust`](config/enum.Backend.html#variant.Rust)<i>, it will panic at runtime</i>
     pub fn configure_backend(&mut self, backend: Backend) -> &mut Hasher {
         self.config.set_backend(backend);
+        self
+    }
+    /// The non-blocking methods on [`Hasher`](struct.Hasher.html)
+    /// ([`hash_non_blocking`](struct.Hasher.html#method.hash_non_blocking)
+    /// and [`hash_raw_non_blocking`](struct.Hasher.html#method.hash_raw_non_blocking))
+    /// use a [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
+    /// in order to push work off onto another thread. This method
+    /// allows you to provide your own [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
+    /// instead of using the default, which is `CpuPool::new(num_cpus::get_physical())`. Note:
+    /// The cpu pool is only used for the two non-blocking methods mentioned above.
+    pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Hasher {
+        self.cpu_pool = cpu_pool;
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom hash length (in bytes). The default is `32`.
@@ -100,13 +113,13 @@ impl Hasher {
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to erase the password bytes after each call to [`hash`](struct.Hasher.html#method.hash)
-    /// or [`hash_raw`](struct.Hasher.html#method.hash_raw). The default is to clear out the password bytes (i.e. `true`).
+    /// or [`hash_raw`](struct.Hasher.html#method.hash_raw) (or their non-blocking versions). The default is to clear out the password bytes (i.e. `true`).
     pub fn configure_password_clearing(&mut self, boolean: bool) -> &mut Hasher {
         self.config.set_password_clearing(boolean);
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to erase the secret key bytes after each call to [`hash`](struct.Hasher.html#method.hash)
-    /// or [`hash_raw`](struct.Hasher.html#method.hash_raw). The default is to <b>not</b> clear out the secret key bytes (i.e. `false`).
+    /// or [`hash_raw`](struct.Hasher.html#method.hash_raw) (or their non-blocking version). The default is to <b>not</b> clear out the secret key bytes (i.e. `false`).
     /// This default was chosen to make it easier to keep using the same [`Hasher`](struct.Hasher.html) for multiple passwords.
     pub fn configure_secret_key_clearing(&mut self, boolean: bool) -> &mut Hasher {
         self.config.set_secret_key_clearing(boolean);
@@ -132,7 +145,7 @@ impl Hasher {
         self.config.set_version(version);
         self
     }
-    /// <b>The primary method (blocking version).</b> After you have configured [`Hasher`](struct.Hasher.html) to your liking and provided
+    /// <b><u>The primary method (blocking version).</u></b> After you have configured [`Hasher`](struct.Hasher.html) to your liking and provided
     /// it will all the data you would like it to hash (e.g. a [`Password`](data/struct.Password.html) and a [`SecretKey`](data/struct.SecretKey.html)), call
     /// this method in order to produce an encoded `String` representing the hash, which is
     /// safe to store in a database and against which you can verify raw passwords later
@@ -141,7 +154,7 @@ impl Hasher {
         let hash = encode_rust(&hash_raw);
         Ok(hash)
     }
-    /// <b>The primary method (non-blocking version).</b> Same as [`hash`](struct.Hasher.html#method.hash) except it returns a [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html) instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
+    /// <b><u>The primary method (non-blocking version).</u></b> Same as [`hash`](struct.Hasher.html#method.hash) except it returns a [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html) instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
     pub fn hash_non_blocking(&mut self) -> impl Future<Item = String, Error = Error> {
         let mut hasher = self.clone();
         self.cpu_pool.spawn_fn(move || {
@@ -217,7 +230,8 @@ impl Hasher {
         self
     }
     /// Provides [`Hasher`](struct.Hasher.html) with the password you would like to hash. [`Hasher`](struct.Hasher.html) must be provided
-    /// with a [`Password`](data/struct.Password.html) for the [`hash`](struct.Hasher.html#method.hash) and [`hash_raw`](struct.Hasher.html#method.hash_raw) methods to work
+    /// with a [`Password`](data/struct.Password.html) for the [`hash`](struct.Hasher.html#method.hash)
+    /// and [`hash_raw`](struct.Hasher.html#method.hash_raw) methods (and their non-blocking versions) to work
     pub fn with_password<P>(&mut self, password: P) -> &mut Hasher
     where
         P: Into<Password>,
@@ -261,6 +275,10 @@ impl Hasher {
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`HasherConfig`](config/struct.HasherConfig.html)
     pub fn config(&self) -> &HasherConfig {
         &self.config
+    }
+    /// Access to the [`Hasher`](struct.Hasher.html)'s [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
+    pub fn cpu_pool(&self) -> CpuPool {
+        self.cpu_pool.clone()
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`Password`](data/struct.Password.html). If you never provided a [`Password`](data/struct.Password.html),
     /// this will return a reference to an empty [`Password`](data/struct.Password.html) (i.e. one whose underlying

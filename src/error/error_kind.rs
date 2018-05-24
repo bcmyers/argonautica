@@ -23,6 +23,12 @@ pub enum ErrorKind {
     #[fail(display = "Failed to encode HashRaw into hash. HashRaw invalid")]
     HashEncodingError,
 
+    /// Called [`verify`](struct.Verifier.html#method.verify) or
+    /// [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking) on a
+    /// [`Verifier`](struct.Verifier.html) withough first providing a hash or [`HashRaw`](output/struct.HashRaw.html)
+    #[fail(display = "Called verify or verify_non_blocking on a Verifier withough first providing a hash or HashRaw")]
+    HashNoneError,
+
     /// Hash length too short. Hash length must be at least 4
     #[fail(display = "Hash length too short. Hash length must be at least 4")]
     HashLengthTooShortError,
@@ -52,9 +58,7 @@ pub enum ErrorKind {
     MemorySizeInvalidError,
 
     /// Memory size too small. Memory size must be at least 8 times the number of lanes
-    #[fail(
-        display = "Memory size too small. Memory size must be at least 8 times the number of lanes"
-    )]
+    #[fail(display = "Memory size too small. Memory size must be at least 8 times the number of lanes")]
     MemorySizeTooSmallError,
 
     /// Failed to access OS random number generator
@@ -90,9 +94,7 @@ pub enum ErrorKind {
     SaltTooLongError,
 
     /// Trying to hash without a secret key when you have not explicitly opted out of using a secret key
-    #[fail(
-        display = "Trying to hash without a secret key when you have not explicitly opted out of using a secret key"
-    )]
+    #[fail(display = "Trying to hash without a secret key when you have not explicitly opted out of using a secret key")]
     SecretKeyMissingError,
 
     /// Secret key too long. Length in bytes must be less than 2^32
@@ -103,9 +105,9 @@ pub enum ErrorKind {
     #[fail(display = "Too many threads. Threads must be less than 2^24")]
     ThreadsTooManyError,
 
-    #[fail(display = "")]
     #[doc(hidden)]
-    __Nonexhaustive
+    #[fail(display = "__Nonexaustive ErrorKind variant")]
+    __Nonexhaustive,
 }
 
 #[cfg(test)]
