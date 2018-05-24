@@ -209,10 +209,7 @@
 //! I'll try to look into it, but to be honest, compiling C programs is not really an area of expertise
 //! for me (so if anyone wants to help out in this area, that would be much appreciated!).
 //!
-//! `a2` was built using stable Rust 1.25.0 and most likely works on earlier versions
-//! of Rust as well, but I'm not currently aware of how far back it will go. Most of the examples
-//! in the examples directory use the relatively new Rust feature [`? in main`](https://github.com/rust-lang/rfcs/pull/1937),
-//! which requires stable Rust 1.26.0 or greater.
+//! `a2` requires stable Rust 1.26.0 or greater.
 //!
 //! ## Alternatives
 //!
@@ -239,6 +236,8 @@ extern crate bitflags;
 extern crate blake2_rfc;
 #[macro_use]
 extern crate failure;
+extern crate futures;
+extern crate futures_cpupool;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
@@ -268,3 +267,5 @@ pub mod utils;
 pub use verifier::Verifier;
 
 // TODO: License
+// TODO: Non-blocking for Actix
+// TODO: SQLlite database for Actix

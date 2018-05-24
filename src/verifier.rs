@@ -1,3 +1,6 @@
+use futures::Future;
+use futures_cpupool::CpuPool;
+use num_cpus;
 use scopeguard;
 
 use backend::verify_c;
@@ -12,6 +15,7 @@ impl Default for Verifier {
         Verifier {
             additional_data: AdditionalData::none(),
             config: VerifierConfig::default(),
+            cpu_pool: CpuPool::new(num_cpus::get_physical()), // TODO: move to Config?
             hash_enum: HashEnum::none(),
             password: Password::none(),
             secret_key: SecretKey::none(),
@@ -20,12 +24,14 @@ impl Default for Verifier {
 }
 
 /// <b><u>One of the two main structs.</u></b> Use it to verify passwords against hashes
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Verifier {
     additional_data: AdditionalData,
     config: VerifierConfig,
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    cpu_pool: CpuPool,
     hash_enum: HashEnum,
     #[cfg_attr(feature = "serde", serde(skip_serializing))]
     password: Password,
@@ -63,7 +69,7 @@ impl Verifier {
         self.config.set_secret_key_clearing(boolean);
         self
     }
-    /// <b>The primary method.</b> After you have configured [`Verifier`](struct.Verifier.html) to your liking and provided
+    /// <b>The primary method (blocking version).</b> After you have configured [`Verifier`](struct.Verifier.html) to your liking and provided
     /// it will all the data it needs to verify a password (e.g. a string-encoded hash or [`HashRaw`](output/struct.HashRaw.html),
     /// a [`Password`](data/struct.Password.html) and a [`SecretKey`](data/struct.SecretKey.html)), call this method in order to determine whether the
     /// provided password matches the provided hash
@@ -84,6 +90,14 @@ impl Verifier {
         };
 
         Ok(is_valid)
+    }
+    /// <b>The primary method (non-blocking version).</b> Same as [`verify`](struct.Verifier.html#method.verify) except it returns a [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html) instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
+    pub fn verify_non_blocking(&mut self) -> impl Future<Item = bool, Error = Error> {
+        let mut verifier = self.clone();
+        self.cpu_pool.spawn_fn(move || {
+            let is_valid = verifier.verify()?;
+            Ok::<_, Error>(is_valid)
+        })
     }
     /// Allows you to provide [`Verifier`](struct.Verifier.html) with the additional data, if any, that was
     /// originally used to create the hash. Normally hashes are not created with

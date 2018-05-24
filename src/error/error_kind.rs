@@ -102,6 +102,10 @@ pub enum ErrorKind {
     /// Too many threads. Threads must be less than 2^24
     #[fail(display = "Too many threads. Threads must be less than 2^24")]
     ThreadsTooManyError,
+
+    #[fail(display = "")]
+    #[doc(hidden)]
+    __Nonexhaustive
 }
 
 #[cfg(test)]

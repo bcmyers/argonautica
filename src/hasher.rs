@@ -1,3 +1,6 @@
+use futures::Future;
+use futures_cpupool::CpuPool;
+use num_cpus;
 use scopeguard;
 
 use backend::{encode_rust, hash_raw_c};
@@ -13,6 +16,7 @@ impl Default for Hasher {
         Hasher {
             additional_data: AdditionalData::none(),
             config: HasherConfig::default(),
+            cpu_pool: CpuPool::new(num_cpus::get_physical()),
             password: Password::none(),
             salt: Salt::default(),
             secret_key: SecretKey::none(),
@@ -21,12 +25,14 @@ impl Default for Hasher {
 }
 
 /// <b><u>One of the two main structs.</u></b> Use it to turn passwords into hashes that are safe to store in a database
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Hasher {
     additional_data: AdditionalData,
     config: HasherConfig,
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    cpu_pool: CpuPool,
     #[cfg_attr(feature = "serde", serde(skip_serializing))]
     password: Password,
     salt: Salt,
@@ -126,7 +132,7 @@ impl Hasher {
         self.config.set_version(version);
         self
     }
-    /// <b>The primary method.</b> After you have configured [`Hasher`](struct.Hasher.html) to your liking and provided
+    /// <b>The primary method (blocking version).</b> After you have configured [`Hasher`](struct.Hasher.html) to your liking and provided
     /// it will all the data you would like it to hash (e.g. a [`Password`](data/struct.Password.html) and a [`SecretKey`](data/struct.SecretKey.html)), call
     /// this method in order to produce an encoded `String` representing the hash, which is
     /// safe to store in a database and against which you can verify raw passwords later
@@ -134,6 +140,14 @@ impl Hasher {
         let hash_raw = self.hash_raw()?;
         let hash = encode_rust(&hash_raw);
         Ok(hash)
+    }
+    /// <b>The primary method (non-blocking version).</b> Same as [`hash`](struct.Hasher.html#method.hash) except it returns a [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html) instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
+    pub fn hash_non_blocking(&mut self) -> impl Future<Item = String, Error = Error> {
+        let mut hasher = self.clone();
+        self.cpu_pool.spawn_fn(move || {
+            let hash = hasher.hash()?;
+            Ok::<_, Error>(hash)
+        })
     }
     /// Like the [`hash`](struct.Hasher.html#method.hash) method, but instead of producing an encoded `String` representing the hash,
     /// produces a [`HashRaw`](output/struct.HashRaw.html) struct that contains all the component parts of the string-encoded
@@ -166,6 +180,14 @@ impl Hasher {
         };
 
         Ok(hash_raw)
+    }
+    /// Same as [`hash_raw`](struct.Hasher.html#method.hash) except it returns a [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html) instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
+    pub fn hash_raw_non_blocking(&mut self) -> impl Future<Item = HashRaw, Error = Error> {
+        let mut hasher = self.clone();
+        self.cpu_pool.spawn_fn(move || {
+            let hash_raw = hasher.hash_raw()?;
+            Ok::<_, Error>(hash_raw)
+        })
     }
     /// For safety reasons, if you would like to produce a hash that does not include a random
     /// salt, you must explicitly opt out of using a random salt with this method. It is
