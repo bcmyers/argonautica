@@ -14,19 +14,22 @@ use output::HashRaw;
 pub(crate) fn decode_c(hash: &str) -> Result<HashRaw, Error> {
     // $argon2id$v=19$m=4096,t=128,p=2$W4KZHc/mgO4iZ9cv3lPjLx0V98XqTPfNnNp4TZ5yw5o$i3fmo6W1OvcpQ4ru35E+MqAOVxa4j1vwmkgV5YYnd+E
     // ["", "argon2id". "v=19". "m=4096,t=128,p=2", "salt", "hash"]
-    let variant_str = hash.split('$')
+    let variant_str = hash
+        .split('$')
         .nth(1)
         .ok_or_else(|| ErrorKind::HashDecodingError)?;
     let variant = variant_str.parse::<Variant>()?;
 
-    let hash_str = hash.split('$')
+    let hash_str = hash
+        .split('$')
         .nth(5)
         .ok_or_else(|| ErrorKind::HashDecodingError)?;
     let hash_len = base64::decode_config(hash_str, base64::STANDARD_NO_PAD)
         .map_err(|_| ErrorKind::Base64DecodingError)?
         .len();
 
-    let salt_str = hash.split('$')
+    let salt_str = hash
+        .split('$')
         .nth(4)
         .ok_or_else(|| ErrorKind::HashDecodingError)?;
     let salt_len = base64::decode_config(salt_str, base64::STANDARD_NO_PAD)

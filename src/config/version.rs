@@ -27,7 +27,7 @@ impl FromStr for Version {
     }
 }
 
-/// Enum repressenting the various versions of the Argon2 algorithm (
+/// Enum representing the various versions of the Argon2 algorithm (
 /// [`0x10`](enum.Version.html#variant._0x10) and
 /// [`0x13`](enum.Version.html#variant._0x13))
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]

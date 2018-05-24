@@ -4,9 +4,9 @@ use error::{Error, ErrorKind};
 use utils;
 
 impl Default for Salt {
-    /// Produces a `Salt` with random bytes of length 32 that will use a cryptographically-secure
-    /// random number genertor to produce new random bytes for each call to `hash()` or
-    /// `hash_raw()` on `Hasher`
+    /// Produces a [`Salt`](struct.Salt.html) with random bytes of length `32` that will use a cryptographically-secure
+    /// random number genertor to produce new random bytes for each call to [`hash`](../struct.Hasher.html#method.hash) or
+    /// [`hash_raw`](../struct.Hasher.html#method.hash_raw) on a [`Hasher`](../struct.Hasher.html)
     fn default() -> Salt {
         Salt {
             bytes: vec![0u8; DEFAULT_SALT_LENGTH as usize],
@@ -95,9 +95,9 @@ pub struct Salt {
 }
 
 impl Salt {
-    /// Constructs a "random" `Salt` of length provided that uses a cryptographically secure
-    /// random number generator to produce new random bytes for each call to `hash()` or
-    /// `hash_raw()` on `Hasher`
+    /// Constructs a "random" [`Salt`](struct.Salt.html) of length provided that uses a cryptographically secure
+    /// random number generator to produce new random bytes for each call to [`hash`](../struct.Hasher.html#method.hash) or
+    /// [`hash_raw`](../struct.Hasher.html#method.hash_raw) on a [`Hasher`](../struct.Hasher.html)
     pub fn random(length: u32) -> Result<Salt, Error> {
         let bytes = utils::generate_random_bytes(length)?;
         Ok(Salt {
@@ -105,6 +105,7 @@ impl Salt {
             is_random: true,
         })
     }
+    /// Returns a bool indicating whether or not the [`Salt`](struct.Salt.html) is random
     pub fn is_random(&self) -> bool {
         self.is_random
     }

@@ -38,12 +38,23 @@ bindgen = "0.37"
 cc = { version = "1.0", features = ["parallel"] }
 
 [dev-dependencies]
+actix-web = "0.6"
 criterion = "0.2"
 dotenv = "0.12"
+env_logger = "0.5"
+futures = "0.1"
+futures-cpupool = "0.1"
+futures-timer = "0.1"
+serde = "1.0"
+serde_derive = "1.0"
 serde_json = "1.0"
 
 [[bench]]
-name = "benches"
+name = "bench_inputs"
+harness = false
+
+[[bench]]
+name = "bench_threads"
 harness = false
 
 [badges]

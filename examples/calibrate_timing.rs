@@ -1,5 +1,4 @@
 extern crate a2;
-extern crate failure;
 extern crate num_cpus;
 
 use std::time::Instant;
@@ -8,18 +7,14 @@ use a2::config::{Variant, Version};
 use a2::data::{Salt, SecretKey};
 
 pub const HASH_LENGTH: u32 = 32;
-pub const ITERATIONS: [u32; 7] = [8, 16, 32, 64, 128, 256, 512];
-pub const MEMORY_SIZES: [u32; 7] = [512, 1_024, 2_048, 4_096, 8_192, 16_384, 32_768];
+pub const ITERATIONS: [u32; 7] = [32, 64, 96, 128, 192, 256, 512];
+pub const MEMORY_SIZES: [u32; 7] = [256, 512, 1_024, 2_048, 4_096, 8_192, 16_384];
 pub const PASSWORD: &str = "P@ssw0rd";
 pub const SALT_LENGTH: u32 = 32;
 pub const VARIANT: Variant = Variant::Argon2id;
 pub const VERSION: Version = Version::_0x13;
 
-fn main() {
-    run().unwrap();
-}
-
-fn run() -> Result<(), failure::Error> {
+fn main() -> Result<(), a2::Error> {
     let salt = Salt::random(SALT_LENGTH)?;
     let secret_key =
         SecretKey::from_base64_encoded_str("t9nGEsDxjWtJYdYeExdB6/HU0vg+rT6czv6HSjVjZng=")?;

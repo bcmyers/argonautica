@@ -19,8 +19,8 @@ pub enum ErrorKind {
     #[fail(display = "Failed to decode hash. Hash invalid")]
     HashDecodingError,
 
-    /// Failed to encode into hash
-    #[fail(display = "Failed to encode into hash")]
+    /// Failed to encode [`HashRaw`](output/struct.HashRaw.html) into hash
+    #[fail(display = "Failed to encode HashRaw into hash. HashRaw invalid")]
     HashEncodingError,
 
     /// Hash length too short. Hash length must be at least 4
@@ -52,18 +52,20 @@ pub enum ErrorKind {
     MemorySizeInvalidError,
 
     /// Memory size too small. Memory size must be at least 8 times the number of lanes
-    #[fail(display = "Memory size too small. Memory size must be at least 8 times the number of lanes")]
+    #[fail(
+        display = "Memory size too small. Memory size must be at least 8 times the number of lanes"
+    )]
     MemorySizeTooSmallError,
 
     /// Failed to access OS random number generator
     #[fail(display = "Failed to access OS random number generator")]
     OsRngError,
 
-    /// Failed to parse into Variant
+    /// Failed to parse into [`Variant`](config/enum.Variant.html)
     #[fail(display = "Failed to parse into Variant")]
     VariantParseError,
 
-    /// Failed to parse into Version
+    /// Failed to parse into [`Version`](config/enum.Version.html)
     #[fail(display = "Failed to parse into Version")]
     VersionParseError,
 
@@ -88,7 +90,9 @@ pub enum ErrorKind {
     SaltTooLongError,
 
     /// Trying to hash without a secret key when you have not explicitly opted out of using a secret key
-    #[fail(display = "Trying to hash without a secret key when you have not explicitly opted out of using a secret key")]
+    #[fail(
+        display = "Trying to hash without a secret key when you have not explicitly opted out of using a secret key"
+    )]
     SecretKeyMissingError,
 
     /// Secret key too long. Length in bytes must be less than 2^32

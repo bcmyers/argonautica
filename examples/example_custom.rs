@@ -9,10 +9,6 @@ use std::env;
 use a2::config::{Variant, Version};
 use a2::data::{Salt, SecretKey};
 
-fn main() {
-    run().unwrap();
-}
-
 fn load_secret_key() -> Result<SecretKey, failure::Error> {
     let dotenv_path = env::current_dir()?.join("examples").join("example.env");
     dotenv::from_path(&dotenv_path).map_err(|e| format_err!("{}", e))?;
@@ -22,7 +18,7 @@ fn load_secret_key() -> Result<SecretKey, failure::Error> {
     )?)
 }
 
-fn run() -> Result<(), failure::Error> {
+fn main() -> Result<(), failure::Error> {
     let secret_key = load_secret_key()?;
     let mut hasher = a2::Hasher::default();
     hasher

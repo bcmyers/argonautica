@@ -5,14 +5,6 @@ use rand::{OsRng, RngCore};
 
 use error::{Error, ErrorKind};
 
-pub fn fails_on_purpose() -> Result<(), Error> {
-    let e = ::std::io::Error::new(::std::io::ErrorKind::Other, "oh no!");
-    let color = "blue";
-    Err(Error::new(ErrorKind::OsRngError)
-        .add_context(format!("This is some {} stuff: {}", color, e)))?;
-    Ok(())
-}
-
 /// A utility function for generating cryptographically-secure random bytes. A quick glance at
 /// this function's source should give you a good idea of what the function is doing.
 pub fn generate_random_bytes(length: u32) -> Result<Vec<u8>, Error> {
@@ -24,7 +16,7 @@ pub fn generate_random_bytes(length: u32) -> Result<Vec<u8>, Error> {
 }
 
 /// A utility function for generating a cryptographically-secure, random, base64-encoded string
-/// based on the [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html).
+/// based on [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html).
 /// A quick glance at this function's source should give you a good idea of what the function is doing.
 pub fn generate_random_base64_encoded_string(length: u32) -> Result<String, Error> {
     let mut rng =

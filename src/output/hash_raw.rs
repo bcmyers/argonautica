@@ -8,7 +8,7 @@ impl FromStr for HashRaw {
     ///
     type Err = Error;
 
-    /// Take a regular string-encoded hash and converts it into an instance of `HashRaw`
+    /// Take a regular string-encoded hash and converts it into an instance of [`HashRaw`](struct.HashRaw.html)
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(decode_rust(s)?)
     }
@@ -33,7 +33,7 @@ pub struct HashRaw {
 }
 
 impl HashRaw {
-    /// Converts the `HashRaw` to a string-encoded hash
+    /// Converts the [`HashRaw`](struct.HashRaw.html) to a string-encoded hash
     pub fn to_hash(&self) -> String {
         encode_rust(self)
     }
@@ -92,6 +92,79 @@ impl HashRaw {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use hasher::Hasher;
+    use verifier::Verifier;
+
+    #[test]
+    fn test_decode() {
+        for hash in &[
+            "$argon2d$v=16$m=32,t=3,p=1$c29tZXNhbHQ$F9F9xbKM80M",
+            "$argon2d$v=19$m=32,t=3,p=1$c29tZXNhbHQ$8M5O+AL7X7g",
+            "$argon2i$v=16$m=32,t=3,p=1$c29tZXNhbHQ$Kq7eFUPUZVI",
+            "$argon2i$v=19$m=32,t=3,p=1$c29tZXNhbHQ$4QLWhz5VaKk",
+            "$argon2id$v=16$m=32,t=3,p=1$c29tZXNhbHQ$tfZjSAPJqZ0",
+            "$argon2id$v=19$m=32,t=3,p=1$c29tZXNhbHQ$lYNMBkRT0DI",
+        ] {
+            let hash_raw = hash.parse::<HashRaw>().unwrap();
+            println!("{:?}", &hash_raw);
+        }
+    }
+
+    #[test]
+    fn test_encode() {
+        let additional_data = "some additional data";
+        let password = "P@ssw0rd";
+        let salt = "somesalt";
+        let secret_key = "secret";
+
+        let mut hasher = Hasher::default();
+        hasher
+            .configure_hash_length(32)
+            .configure_iterations(3)
+            .configure_lanes(4)
+            .configure_memory_size(32)
+            .configure_threads(4)
+            .with_additional_data(additional_data)
+            .with_salt(salt)
+            .with_secret_key(secret_key)
+            .opt_out_of_random_salt();
+
+        let hash_raw = hasher.with_password(password).hash_raw().unwrap();
+        let hash1 = hash_raw.to_hash();
+
+        let hash2 = hasher.with_password(password).hash().unwrap();
+
+        assert_eq!(&hash1, &hash2);
+
+        let mut verifier = Verifier::default();
+
+        let is_valid = verifier
+            .with_additional_data(additional_data)
+            .with_hash_raw(&hash_raw)
+            .with_password(password)
+            .with_secret_key(secret_key)
+            .verify()
+            .unwrap();
+        assert!(is_valid);
+
+        let is_valid = verifier
+            .with_additional_data(additional_data)
+            .with_hash(&hash1)
+            .with_password(password)
+            .with_secret_key(secret_key)
+            .verify()
+            .unwrap();
+        assert!(is_valid);
+
+        let is_valid = verifier
+            .with_additional_data(additional_data)
+            .with_hash(&hash2)
+            .with_password(password)
+            .with_secret_key(secret_key)
+            .verify()
+            .unwrap();
+        assert!(is_valid);
+    }
 
     #[test]
     fn test_send() {

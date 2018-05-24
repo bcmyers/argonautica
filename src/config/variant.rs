@@ -29,7 +29,7 @@ impl FromStr for Variant {
     }
 }
 
-/// Enum repressenting the various variants of the Argon2 algorithm (
+/// Enum representing the various variants of the Argon2 algorithm (
 /// [`Argon2d`](enum.Variant.html#variant.Argon2d),
 /// [`Argon2i`](enum.Variant.html#variant.Argon2i), and
 /// [`Argon2id`](enum.Variant.html#variant.Argon2id)).
@@ -42,7 +42,8 @@ impl FromStr for Variant {
 /// which is preferred for password hashing and password-based key derivation.
 /// Argon2id works as Argon2i for the first half of the first iteration over the memory,
 /// and as Argon2d for the rest, thus providing both side-channel attack
-/// protection and brute-force cost savings due to time-memory tradeoffs."
+/// protection and brute-force cost savings due to time-memory tradeoffs." If you do not
+/// know which variant to use, use the default, which is [`Argon2id`](enum.Variant.html#variant.Argon2id))
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]

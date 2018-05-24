@@ -16,7 +16,7 @@ pub trait Data {
     }
 
     /// Read-only access to the struct's underlying bytes as as a base64-encoded string using
-    /// the [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html)
+    /// [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html)
     fn to_base64_encoded_string(&self) -> String {
         base64::encode_config(self.as_bytes(), base64::STANDARD)
     }

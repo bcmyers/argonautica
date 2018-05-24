@@ -87,4 +87,40 @@ mod tests {
         assert_eq!(hash_raw.iterations(), 3);
         assert_eq!(hash_raw.lanes(), 1);
     }
+
+    #[test]
+    fn test_decode_against_c() {
+        use backend::c::decode_c;
+        use hasher::Hasher;
+        use rand::{RngCore, SeedableRng, StdRng};
+
+        let mut seed = [0u8; 32];
+        seed[0] = 1;
+        seed[1] = 2;
+        seed[2] = 3;
+        seed[3] = 4;
+        let mut rng: StdRng = SeedableRng::from_seed(seed);
+        let mut password = vec![0u8; 12];
+        let mut secret_key = vec![0u8; 32];
+        for _ in 0..1_000 {
+            rng.fill_bytes(&mut password);
+            rng.fill_bytes(&mut secret_key);
+            for hash_length in &[8, 32, 128] {
+                let mut hasher = Hasher::default();
+                let hash = hasher
+                    .configure_hash_length(*hash_length)
+                    .configure_iterations(1)
+                    .configure_memory_size(32)
+                    .configure_threads(1)
+                    .configure_lanes(1)
+                    .with_secret_key(&secret_key[..])
+                    .with_password(&password[..])
+                    .hash()
+                    .unwrap();
+                let hash_raw1 = decode_rust(&hash).unwrap();
+                let hash_raw2 = decode_c(&hash).unwrap();
+                assert_eq!(hash_raw1, hash_raw2);
+            }
+        }
+    }
 }

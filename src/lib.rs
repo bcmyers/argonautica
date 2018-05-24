@@ -24,7 +24,7 @@
 //! ```
 //! extern crate a2;
 //!
-//! fn main() -> Result<(), a2::Error> {
+//! fn main() {
 //!     let mut hasher = a2::Hasher::default();
 //!     let hash = hasher
 //!         .with_password("P@ssw0rd")
@@ -33,10 +33,10 @@
 //!             an environment variable instead of in code, \
 //!             but this is just an example\
 //!         ")
-//!         .hash()?;
+//!         .hash()
+//!         .unwrap();
 //!     println!("{}", &hash);
 //!     // 👆 prints a hash, which will be random since the default Hasher uses a random salt
-//!     Ok(())
 //! }
 //! ```
 //! ## Verifying
@@ -48,13 +48,13 @@
 //! ```
 //! extern crate a2;
 //!
-//! fn main() -> Result<(), a2::Error> {
+//! fn main() {
 //!     let mut verifier = a2::Verifier::default();
 //!     let is_valid = verifier
 //!         .with_hash("\
-//!             $argon2id$v=19$m=4096,t=128,p=2\
-//!             $/q7MXPB7VqmB1iRQvgg6g1Vz5Rr76qISATkCGafVnLU\
-//!             $039phOrF/E5yzN67B2aCbXhRAcNMM1yKhhD8wtDMciY\
+//!            $argon2id$v=19$m=4096,t=128,p=2\
+//!            $IyOw2pHShVfLBeCtdpQbtzLrlL9mxdUhwtMbSqow4u8\
+//!            $w9SjhB3X2Dzbz62eJNqN/FcoHslse27cmGfuxzofHDc\
 //!         ")
 //!         .with_password("P@ssw0rd")
 //!         .with_secret_key("\
@@ -62,10 +62,9 @@
 //!             an environment variable instead of in code, \
 //!             but this is just an example\
 //!         ")
-//!         .verify()?;
-//!     println!("{}", is_valid);
-//!     // 👆 prints true
-//!     Ok(())
+//!         .verify()
+//!         .unwrap();
+//!     assert!(is_valid);
 //! }
 //! ```
 //! ## Configuration
@@ -82,7 +81,7 @@
 //!
 //! use a2::config::{Backend, Variant, Version};
 //!
-//! fn main() -> Result<(), a2::Error> {
+//! fn main() {
 //!     let mut hasher = a2::Hasher::default();
 //!     hasher
 //!         .configure_backend(Backend::C)
@@ -183,20 +182,20 @@
 //!         .with_salt("somesalt")
 //!         // 👆 A non-random salt, which is a bad idea, but possible
 //!         // because we configured this Hasher with opt_out_of_random_salt
-//!         .hash()?;
+//!         .hash()
 //!         // 👆 Notice we did not include a secret key, which is also a bad idea, but possible
 //!         // because we configured this Hasher with opt_out_of_secret_key
+//!         .unwrap();
 //!
 //!     println!("{}", &hash);
-//!     // 👆 prints $argon2id$v=19$m=8192,t=256,p=2$c29tZXNhbHQ$TyX+9AspmkeMGLJRQdJozQ
-//!     Ok(())
+//!     // 👆 prints $argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q
 //! }
 //! ```
 //! ## Installation
 //!
 //! `a2` should be relatively straightforward to include in your Rust project:
-//! * Include `extern crate a2;` in your code (typically in either `lib.rs` or `main.rs`)
-//! * Include the following in the `[dependencies]` section of your `Cargo.toml`:
+//! * Place `extern crate a2;` in your code (typically in either `lib.rs` or `main.rs`)
+//! * Place the following in the `[dependencies]` section of your `Cargo.toml`:
 //!     * `a2 = "0.1.0"`, <b>or</b>
 //!     * `a2 = { version = "0.1.0", features = ["serde"] }`</br>
 //!     (The optional serde feature allows you to serialize or deserialize structs and
@@ -211,13 +210,9 @@
 //! for me (so if anyone wants to help out in this area, that would be much appreciated!).
 //!
 //! `a2` was built using stable Rust 1.25.0 and most likely works on earlier versions
-//! of Rust as well, but I'm not currently aware of how far back it will go.
-//!
-//! ## Miscellaneous
-//!
-//! If you clone the [a2 repository](https://github.com/bcmyers/a2) and would like to run the tests, you must
-//! run the tests with `cargo test --features serde` or `cargo test --all-features`,
-//! since some of the tests depend on serde
+//! of Rust as well, but I'm not currently aware of how far back it will go. Most of the examples
+//! in the examples directory use the relatively new Rust feature [`? in main`](https://github.com/rust-lang/rfcs/pull/1937),
+//! which requires stable Rust 1.26.0 or greater.
 //!
 //! ## Alternatives
 //!
@@ -264,16 +259,12 @@ mod hasher;
 mod verifier;
 
 pub mod config;
+pub use error::Error;
+pub use error::ErrorKind;
 pub mod data;
 pub use hasher::Hasher;
 pub mod output;
 pub mod utils;
 pub use verifier::Verifier;
 
-// TODO: Check for errors before serializing
-// TODO: Use rust for encoding / decoding always?
-// TODO: Errors
-// TODO: Verify compiler flags for build script
-
-pub use error::Error;
-pub use error::ErrorKind;
+// TODO: License

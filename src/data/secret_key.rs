@@ -77,14 +77,14 @@ pub struct SecretKey {
 }
 
 impl SecretKey {
-    /// Constructs a `SecretKey` from a base64-encoded `&str` that uses the
+    /// Constructs a [`SecretKey`](struct.SecretKey.html) from a base64-encoded `&str` that uses
     /// [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html)
     pub fn from_base64_encoded_str(s: &str) -> Result<SecretKey, Error> {
         let bytes =
             base64::decode_config(s, base64::STANDARD).map_err(|_| ErrorKind::Base64DecodingError)?;
         Ok(SecretKey { bytes })
     }
-    /// Constructs a `SecretKey` from a base64-encoded `&str` that uses a non-standard base64 encoding
+    /// Constructs a [`SecretKey`](struct.SecretKey.html) from a base64-encoded `&str` that uses a non-standard base64 encoding
     /// (e.g. a [url-safe encoding](https://docs.rs/base64/0.9.1/base64/constant.URL_SAFE.html)),
     /// which the user specifies via the `config` parameter
     pub fn from_base64_encoded_str_config(
