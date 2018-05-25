@@ -29,6 +29,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         .header("include/argon2.h")
         .header("include/encoding.h")
+        .blacklist_type("max_align_t")
         .layout_tests(true)
         .rustfmt_bindings(false)
         .generate()
