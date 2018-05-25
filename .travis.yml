@@ -12,5 +12,6 @@ rust:
   - beta
   - nightly
 script:
-  - cargo build --verbose --all
+  - cargo build --verbose --all-features
+  - cargo test --verbose --all-features
 sudo: false

@@ -8,8 +8,8 @@ description = "Argon2 password hashing"
 documentation = "https://docs.rs/a2"
 homepage = "https://github.com/bcmyers/a2"
 keywords = ["argon2", "argon2d", "argon2i", "argon2id", "crypto", "cryptography", "hash", "hashing", "password", "passwords", "security"]
-license = "MIT"
-publish = false
+license = "MIT/Apache-2.0"
+publish = true
 readme = "README.md"
 repository = "https://github.com/bcmyers/a2"
 
