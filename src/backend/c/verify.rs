@@ -10,9 +10,9 @@ use {ffi, Error, ErrorKind};
 
 pub(crate) fn verify_c(verifier: &Verifier) -> Result<bool, Error> {
     let is_valid = match verifier.hash_enum() {
-        &HashEnum::Encoded(ref s) => verify_hash(verifier, s)?,
-        &HashEnum::Raw(ref hash_raw) => verify_hash_raw(verifier, hash_raw)?,
-        &HashEnum::None => {
+        HashEnum::Encoded(ref s) => verify_hash(verifier, s)?,
+        HashEnum::Raw(ref hash_raw) => verify_hash_raw(verifier, hash_raw)?,
+        HashEnum::None => {
             return Err(Error::new(ErrorKind::Bug)
                 .add_context("Attempting to verify without a hash. This should be unreachable"))
         }

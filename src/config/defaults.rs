@@ -2,9 +2,16 @@ use num_cpus;
 
 use config::{Backend, Variant, Version};
 
-lazy_static! {
-    pub(crate) static ref DEFAULT_LANES: u32 = num_cpus::get_physical() as u32;
-    pub(crate) static ref DEFAULT_THREADS: u32 = num_cpus::get_physical() as u32;
+/// Returns the number of physical cores on your machine
+#[inline(always)]
+pub fn default_lanes() -> u32 {
+    num_cpus::get_physical() as u32
+}
+
+/// Returns the number of physical cores on your machine
+#[inline(always)]
+pub fn default_threads() -> u32 {
+    num_cpus::get_physical() as u32
 }
 
 /// [`Backend::C`](enum.Backend.html#variant.C)

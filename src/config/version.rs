@@ -60,7 +60,7 @@ impl Version {
         match x {
             16 => Ok(Version::_0x10),
             19 => Ok(Version::_0x13),
-            _ => return Err(ErrorKind::ParseError(ParseError::VersionParseError).into()),
+            _ => Err(ErrorKind::ParseError(ParseError::VersionParseError).into()),
         }
     }
 }

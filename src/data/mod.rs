@@ -15,6 +15,7 @@
 //! Finally, each struct below implements the `Data` trait, which provides read-only access to
 //! the otherwise opaque struct's underlying bytes.
 mod additional_data;
+#[cfg_attr(feature = "cargo-clippy", allow(module_inception))]
 mod data;
 mod password;
 mod salt;

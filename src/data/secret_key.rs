@@ -6,6 +6,13 @@ use data::{Data, DataPrivate};
 use errors::{DataError, ParseError};
 use {Error, ErrorKind};
 
+// TODO: docs hidden
+impl Default for SecretKey {
+    fn default() -> SecretKey {
+        SecretKey { bytes: vec![] }
+    }
+}
+
 impl<'a> From<&'a [u8]> for SecretKey {
     fn from(bytes: &'a [u8]) -> Self {
         SecretKey {

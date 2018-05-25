@@ -25,7 +25,7 @@ fn main() {
         .compile("argon2");
 
     let out_dir = env::var("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir);
+    let path = Path::new(&out_dir).join("bindings.rs");
     let bindings = bindgen::Builder::default()
         .header("include/argon2.h")
         .header("include/encoding.h")
@@ -33,8 +33,8 @@ fn main() {
         .layout_tests(true)
         .rustfmt_bindings(false)
         .generate()
-        .expect("failed to generate bindings");
+        .expect("Build failed. Failed to generate bindings");
     bindings
-        .write_to_file(out_dir.join("bindings.rs"))
-        .expect("failed write bindings");
+        .write_to_file(path)
+        .expect("Build failed. Failed write bindings");
 }

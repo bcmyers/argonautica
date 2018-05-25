@@ -49,12 +49,12 @@ named!(parse_hash<&str, IntermediateStruct>, do_parse!(
     }) >>
     take_until_and_consume!("$") >>
     (IntermediateStruct {
-        iterations: iterations,
-        lanes: lanes,
-        memory_size: memory_size,
-        raw_salt_bytes: raw_salt_bytes,
-        variant: variant,
-        version: version,
+        iterations,
+        lanes,
+        memory_size,
+        raw_salt_bytes,
+        variant,
+        version,
     })
 ));
 

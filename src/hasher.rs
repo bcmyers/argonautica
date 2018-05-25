@@ -4,12 +4,16 @@ use num_cpus;
 use scopeguard;
 
 use backend::{encode_rust, hash_raw_c};
-use config::defaults::DEFAULT_LANES;
+use config::defaults::default_lanes;
 use config::{Backend, HasherConfig, Variant, Version};
 use data::{AdditionalData, DataPrivate, Password, Salt, SecretKey};
 use errors::ConfigurationError;
 use output::HashRaw;
 use {ffi, Error, ErrorKind};
+
+fn default_cpu_pool() -> CpuPool {
+    CpuPool::new(num_cpus::get_physical())
+}
 
 impl Default for Hasher {
     /// Same as the [`new`](struct.Hasher.html#method.new) method
@@ -17,10 +21,10 @@ impl Default for Hasher {
         Hasher {
             additional_data: AdditionalData::none(),
             config: HasherConfig::default(),
-            cpu_pool: CpuPool::new(num_cpus::get_physical()),
-            password: Password::none(),
+            cpu_pool: default_cpu_pool(),
+            password: Password::default(),
             salt: Salt::default(),
-            secret_key: SecretKey::none(),
+            secret_key: SecretKey::default(),
         }
     }
 }
@@ -32,12 +36,13 @@ impl Default for Hasher {
 pub struct Hasher {
     additional_data: AdditionalData,
     config: HasherConfig,
-    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    #[cfg_attr(feature = "serde",
+               serde(skip_serializing, skip_deserializing, default = "default_cpu_pool"))]
     cpu_pool: CpuPool,
-    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     password: Password,
     salt: Salt,
-    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     secret_key: SecretKey,
 }
 
@@ -80,7 +85,7 @@ impl Hasher {
     /// are the same as the defaults. On the developer's early-2014 Macbook Air, this configuration
     /// hashes "some document" in approximately 250 microseconds (on average).
     pub fn fast_but_insecure() -> Hasher {
-        let lanes = *DEFAULT_LANES;
+        let lanes = default_lanes();
         let mut hasher = Hasher::default();
         hasher
             .configure_hash_length(8)

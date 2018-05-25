@@ -243,7 +243,8 @@
 //! For what it's worth, besides API differences, one thing `a2` focuses on relative to other similar
 //! libraries is the ability to easily create hashes using a secret key. Your mileage may vary,
 //! but the crate's author found it somewhat difficult to hash with a secret key when
-//! experimenting with alternative Rust libraries.
+//! experimenting with alternative Rust libraries. In addition, `a2` is the only Rust crate
+//! (as of 5/18) that has the newest Argon2 variant: Argon2id.
 //!
 //! ## License
 //!
@@ -253,10 +254,8 @@
 //!
 //! at your option.
 
-#![allow(unknown_lints)]
+#![deny(missing_debug_implementations, missing_docs, unused_imports)]
 #![doc(html_root_url = "https://docs.rs/a2/0.1.0")]
-#![warn(clippy)]
-#![warn(missing_docs, unused_imports)] // TODO: Deny
 
 extern crate base64;
 #[macro_use]
@@ -267,8 +266,6 @@ extern crate blake2_rfc;
 extern crate failure;
 extern crate futures;
 extern crate futures_cpupool;
-#[macro_use]
-extern crate lazy_static;
 #[macro_use]
 extern crate log;
 #[macro_use]
@@ -297,11 +294,14 @@ pub mod output;
 pub mod utils;
 pub use verifier::Verifier;
 
-// TODO: SQLlite database for Actix
+// TODO: SQLite database for Actix-web example
 // TODO: Test with features
 // TODO: Required features: https://github.com/hyperium/hyper/blob/master/Cargo.toml
-// TODO: Clippy
 // TODO: Missing docs
 // TODO: Clang
 // TODO: MD5 and SHA2
 // TODO: bcrypt, scrypt
+// TODO: Argon2rs
+// TODO: Python
+// TODO: Git submodule
+// TODO: Logging

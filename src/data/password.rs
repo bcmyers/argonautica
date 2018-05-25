@@ -5,6 +5,13 @@ use data::{Data, DataPrivate};
 use errors::DataError;
 use {Error, ErrorKind};
 
+// TODO: Delete none
+impl Default for Password {
+    fn default() -> Password {
+        Password { bytes: vec![] }
+    }
+}
+
 impl<'a> From<&'a [u8]> for Password {
     fn from(bytes: &'a [u8]) -> Self {
         Password {

@@ -10,13 +10,17 @@ use errors::{ConfigurationError, DataError};
 use output::HashRaw;
 use {Error, ErrorKind};
 
+fn default_cpu_pool() -> CpuPool {
+    CpuPool::new(num_cpus::get_physical())
+}
+
 impl Default for Verifier {
     /// Same as the [`new`](struct.Verifier.html#method.new) method
     fn default() -> Verifier {
         Verifier {
             additional_data: AdditionalData::none(),
             config: VerifierConfig::default(),
-            cpu_pool: CpuPool::new(num_cpus::get_physical()), // TODO: move to Config?
+            cpu_pool: default_cpu_pool(),
             hash_enum: HashEnum::default(),
             password: Password::none(),
             secret_key: SecretKey::none(),
@@ -31,12 +35,13 @@ impl Default for Verifier {
 pub struct Verifier {
     additional_data: AdditionalData,
     config: VerifierConfig,
-    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    #[cfg_attr(feature = "serde",
+               serde(skip_serializing, skip_deserializing, default = "default_cpu_pool"))]
     cpu_pool: CpuPool,
     hash_enum: HashEnum,
-    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     password: Password,
-    #[cfg_attr(feature = "serde", serde(skip_serializing))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     secret_key: SecretKey,
 }
 
@@ -88,7 +93,7 @@ impl Verifier {
     /// provided password matches the provided hash
     pub fn verify(&mut self) -> Result<bool, Error> {
         // ensure password and/or secret_key clearing code will run
-        let mut verifier = scopeguard::guard(self, |verifier| {
+        let verifier = scopeguard::guard(self, |verifier| {
             if verifier.config.password_clearing() {
                 verifier.password = Password::none();
             }
@@ -102,7 +107,7 @@ impl Verifier {
 
         // calculate is_valid
         let is_valid = match verifier.config.backend() {
-            Backend::C => verify_c(&mut verifier)?,
+            Backend::C => verify_c(&verifier)?,
             Backend::Rust => {
                 return Err(ErrorKind::ConfigurationError(
                     ConfigurationError::BackendUnsupportedError,
@@ -209,9 +214,8 @@ impl Verifier {
         &self.hash_enum
     }
     pub(crate) fn validate(&self) -> Result<(), Error> {
-        match self.hash_enum {
-            HashEnum::None => return Err(ErrorKind::DataError(DataError::HashMissingError).into()),
-            _ => (),
+        if let HashEnum::None = self.hash_enum {
+            return Err(ErrorKind::DataError(DataError::HashMissingError).into());
         }
         self.password.validate(None)?;
         self.secret_key.validate(Some(true))?;

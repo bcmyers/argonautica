@@ -1,5 +1,5 @@
-use config::defaults::{DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING};
 use config::Backend;
+use config::defaults::{DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING};
 
 /// Read-only configuration for [`Verifier`](../struct.Verifier.html). Can be obtained by calling
 /// the [`config`](../struct.Verifier.html#method.config) method on an instance of [`Verifier`](../struct.Verifier.html)
@@ -13,12 +13,15 @@ pub struct VerifierConfig {
 }
 
 impl VerifierConfig {
+    #[allow(missing_docs)]
     pub fn backend(&self) -> Backend {
         self.backend
     }
+    #[allow(missing_docs)]
     pub fn password_clearing(&self) -> bool {
         self.password_clearing
     }
+    #[allow(missing_docs)]
     pub fn secret_key_clearing(&self) -> bool {
         self.secret_key_clearing
     }

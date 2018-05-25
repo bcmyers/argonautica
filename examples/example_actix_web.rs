@@ -8,9 +8,8 @@ extern crate failure;
 extern crate futures;
 extern crate futures_cpupool;
 extern crate futures_timer;
-extern crate serde;
 #[macro_use]
-extern crate serde_derive;
+extern crate serde;
 extern crate serde_json;
 
 use std::collections::HashMap;

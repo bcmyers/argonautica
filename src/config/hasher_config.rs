@@ -1,7 +1,7 @@
-use config::defaults::{DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES,
+use config::defaults::{default_lanes, default_threads, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS,
                        DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_RANDOM_SALT,
                        DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING,
-                       DEFAULT_SECRET_KEY_CLEARING, DEFAULT_THREADS, DEFAULT_VERSION};
+                       DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION};
 use config::{Backend, Flags, Variant, Version};
 use errors::ConfigurationError;
 use {Error, ErrorKind};
@@ -29,39 +29,51 @@ pub struct HasherConfig {
 }
 
 impl HasherConfig {
+    #[allow(missing_docs)]
     pub fn backend(&self) -> Backend {
         self.backend
     }
+    #[allow(missing_docs)]
     pub fn hash_length(&self) -> u32 {
         self.hash_length
     }
+    #[allow(missing_docs)]
     pub fn iterations(&self) -> u32 {
         self.iterations
     }
+    #[allow(missing_docs)]
     pub fn lanes(&self) -> u32 {
         self.lanes
     }
+    #[allow(missing_docs)]
     pub fn memory_size(&self) -> u32 {
         self.memory_size
     }
+    #[allow(missing_docs)]
     pub fn opt_out_of_random_salt(&self) -> bool {
         self.opt_out_of_random_salt
     }
+    #[allow(missing_docs)]
     pub fn opt_out_of_secret_key(&self) -> bool {
         self.opt_out_of_secret_key
     }
+    #[allow(missing_docs)]
     pub fn password_clearing(&self) -> bool {
         self.password_clearing
     }
+    #[allow(missing_docs)]
     pub fn secret_key_clearing(&self) -> bool {
         self.secret_key_clearing
     }
+    #[allow(missing_docs)]
     pub fn threads(&self) -> u32 {
         self.threads
     }
+    #[allow(missing_docs)]
     pub fn variant(&self) -> Variant {
         self.variant
     }
+    #[allow(missing_docs)]
     pub fn version(&self) -> Version {
         self.version
     }
@@ -73,13 +85,13 @@ impl HasherConfig {
             backend: Backend::default(),
             hash_length: DEFAULT_HASH_LENGTH,
             iterations: DEFAULT_ITERATIONS,
-            lanes: *DEFAULT_LANES,
+            lanes: default_lanes(),
             memory_size: DEFAULT_MEMORY_SIZE,
             opt_out_of_random_salt: DEFAULT_OPT_OUT_OF_RANDOM_SALT,
             opt_out_of_secret_key: DEFAULT_OPT_OUT_OF_SECRET_KEY,
             password_clearing: DEFAULT_PASSWORD_CLEARING,
             secret_key_clearing: DEFAULT_SECRET_KEY_CLEARING,
-            threads: *DEFAULT_THREADS,
+            threads: default_threads(),
             variant: Variant::default(),
             version: Version::default(),
         }
@@ -200,7 +212,7 @@ fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
         return Err(ErrorKind::ConfigurationError(ConfigurationError::LanesTooFewError).into());
     }
-    if lanes > 0x00ffffff {
+    if lanes > 0x00ff_ffff {
         return Err(ErrorKind::ConfigurationError(ConfigurationError::LanesTooManyError).into());
     }
     Ok(())
@@ -224,7 +236,7 @@ fn validate_threads(threads: u32) -> Result<(), Error> {
     if threads == 0 {
         return Err(ErrorKind::ConfigurationError(ConfigurationError::ThreadsTooFewError).into());
     }
-    if threads > 0x00ffffff {
+    if threads > 0x00ff_ffff {
         return Err(ErrorKind::ConfigurationError(ConfigurationError::ThreadsTooManyError).into());
     }
     Ok(())
