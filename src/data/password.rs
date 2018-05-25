@@ -2,7 +2,8 @@
 use serde;
 
 use data::{Data, DataPrivate};
-use error::{Error, ErrorKind};
+use errors::DataError;
+use {Error, ErrorKind};
 
 impl<'a> From<&'a [u8]> for Password {
     fn from(bytes: &'a [u8]) -> Self {
@@ -87,10 +88,10 @@ impl DataPrivate for Password {
     }
     fn validate(&self, _extra: Option<bool>) -> Result<(), Error> {
         if self.bytes.is_empty() {
-            return Err(ErrorKind::PasswordTooShortError.into());
+            return Err(ErrorKind::DataError(DataError::PasswordTooShortError).into());
         }
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::PasswordTooLongError.into());
+            return Err(ErrorKind::DataError(DataError::PasswordTooLongError).into());
         }
         Ok(())
     }

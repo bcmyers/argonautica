@@ -1,7 +1,7 @@
 use config::defaults::DEFAULT_SALT_LENGTH;
 use data::{Data, DataPrivate};
-use error::{Error, ErrorKind};
-use utils;
+use errors::DataError;
+use {utils, Error, ErrorKind};
 
 impl Default for Salt {
     /// Produces a [`Salt`](struct.Salt.html) with random bytes of length `32` that will use a cryptographically-secure
@@ -119,13 +119,13 @@ impl DataPrivate for Salt {
         let opt_out_of_random_salt = extra.unwrap();
         let length = self.bytes.len();
         if length < 8 {
-            return Err(ErrorKind::SaltTooShortError.into());
+            return Err(ErrorKind::DataError(DataError::SaltTooShortError).into());
         }
         if length >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::SaltTooLongError.into());
+            return Err(ErrorKind::DataError(DataError::SaltTooLongError).into());
         }
         if !(opt_out_of_random_salt) && !(self.is_random) {
-            return Err(ErrorKind::SaltNonRandomError.into());
+            return Err(ErrorKind::DataError(DataError::SaltNonRandomError).into());
         }
         Ok(())
     }

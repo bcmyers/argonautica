@@ -4,11 +4,12 @@ use num_cpus;
 use scopeguard;
 
 use backend::{encode_rust, hash_raw_c};
+use config::defaults::DEFAULT_LANES;
 use config::{Backend, HasherConfig, Variant, Version};
 use data::{AdditionalData, DataPrivate, Password, Salt, SecretKey};
-use error::{Error, ErrorKind};
-use ffi;
+use errors::ConfigurationError;
 use output::HashRaw;
+use {ffi, Error, ErrorKind};
 
 impl Default for Hasher {
     /// Same as the [`new`](struct.Hasher.html#method.new) method
@@ -70,6 +71,26 @@ impl Hasher {
     /// * `version`: [`Version::_0x13`](config/enum.Verion.html#variant._0x13)
     pub fn new() -> Hasher {
         Hasher::default()
+    }
+    /// Creates a new [`Hasher`](struct.Hasher.html) that is fast <b><u>but highly insecure</u></b>.
+    /// If for some reason you'd like to use Argon2 for hashing where security is not an issue,
+    /// you can use this configuration. It sets hash length to 8 bytes, uses only 1 iteration, sets memory
+    /// size to the minimum of 8 * the number of lanes, uses a deterministic salt of the minimum length of 8 bytes,
+    /// opts out of a secret key, and sets password clearing to false. All other configuration options
+    /// are the same as the defaults. On the developer's early-2014 Macbook Air, this configuration
+    /// hashes "some document" in approximately 250 microseconds (on average).
+    pub fn fast_but_insecure() -> Hasher {
+        let lanes = *DEFAULT_LANES;
+        let mut hasher = Hasher::default();
+        hasher
+            .configure_hash_length(8)
+            .configure_iterations(1)
+            .configure_memory_size(8 * lanes)
+            .configure_password_clearing(false)
+            .opt_out_of_random_salt()
+            .opt_out_of_secret_key()
+            .with_salt("somesalt");
+        hasher
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom backend implementation. The default
     /// is [`Backend::C`](config/enum.Backend.html#variant.C). <i>Note: Currently the only backend implementation supported is </i> [`Backend::C`](config/enum.Backend.html#variant.C) <i>.
@@ -189,7 +210,11 @@ impl Hasher {
         // calculate hash_raw
         let hash_raw = match hasher.config().backend() {
             Backend::C => hash_raw_c(&mut hasher)?,
-            Backend::Rust => return Err(ErrorKind::BackendUnsupportedError.into()),
+            Backend::Rust => {
+                return Err(ErrorKind::ConfigurationError(
+                    ConfigurationError::BackendUnsupportedError,
+                ).into())
+            }
         };
 
         Ok(hash_raw)

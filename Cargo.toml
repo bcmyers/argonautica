@@ -50,6 +50,10 @@ serde_derive = "1.0"
 serde_json = "1.0"
 
 [[bench]]
+name = "bench_fast_but_insecure"
+harness = false
+
+[[bench]]
 name = "bench_inputs"
 harness = false
 

@@ -9,6 +9,7 @@ use std::env;
 use a2::data::SecretKey;
 use futures::Future;
 
+// Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey, failure::Error> {
     let dotenv_path = env::current_dir()?.join("examples").join("example.env");
     dotenv::from_path(&dotenv_path).map_err(|e| format_err!("{}", e))?;
@@ -30,9 +31,6 @@ fn main() -> Result<(), failure::Error> {
         .hash_non_blocking()
         .and_then(|hash| {
             println!("{}", &hash);
-            Ok(hash)
-        })
-        .and_then(|hash| {
             verifier
                 .with_hash(&hash)
                 .with_password("P@ssw0rd")

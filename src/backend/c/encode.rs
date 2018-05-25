@@ -3,9 +3,8 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
-use error::{Error, ErrorKind};
-use ffi;
 use output::HashRaw;
+use {ffi, Error, ErrorKind};
 
 pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
     let encoded_len = unsafe {
@@ -18,7 +17,6 @@ pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
             hash_raw.variant() as ffi::argon2_type,
         )
     };
-    // TODO: Check error? Here and in other place
     let mut encoded = vec![0 as c_char; encoded_len];
     let encoded_ptr = encoded.as_mut_ptr();
 
@@ -48,7 +46,7 @@ pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
 
     let err = unsafe { ffi::encode_string(encoded_ptr, encoded_len, context_ptr, type_) };
     if err != 0 {
-        return Err(ErrorKind::HashEncodingError.into()); // TODO????
+        return Err(Error::new(ErrorKind::Bug).add_context(format!("HashRaw: {:?}", &hash_raw)));
     }
 
     let c_str: &CStr = unsafe { CStr::from_ptr(encoded_ptr) };

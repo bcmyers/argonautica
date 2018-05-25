@@ -6,8 +6,9 @@ use scopeguard;
 use backend::verify_c;
 use config::{Backend, VerifierConfig};
 use data::{AdditionalData, DataPrivate, Password, SecretKey};
-use error::{Error, ErrorKind};
+use errors::{ConfigurationError, DataError};
 use output::HashRaw;
+use {Error, ErrorKind};
 
 impl Default for Verifier {
     /// Same as the [`new`](struct.Verifier.html#method.new) method
@@ -102,7 +103,11 @@ impl Verifier {
         // calculate is_valid
         let is_valid = match verifier.config.backend() {
             Backend::C => verify_c(&mut verifier)?,
-            Backend::Rust => return Err(ErrorKind::BackendUnsupportedError.into()),
+            Backend::Rust => {
+                return Err(ErrorKind::ConfigurationError(
+                    ConfigurationError::BackendUnsupportedError,
+                ).into())
+            }
         };
 
         Ok(is_valid)
@@ -205,7 +210,7 @@ impl Verifier {
     }
     pub(crate) fn validate(&self) -> Result<(), Error> {
         match self.hash_enum {
-            HashEnum::None => return Err(ErrorKind::HashNoneError.into()),
+            HashEnum::None => return Err(ErrorKind::DataError(DataError::HashMissingError).into()),
             _ => (),
         }
         self.password.validate(None)?;

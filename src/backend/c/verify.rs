@@ -4,10 +4,9 @@ use std::os::raw::c_char;
 use backend::encode_rust;
 use config::Variant;
 use data::DataPrivate;
-use error::{Error, ErrorKind};
-use ffi;
 use output::HashRaw;
 use verifier::{HashEnum, Verifier};
+use {ffi, Error, ErrorKind};
 
 pub(crate) fn verify_c(verifier: &Verifier) -> Result<bool, Error> {
     let is_valid = match verifier.hash_enum() {

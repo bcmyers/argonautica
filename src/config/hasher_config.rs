@@ -1,10 +1,10 @@
-use config::defaults::{
-    DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES, DEFAULT_MEMORY_SIZE,
-    DEFAULT_OPT_OUT_OF_RANDOM_SALT, DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING,
-    DEFAULT_SECRET_KEY_CLEARING, DEFAULT_THREADS, DEFAULT_VERSION,
-};
+use config::defaults::{DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES,
+                       DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_RANDOM_SALT,
+                       DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING,
+                       DEFAULT_SECRET_KEY_CLEARING, DEFAULT_THREADS, DEFAULT_VERSION};
 use config::{Backend, Flags, Variant, Version};
-use error::{Error, ErrorKind};
+use errors::ConfigurationError;
+use {Error, ErrorKind};
 
 const PANIC_WARNING: &str = "Your program will panic at runtime if you use this configuration";
 
@@ -169,51 +169,63 @@ impl HasherConfig {
 fn validate_backend(backend: Backend) -> Result<(), Error> {
     match backend {
         Backend::C => (),
-        Backend::Rust => return Err(ErrorKind::BackendUnsupportedError.into()),
+        Backend::Rust => {
+            return Err(
+                ErrorKind::ConfigurationError(ConfigurationError::BackendUnsupportedError).into(),
+            )
+        }
     }
     Ok(())
 }
 
 fn validate_hash_length(hash_length: u32) -> Result<(), Error> {
     if hash_length < 4 {
-        return Err(ErrorKind::HashLengthTooShortError.into());
+        return Err(
+            ErrorKind::ConfigurationError(ConfigurationError::HashLengthTooShortError).into(),
+        );
     }
     Ok(())
 }
 
 fn validate_iterations(iterations: u32) -> Result<(), Error> {
     if iterations == 0 {
-        return Err(ErrorKind::IterationsTooFewError.into());
+        return Err(
+            ErrorKind::ConfigurationError(ConfigurationError::HashLengthTooShortError).into(),
+        );
     }
     Ok(())
 }
 
 fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
-        return Err(ErrorKind::LanesTooFewError.into());
+        return Err(ErrorKind::ConfigurationError(ConfigurationError::LanesTooFewError).into());
     }
     if lanes > 0x00ffffff {
-        return Err(ErrorKind::LanesTooManyError.into());
+        return Err(ErrorKind::ConfigurationError(ConfigurationError::LanesTooManyError).into());
     }
     Ok(())
 }
 
 fn validate_memory_size(lanes: u32, memory_size: u32) -> Result<(), Error> {
     if memory_size < 8 * lanes {
-        return Err(ErrorKind::MemorySizeTooSmallError.into());
+        return Err(
+            ErrorKind::ConfigurationError(ConfigurationError::MemorySizeTooSmallError).into(),
+        );
     }
     if !(memory_size.is_power_of_two()) {
-        return Err(ErrorKind::MemorySizeInvalidError.into());
+        return Err(
+            ErrorKind::ConfigurationError(ConfigurationError::MemorySizeInvalidError).into(),
+        );
     }
     Ok(())
 }
 
 fn validate_threads(threads: u32) -> Result<(), Error> {
     if threads == 0 {
-        return Err(ErrorKind::LanesTooFewError.into());
+        return Err(ErrorKind::ConfigurationError(ConfigurationError::ThreadsTooFewError).into());
     }
     if threads > 0x00ffffff {
-        return Err(ErrorKind::ThreadsTooManyError.into());
+        return Err(ErrorKind::ConfigurationError(ConfigurationError::ThreadsTooManyError).into());
     }
     Ok(())
 }

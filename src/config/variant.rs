@@ -1,7 +1,8 @@
 use std::str::FromStr;
 
 use config::defaults::DEFAULT_VARIANT;
-use error::{Error, ErrorKind};
+use errors::ParseError;
+use {Error, ErrorKind};
 
 impl Default for Variant {
     /// Returns [`Variant::Argon2id`](enum.Variant.html#variant.Argon2id)
@@ -24,7 +25,7 @@ impl FromStr for Variant {
             "argon2d" => Ok(Variant::Argon2d),
             "argon2i" => Ok(Variant::Argon2i),
             "argon2id" => Ok(Variant::Argon2id),
-            _ => Err(ErrorKind::VariantParseError.into()),
+            _ => Err(ErrorKind::ParseError(ParseError::VariantParseError).into()),
         }
     }
 }

@@ -9,6 +9,7 @@ use std::env;
 use a2::config::{Variant, Version};
 use a2::data::{Salt, SecretKey};
 
+// Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey, failure::Error> {
     let dotenv_path = env::current_dir()?.join("examples").join("example.env");
     dotenv::from_path(&dotenv_path).map_err(|e| format_err!("{}", e))?;

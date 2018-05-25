@@ -3,7 +3,8 @@ use base64;
 use serde;
 
 use data::{Data, DataPrivate};
-use error::{Error, ErrorKind};
+use errors::{DataError, ParseError};
+use {Error, ErrorKind};
 
 impl<'a> From<&'a [u8]> for SecretKey {
     fn from(bytes: &'a [u8]) -> Self {
@@ -80,8 +81,8 @@ impl SecretKey {
     /// Constructs a [`SecretKey`](struct.SecretKey.html) from a base64-encoded `&str` that uses
     /// [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html)
     pub fn from_base64_encoded_str(s: &str) -> Result<SecretKey, Error> {
-        let bytes =
-            base64::decode_config(s, base64::STANDARD).map_err(|_| ErrorKind::Base64DecodingError)?;
+        let bytes = base64::decode_config(s, base64::STANDARD)
+            .map_err(|_| ErrorKind::ParseError(ParseError::Base64ParseError))?;
         Ok(SecretKey { bytes })
     }
     /// Constructs a [`SecretKey`](struct.SecretKey.html) from a base64-encoded `&str` that uses a non-standard base64 encoding
@@ -91,7 +92,8 @@ impl SecretKey {
         s: &str,
         config: base64::Config,
     ) -> Result<SecretKey, Error> {
-        let bytes = base64::decode_config(s, config).map_err(|_| ErrorKind::Base64DecodingError)?;
+        let bytes = base64::decode_config(s, config)
+            .map_err(|_| ErrorKind::ParseError(ParseError::Base64ParseError))?;
         Ok(SecretKey { bytes })
     }
 }
@@ -109,10 +111,10 @@ impl DataPrivate for SecretKey {
     fn validate(&self, extra: Option<bool>) -> Result<(), Error> {
         let opt_out_of_secret_key = extra.unwrap();
         if !(opt_out_of_secret_key) && self.bytes.is_empty() {
-            return Err(ErrorKind::SecretKeyMissingError.into());
+            return Err(ErrorKind::DataError(DataError::SecretKeyMissingError).into());
         }
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::SecretKeyTooLongError.into());
+            return Err(ErrorKind::DataError(DataError::SecretKeyTooLongError).into());
         }
         Ok(())
     }

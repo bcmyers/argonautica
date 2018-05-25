@@ -5,7 +5,8 @@ use std::fmt;
 use serde;
 
 use data::{Data, DataPrivate};
-use error::{Error, ErrorKind};
+use errors::DataError;
+use {Error, ErrorKind};
 
 impl<'a> From<&'a [u8]> for AdditionalData {
     fn from(bytes: &'a [u8]) -> Self {
@@ -102,7 +103,7 @@ impl DataPrivate for AdditionalData {
     }
     fn validate(&self, _extra: Option<bool>) -> Result<(), Error> {
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::AdditionalDataTooLongError.into());
+            return Err(ErrorKind::DataError(DataError::AdditionalDataTooLongError).into());
         }
         Ok(())
     }

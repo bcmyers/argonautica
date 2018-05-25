@@ -1,7 +1,8 @@
 use std::str::FromStr;
 
 use config::defaults::DEFAULT_VERSION;
-use error::{Error, ErrorKind};
+use errors::ParseError;
+use {Error, ErrorKind};
 
 impl Default for Version {
     /// Returns [`Version::_0x13`](enum.Version.html#variant._0x13)
@@ -22,7 +23,7 @@ impl FromStr for Version {
         match s {
             "16" => Ok(Version::_0x10),
             "19" => Ok(Version::_0x13),
-            _ => Err(ErrorKind::VersionParseError.into()),
+            _ => Err(ErrorKind::ParseError(ParseError::VersionParseError).into()),
         }
     }
 }
@@ -59,7 +60,7 @@ impl Version {
         match x {
             16 => Ok(Version::_0x10),
             19 => Ok(Version::_0x13),
-            _ => return Err(ErrorKind::VersionParseError.into()),
+            _ => return Err(ErrorKind::ParseError(ParseError::VersionParseError).into()),
         }
     }
 }

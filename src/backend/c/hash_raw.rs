@@ -1,9 +1,8 @@
 use backend::c::check_error;
 use data::Data;
-use error::Error;
-use ffi;
 use hasher::Hasher;
 use output::HashRaw;
+use {ffi, Error};
 
 pub(crate) fn hash_raw_c(hasher: &mut Hasher) -> Result<HashRaw, Error> {
     let mut buffer = vec![0u8; hasher.config().hash_length() as usize];

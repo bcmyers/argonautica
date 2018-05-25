@@ -1,6 +1,7 @@
 use base64;
 
-use error::{Error, ErrorKind};
+use errors::ParseError;
+use {Error, ErrorKind};
 
 /// Trait implemented by `AdditionalData`, `Password`, `Salt`, and `SecretKey` that gives you
 /// read-only access their underlying bytes
@@ -11,7 +12,8 @@ pub trait Data {
     /// Read-only access to the struct's underlying bytes as a `&str` if those bytes are valid utf-8
     fn to_str(&self) -> Result<&str, Error> {
         let bytes = self.as_bytes();
-        let s = ::std::str::from_utf8(bytes).map_err(|_| ErrorKind::InvalidUtf8Error)?;
+        let s = ::std::str::from_utf8(bytes)
+            .map_err(|_| ErrorKind::ParseError(ParseError::Utf8ParseError))?;
         Ok(s)
     }
 

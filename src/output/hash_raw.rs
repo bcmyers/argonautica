@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
+use Error;
 use backend::{decode_rust, encode_rust};
 use config::{Variant, Version};
-use error::Error;
 
 impl FromStr for HashRaw {
     ///

@@ -268,13 +268,15 @@ extern crate serde;
 
 mod backend;
 mod error;
+mod error_kind;
 mod ffi;
 mod hasher;
 mod verifier;
 
 pub mod config;
+pub mod errors;
 pub use error::Error;
-pub use error::ErrorKind;
+pub use error_kind::ErrorKind;
 pub mod data;
 pub use hasher::Hasher;
 pub mod output;
@@ -282,5 +284,5 @@ pub mod utils;
 pub use verifier::Verifier;
 
 // TODO: License
-// TODO: Non-blocking for Actix
 // TODO: SQLlite database for Actix
+// TODO: Test with features

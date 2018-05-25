@@ -1,6 +1,6 @@
 use std::fmt;
 
-use error::ErrorKind;
+use ErrorKind;
 
 impl fmt::Debug for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -27,6 +27,12 @@ impl fmt::Display for Error {
     }
 }
 
+impl From<ErrorKind> for Error {
+    fn from(kind: ErrorKind) -> Error {
+        Error::new(kind)
+    }
+}
+
 /// Struct representing an error, which implements the
 /// [`Fail`](https://docs.rs/failure/0.1.1/failure/trait.Fail.html) trait
 /// from [failure](https://github.com/rust-lang-nursery/failure)
@@ -36,12 +42,6 @@ impl fmt::Display for Error {
 pub struct Error {
     kind: ErrorKind,
     display: String,
-}
-
-impl From<ErrorKind> for Error {
-    fn from(kind: ErrorKind) -> Error {
-        Error::new(kind)
-    }
 }
 
 impl Error {

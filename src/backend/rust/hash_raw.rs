@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use error::Error;
+use Error;
 use hasher::Hasher;
 use output::HashRaw;
 
