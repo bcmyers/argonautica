@@ -244,6 +244,14 @@
 //! libraries is the ability to easily create hashes using a secret key. Your mileage may vary,
 //! but the crate's author found it somewhat difficult to hash with a secret key when
 //! experimenting with alternative Rust libraries.
+//!
+//! ## License
+//!
+//! `a2` is licensed under either of:
+//! * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
+//! * [MIT license](http://opensource.org/licenses/MIT)
+//!
+//! at your option.
 
 #![allow(unknown_lints)]
 #![doc(html_root_url = "https://docs.rs/a2/0.1.0")]
