@@ -18,7 +18,7 @@
 //! * to use sensible defaults, and
 //! * to (as much as possible), follow the [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 //!
-//! The library was built with a simple use-case in mind: hashing passwords for storage in a database.
+//! The library was built with a simple use-case in mind: hashing passwords for storage in a website database.
 //! That said, `a2` is also feature-complete, meaning you should be able to to anything
 //! with `a2` that you can do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2)
 //! of Argon2.
@@ -217,20 +217,19 @@
 //! `a2` should be relatively straightforward to include in your Rust project:
 //! * Place `extern crate a2;` in your code (typically in either `lib.rs` or `main.rs`)
 //! * Place the following in the `[dependencies]` section of your `Cargo.toml`:
-//!     * `a2 = "0.1.0"`, <b>or</b>
+//!     * `a2 = "0.1.0"`, or
 //!     * `a2 = { version = "0.1.0", features = ["serde"] }`</br>
-//!     (The optional serde feature allows you to serialize or deserialize structs and
+//!     (The optional serde feature allows you to serialize / deserialize structs and
 //!     enums from `a2` using the [serde](https://github.com/serde-rs/serde) ecosystem).
 //!
 //! That said, `a2` uses [cc](https://github.com/alexcrichton/cc-rs) to compile the cannonical
 //! [C implemenation](https://github.com/P-H-C/phc-winner-argon2) of Argon2 into a
 //! static archive during the build process. This means that you need a C compiler on your
-//! machine in order to build `a2`. I can anticipate this causing issues for some users.
-//! At the moment, all I can say is please submit an issue if `a2` fails to build on your machine and
+//! machine in order to build `a2`. If `a2` fails to build on your machine, submit an issue and
 //! I'll try to look into it, but to be honest, compiling C programs is not really an area of expertise
 //! for me (so if anyone wants to help out in this area, that would be much appreciated!).
 //!
-//! `a2` runs on stable Rust and requires Rust version 1.26.0 or greater.
+//! `a2` runs on stable Rust version 1.26.0 or greater.
 //!
 //! ## Alternatives
 //!
@@ -243,7 +242,7 @@
 //!
 //! For what it's worth, besides API differences, one thing `a2` focuses on relative to other similar
 //! libraries is the ability to easily create hashes using a secret key. Your mileage may vary,
-//! but the crate's author found it somewhat difficult to create hashes using a secret key when
+//! but the crate's author found it somewhat difficult to hash with a secret key when
 //! experimenting with alternative Rust libraries.
 
 #![allow(unknown_lints)]
