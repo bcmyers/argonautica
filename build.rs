@@ -20,7 +20,6 @@ fn main() {
         .flag_if_supported("-O3")
         .flag_if_supported("-pthread")
         .flag_if_supported("-std=c89")
-        .flag_if_supported("-Wall")
         .compile("argon2");
 
     let out_dir = env::var("OUT_DIR").unwrap();
