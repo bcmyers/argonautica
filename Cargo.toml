@@ -4,7 +4,7 @@ version = "0.1.0" # remember to update html_root_url
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
 categories = ["Algorithms", "API bindings", "Authentication", "Cryptography"]
-description = "Argon2 password hashing"
+description = "Idiomatic Argon2 password hashing for Rust"
 documentation = "https://docs.rs/a2"
 homepage = "https://github.com/bcmyers/a2"
 keywords = ["argon2", "argon2d", "argon2i", "argon2id", "crypto", "cryptography", "hash", "hashing", "password", "passwords", "security"]

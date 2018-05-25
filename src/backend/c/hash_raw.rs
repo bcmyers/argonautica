@@ -8,7 +8,8 @@ pub(crate) fn hash_raw_c(hasher: &mut Hasher) -> Result<HashRaw, Error> {
     let mut buffer = vec![0u8; hasher.config().hash_length() as usize];
     let mut context = hasher.context(&mut buffer);
     let context_ptr = &mut context as *mut ffi::Argon2_Context;
-    let err = unsafe { ffi::argon2_ctx(context_ptr, hasher.config().variant() as u32) };
+    let err =
+        unsafe { ffi::argon2_ctx(context_ptr, hasher.config().variant() as ffi::argon2_type) };
     check_error(err)?;
     Ok(HashRaw::new(
         /* iterations: */ hasher.config().iterations(),

@@ -16,9 +16,9 @@
 //! * to be easy to use,
 //! * to have robust, beginner-friendly documentation,
 //! * to use sensible defaults, and
-//! * to (as much as possible), follow the [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
+//! * to (as much as possible) follow the [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 //!
-//! The library was built with a simple use-case in mind: hashing passwords for storage in a website database.
+//! The library was built with a simple use-case in mind: hashing passwords for storage in a website's database.
 //! That said, `a2` is also feature-complete, meaning you should be able to to anything
 //! with `a2` that you can do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2)
 //! of Argon2.
@@ -248,8 +248,8 @@
 //! ## License
 //!
 //! `a2` is licensed under either of:
-//! * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
-//! * [MIT license](http://opensource.org/licenses/MIT)
+//! * [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
+//! * [The MIT license](http://opensource.org/licenses/MIT)
 //!
 //! at your option.
 
@@ -296,6 +296,6 @@ pub mod output;
 pub mod utils;
 pub use verifier::Verifier;
 
-// TODO: License
 // TODO: SQLlite database for Actix
 // TODO: Test with features
+// TODO: Required features: https://github.com/hyperium/hyper/blob/master/Cargo.toml
