@@ -5,6 +5,8 @@ extern crate criterion;
 use a2::Hasher;
 use criterion::Criterion;
 
+const SAMPLE_SIZE: usize = 100;
+
 fn bench_fast_but_insecure(c: &mut Criterion) {
     let mut hasher = Hasher::fast_but_insecure();
     hasher.with_password("some document");
@@ -17,7 +19,7 @@ fn bench_fast_but_insecure(c: &mut Criterion) {
 
 criterion_group!{
     name = benches;
-    config = Criterion::default().sample_size(500);
+    config = Criterion::default().sample_size(SAMPLE_SIZE);
     targets = bench_fast_but_insecure,
 }
 criterion_main!(benches);

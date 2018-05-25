@@ -256,6 +256,7 @@
 #![allow(unknown_lints)]
 #![doc(html_root_url = "https://docs.rs/a2/0.1.0")]
 #![warn(clippy)]
+#![warn(missing_docs, unused_imports)] // TODO: Deny
 
 extern crate base64;
 #[macro_use]
@@ -299,3 +300,8 @@ pub use verifier::Verifier;
 // TODO: SQLlite database for Actix
 // TODO: Test with features
 // TODO: Required features: https://github.com/hyperium/hyper/blob/master/Cargo.toml
+// TODO: Clippy
+// TODO: Missing docs
+// TODO: Clang
+// TODO: MD5 and SHA2
+// TODO: bcrypt, scrypt
