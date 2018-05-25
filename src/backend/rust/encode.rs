@@ -36,7 +36,7 @@ mod tests {
         let mut rng: StdRng = SeedableRng::from_seed(seed);
         let mut password = vec![0u8; 12];
         let mut secret_key = vec![0u8; 32];
-        for _ in 0..1_000 {
+        for _ in 0..100 {
             rng.fill_bytes(&mut password);
             rng.fill_bytes(&mut secret_key);
             for hash_length in &[8, 32, 128] {
