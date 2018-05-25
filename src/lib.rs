@@ -1,7 +1,7 @@
 //! [![Build Status](https://travis-ci.org/bcmyers/a2.svg?branch=master)](https://travis-ci.org/bcmyers/a2)
 //! [![Crates.io](https://img.shields.io/crates/v/a2.svg)](https://crates.io/crates/a2)
 //! [![Documentation](https://docs.rs/a2/badge.svg)](https://docs.rs/a2/)
-//! [![Github.com](https://img.shields.io/badge/github.com-bcmyers%2Fa2-blue.svg)](http://www.github.com/bcmyers/a2)
+//! [![Github.com](https://img.shields.io/badge/github-bcmyers%2Fa2-blue.svg)](http://www.github.com/bcmyers/a2)
 //! ![License](https://img.shields.io/crates/l/a2.svg)
 //!
 //! ## Overview

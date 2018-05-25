@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/bcmyers/a2.svg?branch=master)](https://travis-ci.org/bcmyers/a2)
 [![Crates.io](https://img.shields.io/crates/v/a2.svg)](https://crates.io/crates/a2)
 [![Documentation](https://docs.rs/a2/badge.svg)](https://docs.rs/a2/)
-[![Github.com](https://img.shields.io/badge/github.com-bcmyers%2Fa2-blue.svg)](http://www.github.com/bcmyers/a2)
+[![Github.com](https://img.shields.io/badge/github-bcmyers%2Fa2-blue.svg)](http://www.github.com/bcmyers/a2)
 ![License](https://img.shields.io/crates/l/a2.svg)
 
 ### Overview
@@ -15,6 +15,7 @@ comparable to other secure hashing algorithms such as [bcrypt](https://en.wikipe
 and [scrypt](https://en.wikipedia.org/wiki/Scrypt).
 
 `a2` was designed:
+
 * to be easy to use,
 * to have robust, beginner-friendly documentation,
 * to use sensible defaults, and
@@ -27,8 +28,9 @@ of Argon2.
 
 ### Hashing
 
-Hashing passwords with `a2` is simple.  Just instantiate a default [`Hasher`](struct.Hasher.html), provide it
+Hashing passwords with `a2` is simple. Just instantiate a default [`Hasher`](struct.Hasher.html), provide it
 with a password and a secret key, and then call the [`hash`](struct.Hasher.html#method.hash) method.
+
 ```rust
 extern crate a2;
 
@@ -47,12 +49,14 @@ fn main() {
     // 👆 prints a hash, which will be random since the default Hasher uses a random salt
 }
 ```
+
 ### Verifying
 
 Verifying passwords against a hash is equally as simple. Just instantiate a
 default [`Verifier`](struct.Verifier.html), provide it with the password and the hash you would like to compare,
 provide it with the secret key that was used to create the hash, and then call the [`verify`](struct.Verifier.html#method.verify)
 method.
+
 ```rust
 extern crate a2;
 
@@ -75,6 +79,7 @@ fn main() {
     assert!(is_valid);
 }
 ```
+
 ### Configuration
 
 The default configurations for [`Hasher`](struct.Hasher.html) and [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for
@@ -84,6 +89,7 @@ the general use-case of hashing passwords for storage in a website database, but
 
 Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom configuration options. It provides
 color on each of the options.
+
 ```rust
 extern crate a2;
 extern crate futures_cpupool;
@@ -214,13 +220,15 @@ fn main() {
     // 👆 prints $argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q
 }
 ```
+
 ### Installation
 
 `a2` should be relatively straightforward to include in your Rust project:
+
 * Place `extern crate a2;` in your code (typically in either `lib.rs` or `main.rs`)
 * Place the following in the `[dependencies]` section of your `Cargo.toml`:
-    * `a2 = "0.1.0"`, <b>or</b>
-    * `a2 = { version = "0.1.0", features = ["serde"] }`</br>
+  * `a2 = "0.1.0"`, <b>or</b>
+  * `a2 = { version = "0.1.0", features = ["serde"] }`</br>
     (The optional serde feature allows you to serialize or deserialize structs and
     enums from `a2` using the [serde](https://github.com/serde-rs/serde) ecosystem).
 
