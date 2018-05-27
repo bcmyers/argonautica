@@ -19,10 +19,8 @@ ffi.cdef("""
         uint32_t    version,
         int*        error_code_ptr
     );
-
-    void a2_test();
 """)
-a2 = ffi.dlopen("./target/debug/liba2py.dylib")
+a2 = ffi.dlopen("./target/release/liba2py.dylib")
 
 
 class Backend(Enum):
@@ -53,7 +51,7 @@ def hash(
     variant: Variant = Variant.Argon2id,
     version: Version = Version._0x13,
 ) -> str:
-    error_code_ptr = ffi.new("int*", init=0)
+    error_code_ptr = ffi.new("int*", init=-1)
     password_bytes = password.encode("utf-8")
     hash_ptr = a2.a2_hash(
         password_bytes,
@@ -70,9 +68,11 @@ def hash(
     )
     encoded = ffi.string(hash_ptr).decode("utf-8")
     a2.a2_free(hash_ptr)
+    if error_code_ptr[0] != 0:
+        raise Exception("failed :(")
     return encoded
 
 
 if __name__ == "__main__":
-    encoded = hash("P@ssw0rd")
+    encoded = hash("P@ssw0rd", hash_length=16)
     print(encoded)
