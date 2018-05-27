@@ -1,20 +1,27 @@
-use config::defaults::{default_lanes, default_threads, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS,
-                       DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_RANDOM_SALT,
-                       DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING,
-                       DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION};
-use config::{Backend, Flags, Variant, Version};
+use futures_cpupool::CpuPool;
+
+#[cfg(feature = "serde")]
+use config::default_cpu_pool_serde;
+use config::{default_lanes, default_threads, Backend, Flags, Variant, Version,
+             DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
+             DEFAULT_OPT_OUT_OF_RANDOM_SALT, DEFAULT_OPT_OUT_OF_SECRET_KEY,
+             DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION};
 use errors::ConfigurationError;
 use {Error, ErrorKind};
 
-const PANIC_WARNING: &str = "Your program will panic at runtime if you use this configuration";
+const PANIC_WARNING: &str = "Your program will error if you use this configuration";
 
 /// Read-only configuration for [`Hasher`](../struct.Hasher.html). Can be obtained by calling
-/// the [`config`](../struct.Hasher.html#method.config) method on an instance of [`Hasher`](../struct.Hasher.html)
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+/// the [`config`](../struct.Hasher.html#method.config) method on an instance of
+/// [`Hasher`](../struct.Hasher.html)
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct HasherConfig {
     backend: Backend,
+    #[cfg_attr(feature = "serde",
+               serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde"))]
+    cpu_pool: Option<CpuPool>,
     hash_length: u32,
     iterations: u32,
     lanes: u32,
@@ -32,6 +39,13 @@ impl HasherConfig {
     #[allow(missing_docs)]
     pub fn backend(&self) -> Backend {
         self.backend
+    }
+    #[allow(missing_docs)]
+    pub fn cpu_pool(&self) -> Option<CpuPool> {
+        match self.cpu_pool {
+            Some(ref cpu_pool) => Some(cpu_pool.clone()),
+            None => None,
+        }
     }
     #[allow(missing_docs)]
     pub fn hash_length(&self) -> u32 {
@@ -83,6 +97,7 @@ impl HasherConfig {
     pub(crate) fn default() -> HasherConfig {
         HasherConfig {
             backend: Backend::default(),
+            cpu_pool: None,
             hash_length: DEFAULT_HASH_LENGTH,
             iterations: DEFAULT_ITERATIONS,
             lanes: default_lanes(),
@@ -111,6 +126,9 @@ impl HasherConfig {
             warn!("{}. {}.", e, PANIC_WARNING);
         });
         self.backend = backend;
+    }
+    pub(crate) fn set_cpu_pool(&mut self, cpu_pool: CpuPool) {
+        self.cpu_pool = Some(cpu_pool);
     }
     pub(crate) fn set_hash_length(&mut self, hash_length: u32) {
         validate_hash_length(hash_length).unwrap_or_else(|e| {
@@ -192,52 +210,60 @@ fn validate_backend(backend: Backend) -> Result<(), Error> {
 
 fn validate_hash_length(hash_length: u32) -> Result<(), Error> {
     if hash_length < 4 {
-        return Err(
-            ErrorKind::ConfigurationError(ConfigurationError::HashLengthTooShortError).into(),
-        );
+        return Err(Error::new(ErrorKind::ConfigurationError(
+            ConfigurationError::HashLengthTooShortError,
+        )).add_context(format!("Hash length: {}", hash_length)));
     }
     Ok(())
 }
 
 fn validate_iterations(iterations: u32) -> Result<(), Error> {
     if iterations == 0 {
-        return Err(
-            ErrorKind::ConfigurationError(ConfigurationError::HashLengthTooShortError).into(),
-        );
+        return Err(Error::new(ErrorKind::ConfigurationError(
+            ConfigurationError::HashLengthTooShortError,
+        )).add_context(format!("Iterations: {}", iterations)));
     }
     Ok(())
 }
 
 fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
-        return Err(ErrorKind::ConfigurationError(ConfigurationError::LanesTooFewError).into());
+        return Err(Error::new(ErrorKind::ConfigurationError(
+            ConfigurationError::LanesTooFewError,
+        )).add_context(format!("Lanes: {}", lanes)));
     }
     if lanes > 0x00ff_ffff {
-        return Err(ErrorKind::ConfigurationError(ConfigurationError::LanesTooManyError).into());
+        return Err(Error::new(ErrorKind::ConfigurationError(
+            ConfigurationError::LanesTooManyError,
+        )).add_context(format!("Lanes: {}", lanes)));
     }
     Ok(())
 }
 
 fn validate_memory_size(lanes: u32, memory_size: u32) -> Result<(), Error> {
     if memory_size < 8 * lanes {
-        return Err(
-            ErrorKind::ConfigurationError(ConfigurationError::MemorySizeTooSmallError).into(),
-        );
+        return Err(Error::new(ErrorKind::ConfigurationError(
+            ConfigurationError::MemorySizeTooSmallError,
+        )).add_context(format!("Lanes: {}. Memory size: {}", lanes, memory_size)));
     }
     if !(memory_size.is_power_of_two()) {
-        return Err(
-            ErrorKind::ConfigurationError(ConfigurationError::MemorySizeInvalidError).into(),
-        );
+        return Err(Error::new(ErrorKind::ConfigurationError(
+            ConfigurationError::MemorySizeInvalidError,
+        )).add_context(format!("Memory size: {}", memory_size)));
     }
     Ok(())
 }
 
 fn validate_threads(threads: u32) -> Result<(), Error> {
     if threads == 0 {
-        return Err(ErrorKind::ConfigurationError(ConfigurationError::ThreadsTooFewError).into());
+        return Err(Error::new(ErrorKind::ConfigurationError(
+            ConfigurationError::ThreadsTooFewError,
+        )).add_context(format!("Threads: {}", threads)));
     }
     if threads > 0x00ff_ffff {
-        return Err(ErrorKind::ConfigurationError(ConfigurationError::ThreadsTooManyError).into());
+        return Err(Error::new(ErrorKind::ConfigurationError(
+            ConfigurationError::ThreadsTooManyError,
+        )).add_context(format!("Threads: {}", threads)));
     }
     Ok(())
 }
@@ -256,5 +282,21 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<HasherConfig>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialize() {
+        use serde;
+        fn assert_serialize<T: serde::Serialize>() {}
+        assert_serialize::<HasherConfig>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_deserialize() {
+        use serde;
+        fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
+        assert_deserialize::<HasherConfig>();
     }
 }

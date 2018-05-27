@@ -79,8 +79,8 @@
 //! The default configurations for [`Hasher`](struct.Hasher.html) and
 //! [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for the general
 //! use-case of hashing passwords for storage in a website database, but if you want to use
-//! `a2` for a different use-case or if you just disagree with the chosen defaults, customizing
-//! `a2` to meet your needs should hopefully as easy and as intuitive as using the defaults.
+//! `a2` for different reasons or if you just disagree with the chosen defaults, customizing
+//! `a2` to meet your needs should hopefully be as easy and as intuitive as using the defaults.
 //!
 //! Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom
 //! configuration options. It provides color on each of the options.
@@ -195,20 +195,20 @@
 //!         .opt_out_of_random_salt(true)
 //!         // 👆 As a built-in "safety" mechanism, if you wish to use a non-random salt,
 //!         // which is generally not a good idea, you must explicity call this method
-//!         // in order to allow it
+//!         // with `true` in order to allow it
 //!         .opt_out_of_secret_key(true);
 //!         // 👆 As a built-in "safety" mechanism, if you wish to hash without a secret key,
 //!         // which is generally not a good idea, you must explicity call this method
-//!         // in order to allow it
+//!         // with `true` in order to allow it
 //!
 //!     let hash = hasher
 //!         .with_password("P@ssw0rd")
 //!         .with_salt("somesalt")
 //!         // 👆 A non-random salt, which is a bad idea, but possible
-//!         // because we configured this Hasher with opt_out_of_random_salt
+//!         // because we configured this Hasher with opt_out_of_random_salt(true)
 //!         .hash()
 //!         // 👆 Notice we did not include a secret key, which is also a bad idea, but possible
-//!         // because we configured this Hasher with opt_out_of_secret_key
+//!         // because we configured this Hasher with opt_out_of_secret_key(true)
 //!         .unwrap();
 //!
 //!     println!("{}", &hash);
@@ -264,7 +264,8 @@
 //!
 //! at your option.
 
-#![warn(missing_debug_implementations, missing_docs, unused_imports, unused_variables)] // TODO
+#![warn(missing_debug_implementations, missing_docs, unused_imports, unused_unsafe,
+        unused_variables)] // TODO
 #![doc(html_root_url = "https://docs.rs/a2/0.1.0")]
 
 extern crate base64;
@@ -276,6 +277,7 @@ extern crate blake2_rfc;
 extern crate failure;
 extern crate futures;
 extern crate futures_cpupool;
+extern crate libc;
 #[macro_use]
 extern crate log;
 #[macro_use]
@@ -298,6 +300,7 @@ mod verifier;
 
 pub mod config;
 pub mod errors;
+pub mod external;
 pub use error::Error;
 pub use error_kind::ErrorKind;
 pub mod data;
@@ -307,8 +310,5 @@ pub mod utils;
 pub use verifier::Verifier;
 
 // TODO: SQLite database for Actix-web example
-// TODO: Move CpuPool to config
-// TODO: Check C types
-// TODO: MD5 and SHA2
 // TODO: Python
 // TODO: Logging

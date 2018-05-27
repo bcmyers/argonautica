@@ -25,7 +25,10 @@ impl FromStr for Variant {
             "argon2d" => Ok(Variant::Argon2d),
             "argon2i" => Ok(Variant::Argon2i),
             "argon2id" => Ok(Variant::Argon2id),
-            _ => Err(ErrorKind::ParseError(ParseError::VariantParseError).into()),
+            _ => Err(
+                Error::new(ErrorKind::ParseError(ParseError::VariantParseError))
+                    .add_context(format!("String: {}", s)),
+            ),
         }
     }
 }
@@ -94,5 +97,21 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<Variant>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialize() {
+        use serde;
+        fn assert_serialize<T: serde::Serialize>() {}
+        assert_serialize::<Variant>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_deserialize() {
+        use serde;
+        fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
+        assert_deserialize::<Variant>();
     }
 }

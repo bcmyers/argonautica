@@ -3,8 +3,9 @@ use base64;
 use errors::ParseError;
 use {Error, ErrorKind};
 
-/// Trait implemented by `AdditionalData`, `Password`, `Salt`, and `SecretKey` that gives you
-/// read-only access their underlying bytes
+/// Trait implemented by [`AdditionalData`](struct.AdditionalData.html),
+/// [`Password`](struct.Password.html), [`Salt`](struct.Salt.html), and
+/// [`SecretKey`](struct.Salt.html) that gives you read-only access their underlying bytes
 pub trait Data {
     /// Read-only access to the type's underlying byte buffer
     fn as_bytes(&self) -> &[u8];
@@ -24,8 +25,10 @@ pub trait Data {
     /// Read-only access to the type's underlying byte buffer as a `&str` if those bytes are valid utf-8
     fn to_str(&self) -> Result<&str, Error> {
         let bytes = self.as_bytes();
-        let s = ::std::str::from_utf8(bytes)
-            .map_err(|_| ErrorKind::ParseError(ParseError::Utf8ParseError))?;
+        let s = ::std::str::from_utf8(bytes).map_err(|_| {
+            Error::new(ErrorKind::ParseError(ParseError::Utf8Error))
+                .add_context(format!("Bytes: {:?}", bytes))
+        })?;
         Ok(s)
     }
 

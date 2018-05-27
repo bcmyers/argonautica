@@ -26,7 +26,7 @@ pub enum ErrorKind {
     ParseError(ParseError),
 
     #[doc(hidden)]
-    #[fail(display = "__Nonexaustive ErrorKind variant")]
+    #[fail(display = "__Nonexaustive variant")]
     __Nonexhaustive,
 }
 
@@ -44,5 +44,21 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<ErrorKind>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialize() {
+        use serde;
+        fn assert_serialize<T: serde::Serialize>() {}
+        assert_serialize::<ErrorKind>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_deserialize() {
+        use serde;
+        fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
+        assert_deserialize::<ErrorKind>();
     }
 }

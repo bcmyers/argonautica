@@ -1,7 +1,10 @@
 .DS_Store
 .vscode/
-bindings.rs
-/data
-/target
+
 **/*.rs.bk
+bindings.rs
 Cargo.lock
+target/
+
+.mypy_cache
+venv/

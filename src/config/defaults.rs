@@ -4,7 +4,7 @@ use num_cpus;
 use config::{Backend, Variant, Version};
 
 /// Returns a [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
-/// with the number of logical cores on your machine
+/// with threads equal to the number of logical cores on your machine
 #[inline(always)]
 pub fn default_cpu_pool() -> CpuPool {
     CpuPool::new(num_cpus::get())

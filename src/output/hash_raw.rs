@@ -8,16 +8,20 @@ impl FromStr for HashRaw {
     ///
     type Err = Error;
 
-    /// Take a regular string-encoded hash and converts it into an instance of [`HashRaw`](struct.HashRaw.html)
+    /// Takes a regular string-encoded hash and converts it into an instance
+    /// of [`HashRaw`](struct.HashRaw.html)
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(decode_rust(s)?)
     }
 }
 
-/// Struct representing raw hash output. If you use the regular [`hash`](../struct.Hasher.html#method.hash)
-/// method on [`Hasher`](../struct.Hasher.html), you won't have to use this.
-/// If, however, you prefer to see the raw bytes behind the hash, you can obtain an instance of
-/// this struct with the [`hash_raw`](../struct.Hasher.html#method.hash_raw) method on
+/// Struct representing raw hash output. If you use the regular
+/// [`hash`](../struct.Hasher.html#method.hash) or
+/// [`hash_non_blocking`](../struct.Hasher.html#method.hash_non_blocking) methods on
+/// [`Hasher`](../struct.Hasher.html), you won't have to use this. If, however, you prefer
+/// to see the raw bytes behind the hash, you can obtain an instance of this struct with the
+/// [`hash_raw`](../struct.Hasher.html#method.hash_raw) or
+/// [`hash_raw_non_blocking`](../struct.Hasher.html#method.hash_raw_non_blocking) methods on
 /// [`Hasher`](../struct.Hasher.html)
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -49,11 +53,11 @@ impl HashRaw {
     pub fn memory_size(&self) -> u32 {
         self.memory_size
     }
-    /// Access to the raw hash bytes
+    /// Read-only access to the raw hash bytes
     pub fn raw_hash_bytes(&self) -> &[u8] {
         &self.raw_hash_bytes
     }
-    /// Access to the raw salt bytes
+    /// Read-only access to the raw salt bytes
     pub fn raw_salt_bytes(&self) -> &[u8] {
         &self.raw_salt_bytes
     }
@@ -176,5 +180,21 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<HashRaw>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialize() {
+        use serde;
+        fn assert_serialize<T: serde::Serialize>() {}
+        assert_serialize::<HashRaw>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_deserialize() {
+        use serde;
+        fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
+        assert_deserialize::<HashRaw>();
     }
 }

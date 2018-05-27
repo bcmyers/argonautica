@@ -69,8 +69,10 @@ impl SecretKey {
     /// Constructs a [`SecretKey`](struct.SecretKey.html) from a base64-encoded `&str` that uses
     /// [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html)
     pub fn from_base64_encoded_str(s: &str) -> Result<SecretKey, Error> {
-        let bytes = base64::decode_config(s, base64::STANDARD)
-            .map_err(|_| ErrorKind::ParseError(ParseError::Base64ParseError))?;
+        let bytes = base64::decode_config(s, base64::STANDARD).map_err(|_| {
+            Error::new(ErrorKind::ParseError(ParseError::Base64DecodeError))
+                .add_context(format!("String: {}", s))
+        })?;
         Ok(SecretKey { bytes })
     }
     /// Constructs a [`SecretKey`](struct.SecretKey.html) from a base64-encoded `&str` that uses a non-standard base64 encoding
@@ -80,8 +82,10 @@ impl SecretKey {
         s: &str,
         config: base64::Config,
     ) -> Result<SecretKey, Error> {
-        let bytes = base64::decode_config(s, config)
-            .map_err(|_| ErrorKind::ParseError(ParseError::Base64ParseError))?;
+        let bytes = base64::decode_config(s, config).map_err(|_| {
+            Error::new(ErrorKind::ParseError(ParseError::Base64DecodeError))
+                .add_context(format!("String: {}", s))
+        })?;
         Ok(SecretKey { bytes })
     }
 }
@@ -90,7 +94,10 @@ impl SecretKey {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         // TODO: SecretKey too short?
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::DataError(DataError::SecretKeyTooLongError).into());
+            return Err(
+                Error::new(ErrorKind::DataError(DataError::SecretKeyTooLongError))
+                    .add_context(format!("Length: {}", self.bytes.len())),
+            );
         }
         Ok(())
     }

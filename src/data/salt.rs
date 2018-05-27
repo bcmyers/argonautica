@@ -115,10 +115,16 @@ impl Salt {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         let length = self.bytes.len();
         if length < 8 {
-            return Err(ErrorKind::DataError(DataError::SaltTooShortError).into());
+            return Err(
+                Error::new(ErrorKind::DataError(DataError::SaltTooShortError))
+                    .add_context(format!("Length: {}", length)),
+            );
         }
         if length >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::DataError(DataError::SaltTooLongError).into());
+            return Err(
+                Error::new(ErrorKind::DataError(DataError::SaltTooLongError))
+                    .add_context(format!("Length: {}", length)),
+            );
         }
         Ok(())
     }
@@ -144,5 +150,21 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<Salt>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialize() {
+        use serde;
+        fn assert_serialize<T: serde::Serialize>() {}
+        assert_serialize::<Salt>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_deserialize() {
+        use serde;
+        fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
+        assert_deserialize::<Salt>();
     }
 }

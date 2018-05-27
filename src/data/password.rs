@@ -69,7 +69,10 @@ impl Password {
             return Err(ErrorKind::DataError(DataError::PasswordTooShortError).into());
         }
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::DataError(DataError::PasswordTooLongError).into());
+            return Err(
+                Error::new(ErrorKind::DataError(DataError::PasswordTooLongError))
+                    .add_context(format!("Length: {}", self.bytes.len())),
+            );
         }
         Ok(())
     }

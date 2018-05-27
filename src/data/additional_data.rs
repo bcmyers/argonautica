@@ -94,7 +94,10 @@ pub struct AdditionalData {
 impl AdditionalData {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::DataError(DataError::AdditionalDataTooLongError).into());
+            return Err(
+                Error::new(ErrorKind::DataError(DataError::AdditionalDataTooLongError))
+                    .add_context(format!("Length: {}", self.bytes.len())),
+            );
         }
         Ok(())
     }
@@ -162,5 +165,21 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<AdditionalData>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialize() {
+        use serde;
+        fn assert_serialize<T: serde::Serialize>() {}
+        assert_serialize::<AdditionalData>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_deserialize() {
+        use serde;
+        fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
+        assert_deserialize::<AdditionalData>();
     }
 }

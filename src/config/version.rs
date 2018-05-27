@@ -23,7 +23,10 @@ impl FromStr for Version {
         match s {
             "16" => Ok(Version::_0x10),
             "19" => Ok(Version::_0x13),
-            _ => Err(ErrorKind::ParseError(ParseError::VersionParseError).into()),
+            _ => Err(
+                Error::new(ErrorKind::ParseError(ParseError::VersionParseError))
+                    .add_context(format!("String: {}", s)),
+            ),
         }
     }
 }
@@ -60,7 +63,10 @@ impl Version {
         match x {
             16 => Ok(Version::_0x10),
             19 => Ok(Version::_0x13),
-            _ => Err(ErrorKind::ParseError(ParseError::VersionParseError).into()),
+            _ => Err(
+                Error::new(ErrorKind::ParseError(ParseError::VersionParseError))
+                    .add_context(format!("Int: {}", x)),
+            ),
         }
     }
 }
@@ -79,5 +85,21 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<Version>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialize() {
+        use serde;
+        fn assert_serialize<T: serde::Serialize>() {}
+        assert_serialize::<Version>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_deserialize() {
+        use serde;
+        fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
+        assert_deserialize::<Version>();
     }
 }

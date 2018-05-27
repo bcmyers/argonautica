@@ -2,8 +2,6 @@ use futures::Future;
 use futures_cpupool::CpuPool;
 use scopeguard;
 
-#[cfg(feature = "serde")]
-use config::default_cpu_pool_serde;
 use config::{default_cpu_pool, Backend, VerifierConfig};
 use data::{AdditionalData, Password, SecretKey};
 use errors::{ConfigurationError, DataError};
@@ -16,7 +14,6 @@ impl Default for Verifier {
         Verifier {
             additional_data: None,
             config: VerifierConfig::default(),
-            cpu_pool: None,
             hash: None,
             password: None,
             secret_key: None,
@@ -31,9 +28,6 @@ impl Default for Verifier {
 pub struct Verifier {
     additional_data: Option<AdditionalData>,
     config: VerifierConfig,
-    #[cfg_attr(feature = "serde",
-               serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde"))]
-    cpu_pool: Option<CpuPool>,
     hash: Option<String>,
     #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     password: Option<Password>,
@@ -47,7 +41,7 @@ impl Verifier {
     /// * `backend`: [`Backend::C`](config/enum.Backend.html#variant.C)
     /// * `cpu_pool`: A [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html) ...
     ///     * with threads equal to the number of logical cores on your machine
-    ///     * that is lazily created, i.e. created only if and when you call the only method that
+    ///     * that is lazily created, i.e. created only if / when you call the method that
     ///       needs it ([`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking))
     /// * `password_clearing`: `true`
     /// * `secret_key_clearing`: `false`
@@ -58,33 +52,22 @@ impl Verifier {
     /// default backend is [`Backend::C`](config/enum.Backend.html#variant.C), <i>which is
     /// currently the only backend supported. A Rust backend is planned, but is not currently
     /// available. If you configure a [`Verifier`](struct.Verifier.html) with
-    /// [`Backend::Rust`](config/enum.Backend.html#variant.Rust) it will panic at runtime</i>
+    /// [`Backend::Rust`](config/enum.Backend.html#variant.Rust) it will error</i>
     pub fn configure_backend(&mut self, backend: Backend) -> &mut Verifier {
         self.config.set_backend(backend);
         self
     }
     /// Allows you to configure [`Verifier`](struct.Verifier.html) with a custom
     /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html).
-    /// The default [`Verifier`](struct.Verifier.html) does not have a
-    /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html).
-    /// A [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
-    /// is only needed for the
-    /// [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking) method.
-    /// If you call [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking)
-    /// on a [`Verifier`](struct.Verifier.html) without a
-    /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html),
-    /// a default
-    /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
-    /// will be created on the fly; so even if you never configure
-    /// [`Verifier`](struct.Verifier.html) with a
-    /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
-    /// you can still use the
-    /// [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking) method.
-    /// The default
-    /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
-    /// has as many threads a logical cores on your machine.
+    /// The default [`Verifier`](struct.Verifier.html) does not have a cpu pool, which is
+    /// only needed for the [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking)
+    /// method. If you call [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking)
+    /// without a cpu pool, a default cpu pool will be created for you on the fly; so even
+    /// if you never configure [`Verifier`](struct.Verifier.html) with this method you can still
+    /// use the [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking) method.
+    /// The default cpu pool has as many threads as the number of logical cores on your machine
     pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Verifier {
-        self.cpu_pool = Some(cpu_pool);
+        self.config.set_cpu_pool(cpu_pool);
         self
     }
     /// Allows you to configure [`Verifier`](struct.Verifier.html) to erase the password bytes
@@ -148,14 +131,14 @@ impl Verifier {
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
     pub fn verify_non_blocking(&mut self) -> impl Future<Item = bool, Error = Error> {
         let mut verifier = self.clone();
-        match self.cpu_pool {
-            Some(ref cpu_pool) => cpu_pool.spawn_fn(move || {
+        match self.config.cpu_pool() {
+            Some(cpu_pool) => cpu_pool.spawn_fn(move || {
                 let is_valid = verifier.verify()?;
                 Ok::<_, Error>(is_valid)
             }),
             None => {
                 let cpu_pool = default_cpu_pool();
-                self.cpu_pool = Some(cpu_pool.clone());
+                self.config.set_cpu_pool(cpu_pool.clone());
                 cpu_pool.spawn_fn(move || {
                     let is_valid = verifier.verify()?;
                     Ok::<_, Error>(is_valid)
@@ -219,15 +202,6 @@ impl Verifier {
     /// [`VerifierConfig`](config/struct.VerifierConfig.html)
     pub fn config(&self) -> &VerifierConfig {
         &self.config
-    }
-    /// Access to the [`Verifier`](struct.Verifier.html)'s
-    /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html),
-    /// if any
-    pub fn cpu_pool(&self) -> Option<CpuPool> {
-        match self.cpu_pool {
-            Some(ref cpu_pool) => Some(cpu_pool.clone()),
-            None => None,
-        }
     }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s hash, if any
     pub fn hash(&self) -> Option<&str> {
@@ -402,5 +376,21 @@ mod tests {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<Verifier>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialize() {
+        use serde;
+        fn assert_serialize<T: serde::Serialize>() {}
+        assert_serialize::<Verifier>();
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_deserialize() {
+        use serde;
+        fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
+        assert_deserialize::<Verifier>();
     }
 }
