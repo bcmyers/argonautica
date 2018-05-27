@@ -9,12 +9,6 @@ use libc;
 use config::{Backend, Variant, Version};
 use hasher::Hasher;
 
-/// Test
-#[no_mangle]
-pub unsafe extern "C" fn a2_test() {
-    println!("Hello from Rust");
-}
-
 /// Frees memory associated with a pointer that was previously returned from
 /// [`a2_hash`](function.a2_hash.html). See [`a2_hash`](function.a2_hash.html) below
 /// for more information
