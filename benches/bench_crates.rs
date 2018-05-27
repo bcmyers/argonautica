@@ -5,11 +5,13 @@ extern crate argon2rs;
 extern crate criterion;
 extern crate rand;
 
-use a2::config::{default_lanes, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
-                 DEFAULT_SALT_LENGTH};
+use a2::config::{
+    default_lanes, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
+    DEFAULT_SALT_LENGTH,
+};
 use criterion::{Criterion, Fun};
-use rand::RngCore;
 use rand::rngs::OsRng;
+use rand::RngCore;
 
 const PASSWORD: &str = "P@ssw0rd";
 const SAMPLE_SIZE: usize = 10;

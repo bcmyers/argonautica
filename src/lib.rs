@@ -306,7 +306,6 @@ pub mod output;
 pub mod utils;
 pub use verifier::Verifier;
 
-// TODO: Delete main
 // TODO: SQLite database for Actix-web example
 // TODO: Move CpuPool to config
 // TODO: Check C types

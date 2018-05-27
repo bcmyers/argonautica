@@ -35,7 +35,6 @@ fn main() {
         .whitelist_function("decode_string")
         .whitelist_function("encode_string")
         .whitelist_type("Argon2_ErrorCodes")
-        // .blacklist_type("max_align_t")
         .layout_tests(true)
         .rustfmt_bindings(false)
         .generate()

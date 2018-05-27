@@ -7,10 +7,9 @@ pub enum ParseError {
     #[fail(display = "Base64 parse error. Failed to parse &str into bytes")]
     Base64ParseError,
 
-    /// Hash parse error. Invalid hash
-    #[fail(display = "Hash parse error. Invalid hash")]
-    HashParseError,
-
+    // /// Hash parse error. Invalid hash
+    // #[fail(display = "Hash parse error. Invalid hash")]
+    // HashParseError,
     /// Utf8 parse error. Failed to parse bytes into utf8 String
     #[fail(display = "Utf8 parse error. Failed to parse bytes into utf8 String")]
     Utf8ParseError,

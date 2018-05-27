@@ -11,6 +11,10 @@ pub enum DataError {
     #[fail(display = "Hash missing. Attempted to verify without first having provided a hash")]
     HashMissingError,
 
+    /// Hash invalid
+    #[fail(display = "Hash invalid")]
+    HashInvalidError,
+
     /// Password missing. Attempted to verify without first having provided a password
     #[fail(display = "Password missing. Attempted to verify without first having provided a password")]
     PasswordMissingError,

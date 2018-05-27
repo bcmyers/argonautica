@@ -3,11 +3,12 @@ extern crate a2;
 extern crate criterion;
 extern crate num_cpus;
 
-use a2::Hasher;
-use a2::config::{Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_PASSWORD_CLEARING,
-                 DEFAULT_SALT_LENGTH, DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VARIANT,
-                 DEFAULT_VERSION};
+use a2::config::{
+    Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_PASSWORD_CLEARING, DEFAULT_SALT_LENGTH,
+    DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VARIANT, DEFAULT_VERSION,
+};
 use a2::data::{Salt, SecretKey};
+use a2::Hasher;
 use criterion::Criterion;
 
 const SAMPLE_SIZE: usize = 5;

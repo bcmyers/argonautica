@@ -5,16 +5,13 @@ use std::os::raw::c_char;
 
 use base64;
 
-use backend::c::check_error;
 use config::{Variant, Version};
-use errors::ParseError;
+use errors::DataError;
 use output::HashRaw;
 use {ffi, Error, ErrorKind};
 
 pub(crate) fn decode_c(hash: &str) -> Result<HashRaw, Error> {
-    // $argon2id$v=19$m=4096,t=128,p=2$W4KZHc/mgO4iZ9cv3lPjLx0V98XqTPfNnNp4TZ5yw5o$i3fmo6W1OvcpQ4ru35E+MqAOVxa4j1vwmkgV5YYnd+E
-    // ["", "argon2id". "v=19". "m=4096,t=128,p=2", "salt", "hash"]
-    let error = Error::new(ErrorKind::ParseError(ParseError::HashParseError))
+    let error = Error::new(ErrorKind::DataError(DataError::HashInvalidError))
         .add_context(format!("Hash: {}", &hash));
 
     let variant_str = hash.split('$').nth(1).ok_or_else(|| error.clone())?;
@@ -57,13 +54,19 @@ pub(crate) fn decode_c(hash: &str) -> Result<HashRaw, Error> {
 
     let context_ptr = &mut context as *mut ffi::argon2_context;
     let cstring = CString::new(hash).map_err(|_| {
-        Error::new(ErrorKind::Bug)
-            .add_context("Interior null byte found while attempting to create CString")
+        Error::new(ErrorKind::DataError(DataError::HashInvalidError)).add_context(format!(
+            "Hash cannot contain an interior null byte. Hash: {}",
+            &hash
+        ))
     })?;
     let cstring_ptr = cstring.as_ptr() as *const c_char;
-
     let err = unsafe { ffi::decode_string(context_ptr, cstring_ptr, variant as ffi::argon2_type) };
-    check_error(err)?;
+    if err != 0 {
+        return Err(
+            Error::new(ErrorKind::DataError(DataError::HashInvalidError))
+                .add_context(format!("Hash: {}", &hash)),
+        );
+    }
     let hash_raw = HashRaw::new(
         /* iterations */ context.t_cost,
         /* lanes */ context.lanes,
