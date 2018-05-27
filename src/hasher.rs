@@ -1,30 +1,25 @@
 use futures::Future;
 use futures_cpupool::CpuPool;
-use num_cpus;
 use scopeguard;
 
-use backend::{encode_rust, hash_raw_c};
-use config::defaults::default_lanes;
-use config::{Backend, HasherConfig, Variant, Version};
-use data::{AdditionalData, DataPrivate, Password, Salt, SecretKey};
-use errors::ConfigurationError;
+#[cfg(feature = "serde")]
+use config::default_cpu_pool_serde;
+use config::{default_cpu_pool, default_lanes, Backend, HasherConfig, Variant, Version};
+use data::{AdditionalData, Data, DataPrivate, Password, Salt, SecretKey};
+use errors::{ConfigurationError, DataError};
 use output::HashRaw;
 use {ffi, Error, ErrorKind};
-
-fn default_cpu_pool() -> CpuPool {
-    CpuPool::new(num_cpus::get_physical())
-}
 
 impl Default for Hasher {
     /// Same as the [`new`](struct.Hasher.html#method.new) method
     fn default() -> Hasher {
         Hasher {
-            additional_data: AdditionalData::none(),
+            additional_data: None,
             config: HasherConfig::default(),
-            cpu_pool: default_cpu_pool(),
-            password: Password::default(),
+            cpu_pool: None,
+            password: None,
             salt: Salt::default(),
-            secret_key: SecretKey::default(),
+            secret_key: None,
         }
     }
 }
@@ -34,16 +29,16 @@ impl Default for Hasher {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Hasher {
-    additional_data: AdditionalData,
+    additional_data: Option<AdditionalData>,
     config: HasherConfig,
     #[cfg_attr(feature = "serde",
-               serde(skip_serializing, skip_deserializing, default = "default_cpu_pool"))]
-    cpu_pool: CpuPool,
+               serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde"))]
+    cpu_pool: Option<CpuPool>,
     #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
-    password: Password,
+    password: Option<Password>,
     salt: Salt,
     #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
-    secret_key: SecretKey,
+    secret_key: Option<SecretKey>,
 }
 
 impl Hasher {
@@ -92,8 +87,8 @@ impl Hasher {
             .configure_iterations(1)
             .configure_memory_size(8 * lanes)
             .configure_password_clearing(false)
-            .opt_out_of_random_salt()
-            .opt_out_of_secret_key()
+            .opt_out_of_random_salt(false)
+            .opt_out_of_secret_key(false)
             .with_salt("somesalt");
         hasher
     }
@@ -114,7 +109,7 @@ impl Hasher {
     /// instead of using the default, which is `CpuPool::new(num_cpus::get_physical())`. Note:
     /// The cpu pool is only used for the two non-blocking methods mentioned above.
     pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Hasher {
-        self.cpu_pool = cpu_pool;
+        self.cpu_pool = Some(cpu_pool);
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom hash length (in bytes). The default is `32`.
@@ -176,15 +171,16 @@ impl Hasher {
     /// this method in order to produce an encoded `String` representing the hash, which is
     /// safe to store in a database and against which you can verify raw passwords later
     pub fn hash(&mut self) -> Result<String, Error> {
+        use backend::encode_rust;
         let hash_raw = self.hash_raw()?;
         let hash = encode_rust(&hash_raw);
         Ok(hash)
     }
     /// <b><u>The primary method (non-blocking version).</u></b> Same as [`hash`](struct.Hasher.html#method.hash) except it returns a [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html) instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
     pub fn hash_non_blocking(&mut self) -> impl Future<Item = String, Error = Error> {
-        let mut hasher = self.clone();
-        self.cpu_pool.spawn_fn(move || {
-            let hash = hasher.hash()?;
+        use backend::encode_rust;
+        self.hash_raw_non_blocking().and_then(|hash_raw| {
+            let hash = encode_rust(&hash_raw);
             Ok::<_, Error>(hash)
         })
     }
@@ -193,25 +189,23 @@ impl Hasher {
     /// version, including the raw hash bytes and the raw salt bytes. In general, you should
     /// prefer to use the [`hash`](struct.Hasher.html#method.hash) method instead of this method
     pub fn hash_raw(&mut self) -> Result<HashRaw, Error> {
+        use backend::hash_raw_c;
         // ensure password and/or secret_key clearing code will run
         let mut hasher = scopeguard::guard(self, |hasher| {
             if hasher.config().password_clearing() {
-                hasher.set_password(Password::none());
+                hasher.set_password(None);
             }
             if hasher.config().secret_key_clearing() {
-                hasher.set_secret_key(SecretKey::none());
+                hasher.set_secret_key(None);
             }
         });
-
         // reset salt if it is random
         if hasher.salt().is_random() {
             let len = hasher.salt().len();
-            hasher.set_salt(Salt::random(len)?);
+            hasher.set_salt(Salt::random(len as u32)?);
         }
-
         // validate inputs
         hasher.validate()?;
-
         // calculate hash_raw
         let hash_raw = match hasher.config().backend() {
             Backend::C => hash_raw_c(&mut hasher)?,
@@ -221,29 +215,38 @@ impl Hasher {
                 ).into())
             }
         };
-
         Ok(hash_raw)
     }
     /// Same as [`hash_raw`](struct.Hasher.html#method.hash) except it returns a [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html) instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
     pub fn hash_raw_non_blocking(&mut self) -> impl Future<Item = HashRaw, Error = Error> {
         let mut hasher = self.clone();
-        self.cpu_pool.spawn_fn(move || {
-            let hash_raw = hasher.hash_raw()?;
-            Ok::<_, Error>(hash_raw)
-        })
+        match self.cpu_pool {
+            Some(ref cpu_pool) => cpu_pool.spawn_fn(move || {
+                let hash_raw = hasher.hash_raw()?;
+                Ok::<_, Error>(hash_raw)
+            }),
+            None => {
+                let cpu_pool = default_cpu_pool();
+                self.cpu_pool = Some(cpu_pool.clone());
+                cpu_pool.spawn_fn(move || {
+                    let hash_raw = hasher.hash_raw()?;
+                    Ok::<_, Error>(hash_raw)
+                })
+            }
+        }
     }
     /// For safety reasons, if you would like to produce a hash that does not include a random
-    /// salt, you must explicitly opt out of using a random salt with this method. It is
-    /// not recommended that you do this
-    pub fn opt_out_of_random_salt(&mut self) -> &mut Hasher {
-        self.config.set_opt_out_of_random_salt(true);
+    /// salt, you must explicitly opt out of using a random salt by passing this method `true`.
+    /// It is not recommended that you do this
+    pub fn opt_out_of_random_salt(&mut self, boolean: bool) -> &mut Hasher {
+        self.config.set_opt_out_of_random_salt(boolean);
         self
     }
     /// For safety reasons, if you would like to produce a hash that does not include a secret
-    /// key, you must explicitly opt out of using a secret key. It is not recommended that you
-    /// do this
-    pub fn opt_out_of_secret_key(&mut self) -> &mut Hasher {
-        self.config.set_opt_out_of_secret_key(true);
+    /// key, you must explicitly opt out of using a secret key by passing this method `true`.
+    /// It is not recommended that you do this
+    pub fn opt_out_of_secret_key(&mut self, boolean: bool) -> &mut Hasher {
+        self.config.set_opt_out_of_secret_key(boolean);
         self
     }
     /// Allows you to provide [`Hasher`](struct.Hasher.html) with some additional data to hash alongside
@@ -256,7 +259,7 @@ impl Hasher {
     where
         AD: Into<AdditionalData>,
     {
-        self.additional_data = additional_data.into();
+        self.additional_data = Some(additional_data.into());
         self
     }
     /// Provides [`Hasher`](struct.Hasher.html) with the password you would like to hash. [`Hasher`](struct.Hasher.html) must be provided
@@ -266,7 +269,7 @@ impl Hasher {
     where
         P: Into<Password>,
     {
-        self.password = password.into();
+        self.password = Some(password.into());
         self
     }
     /// Allows you to provide [`Hasher`](struct.Hasher.html) with a custom [`Salt`](data/struct.Salt.html) to include in the hash. The default
@@ -293,28 +296,31 @@ impl Hasher {
     where
         SK: Into<SecretKey>,
     {
-        self.secret_key = secret_key.into();
+        self.secret_key = Some(secret_key.into());
         self
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`AdditionalData`](data/struct.AdditionalData.html). If you never provided [`AdditionalData`](data/struct.AdditionalData.html),
     /// this will return a reference to an empty [`AdditionalData`](data/struct.AdditionalData.html) (i.e. one whose underlying
     /// vector of bytes has zero length)
-    pub fn additional_data(&self) -> &AdditionalData {
-        &self.additional_data
+    pub fn additional_data(&self) -> Option<&AdditionalData> {
+        self.additional_data.as_ref()
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`HasherConfig`](config/struct.HasherConfig.html)
     pub fn config(&self) -> &HasherConfig {
         &self.config
     }
     /// Access to the [`Hasher`](struct.Hasher.html)'s [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
-    pub fn cpu_pool(&self) -> CpuPool {
-        self.cpu_pool.clone()
+    pub fn cpu_pool(&self) -> Option<CpuPool> {
+        match self.cpu_pool {
+            Some(ref cpu_pool) => Some(cpu_pool.clone()),
+            None => None,
+        }
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`Password`](data/struct.Password.html). If you never provided a [`Password`](data/struct.Password.html),
     /// this will return a reference to an empty [`Password`](data/struct.Password.html) (i.e. one whose underlying
     /// vector of bytes has zero length)
-    pub fn password(&self) -> &Password {
-        &self.password
+    pub fn password(&self) -> Option<&Password> {
+        self.password.as_ref()
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`Salt`](data/struct.Salt.html)
     pub fn salt(&self) -> &Salt {
@@ -323,8 +329,8 @@ impl Hasher {
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`SecretKey`](data/struct.SecretKey.html). If you never provided a [`SecretKey`](data/struct.SecretKey.html),
     /// this will return a reference to an empty [`SecretKey`](data/struct.SecretKey.html) (i.e. one whose underlying
     /// vector of bytes has zero length)
-    pub fn secret_key(&self) -> &SecretKey {
-        &self.secret_key
+    pub fn secret_key(&self) -> Option<&SecretKey> {
+        self.secret_key.as_ref()
     }
 }
 
@@ -333,14 +339,14 @@ impl Hasher {
         ffi::Argon2_Context {
             out: buffer.as_mut_ptr(),
             outlen: buffer.len() as u32,
-            pwd: self.password.as_mut_ptr(),
-            pwdlen: self.password.len(),
+            pwd: self.password_mut().as_mut_ptr(),
+            pwdlen: self.password().len() as u32,
             salt: self.salt.as_mut_ptr(),
-            saltlen: self.salt.len(),
-            secret: self.secret_key.as_mut_ptr(),
-            secretlen: self.secret_key.len(),
-            ad: self.additional_data.as_mut_ptr(),
-            adlen: self.additional_data.len(),
+            saltlen: self.salt.len() as u32,
+            secret: self.secret_key_mut().as_mut_ptr(),
+            secretlen: self.secret_key().len() as u32,
+            ad: self.additional_data_mut().as_mut_ptr(),
+            adlen: self.additional_data().len() as u32,
             t_cost: self.config.iterations(),
             m_cost: self.config.memory_size(),
             lanes: self.config.lanes(),
@@ -351,32 +357,53 @@ impl Hasher {
             flags: self.config.flags().bits(),
         }
     }
-    pub(crate) fn set_password<P>(&mut self, password: P)
-    where
-        P: Into<Password>,
-    {
-        self.password = password.into();
+    pub(crate) fn additional_data_mut(&mut self) -> Option<&mut AdditionalData> {
+        self.additional_data.as_mut()
     }
-    pub(crate) fn set_salt<S>(&mut self, salt: S)
-    where
-        S: Into<Salt>,
-    {
-        self.salt = salt.into();
+    pub(crate) fn password_mut(&mut self) -> Option<&mut Password> {
+        self.password.as_mut()
     }
-    pub(crate) fn set_secret_key<SK>(&mut self, secret_key: SK)
-    where
-        SK: Into<SecretKey>,
-    {
-        self.secret_key = secret_key.into();
+    pub(crate) fn secret_key_mut(&mut self) -> Option<&mut SecretKey> {
+        self.secret_key.as_mut()
+    }
+    pub(crate) fn set_password(&mut self, password: Option<Password>) {
+        self.password = password;
+    }
+    pub(crate) fn set_salt(&mut self, salt: Salt) {
+        self.salt = salt;
+    }
+    pub(crate) fn set_secret_key(&mut self, secret_key: Option<SecretKey>) {
+        self.secret_key = secret_key;
     }
     pub(crate) fn validate(&self) -> Result<(), Error> {
         self.config.validate()?;
-        self.additional_data.validate(None)?;
-        self.password.validate(None)?;
-        self.salt
-            .validate(Some(self.config.opt_out_of_random_salt()))?;
-        self.secret_key
-            .validate(Some(self.config.opt_out_of_secret_key()))?;
+        if let Some(ref additional_data) = self.additional_data {
+            additional_data.validate()?;
+        }
+        match self.password {
+            Some(ref password) => password.validate()?,
+            None => {
+                return Err(Error::new(ErrorKind::DataError(
+                    DataError::PasswordMissingError,
+                )))
+            }
+        }
+        self.salt.validate()?;
+        if !self.config.opt_out_of_random_salt() & !self.salt.is_random() {
+            return Err(Error::new(ErrorKind::DataError(
+                DataError::SaltNonRandomError,
+            )));
+        }
+        match self.secret_key {
+            Some(ref secret_key) => secret_key.validate()?,
+            None => {
+                if !self.config.opt_out_of_secret_key() {
+                    return Err(Error::new(ErrorKind::DataError(
+                        DataError::SecretKeyMissingError,
+                    )));
+                }
+            }
+        }
         Ok(())
     }
 }
@@ -403,7 +430,7 @@ mod tests {
                 .configure_threads(4)
                 .configure_variant(self.variant)
                 .configure_version(self.version)
-                .opt_out_of_random_salt()
+                .opt_out_of_random_salt(true)
                 .with_additional_data(vec![4; 12])
                 .with_password(vec![1; 32])
                 .with_salt(vec![2; 16])
@@ -534,7 +561,7 @@ mod tests {
     #[test]
     fn test_config_opt_of_secret_key() {
         let mut hasher = Hasher::default();
-        hasher.opt_out_of_secret_key();
+        hasher.opt_out_of_secret_key(true);
         let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
     }
 
@@ -544,7 +571,7 @@ mod tests {
         hasher
             .with_secret_key("secret")
             .with_salt("somesalt")
-            .opt_out_of_random_salt();
+            .opt_out_of_random_salt(true);
         let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
     }
 
@@ -563,7 +590,7 @@ mod tests {
         hasher
             .with_secret_key("secret")
             .with_salt("1234567")
-            .opt_out_of_random_salt();
+            .opt_out_of_random_salt(true);
         let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
     }
 
@@ -591,6 +618,44 @@ mod tests {
                 .hash()
                 .unwrap();
         }
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialization() {
+        use serde_json;
+
+        let password = "P@ssw0rd";
+        let secret_key = "secret";
+
+        let mut hasher1 = Hasher::default();
+        hasher1
+            .configure_password_clearing(false)
+            .opt_out_of_random_salt(true)
+            .with_additional_data("additional data")
+            .with_password(password)
+            .with_secret_key(secret_key)
+            .with_salt("somesalt");
+        let hash1 = hasher1.hash().expect("failed to hash");
+        let hash_raw1 = hasher1.hash_raw().expect("failed to hash_raw");
+
+        // Serialize Hasher
+        let j = serde_json::to_string_pretty(&hasher1).expect("failed to serialize hasher");
+        // Deserialize Hasher
+        let mut hasher2: Hasher = serde_json::from_str(&j).expect("failed to deserialize hasher");
+        // Assert that password and secret key have been erased
+        assert_eq!(hasher2.password(), None);
+        assert_eq!(hasher2.secret_key(), None);
+        // Assert that calling hash or hash_raw produces an error
+        assert!(hasher2.hash().is_err());
+        assert!(hasher2.hash_raw().is_err());
+        // Add a password and secret key and ensure hash and hash_raw now work
+        hasher2.with_password(password).with_secret_key(secret_key);
+        let hash2 = hasher2.hash().expect("failed to hash");
+        let hash_raw2 = hasher2.hash_raw().expect("failed to hash_raw");
+        // Assert hashes match originals
+        assert_eq!(hash1, hash2);
+        assert_eq!(hash_raw1, hash_raw2);
     }
 
     #[test]

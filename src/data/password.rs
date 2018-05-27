@@ -1,16 +1,6 @@
-#[cfg(feature = "serde")]
-use serde;
-
 use data::{Data, DataPrivate};
 use errors::DataError;
 use {Error, ErrorKind};
-
-// TODO: Delete none
-impl Default for Password {
-    fn default() -> Password {
-        Password { bytes: vec![] }
-    }
-}
 
 impl<'a> From<&'a [u8]> for Password {
     fn from(bytes: &'a [u8]) -> Self {
@@ -67,16 +57,6 @@ impl Data for Password {
     }
 }
 
-#[cfg(feature = "serde")]
-impl<'de> serde::Deserialize<'de> for Password {
-    fn deserialize<D>(_deserializer: D) -> Result<Password, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(Password::none())
-    }
-}
-
 /// Type-safe struct representing the raw bytes of your password
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Password {
@@ -84,16 +64,7 @@ pub struct Password {
 }
 
 impl Password {
-    pub(crate) fn none() -> Password {
-        Password { bytes: vec![] }
-    }
-}
-
-impl DataPrivate for Password {
-    fn as_mut_bytes(&mut self) -> &mut [u8] {
-        &mut self.bytes
-    }
-    fn validate(&self, _extra: Option<bool>) -> Result<(), Error> {
+    pub(crate) fn validate(&self) -> Result<(), Error> {
         if self.bytes.is_empty() {
             return Err(ErrorKind::DataError(DataError::PasswordTooShortError).into());
         }
@@ -101,6 +72,12 @@ impl DataPrivate for Password {
             return Err(ErrorKind::DataError(DataError::PasswordTooLongError).into());
         }
         Ok(())
+    }
+}
+
+impl DataPrivate for Password {
+    fn as_mut_bytes(&mut self) -> &mut [u8] {
+        &mut self.bytes
     }
 }
 

@@ -19,7 +19,7 @@ fn bench_crates(c: &mut Criterion) {
     let mut hasher = a2::Hasher::default();
     hasher
         .configure_variant(a2::config::Variant::Argon2i)
-        .opt_out_of_secret_key();
+        .opt_out_of_secret_key(true);
     let a2 = Fun::new("a2", move |b, _| {
         b.iter(|| {
             let _ = hasher.with_password(PASSWORD).hash_raw().unwrap();

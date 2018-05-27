@@ -7,11 +7,13 @@ pub enum DataError {
     #[fail(display = "Additional data too long. Length in bytes must be less than 2^32")]
     AdditionalDataTooLongError,
 
-    /// Called [`verify`](struct.Verifier.html#method.verify) or
-    /// [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking) on a
-    /// [`Verifier`](struct.Verifier.html) withough first providing a hash or [`HashRaw`](output/struct.HashRaw.html)
-    #[fail(display = "Called verify or verify_non_blocking on a Verifier withough first providing a hash or HashRaw")]
+    /// Hash missing. Attempted to verify without first having provided a hash
+    #[fail(display = "Hash missing. Attempted to verify without first having provided a hash")]
     HashMissingError,
+
+    /// Password missing. Attempted to verify without first having provided a password
+    #[fail(display = "Password missing. Attempted to verify without first having provided a password")]
+    PasswordMissingError,
 
     /// Password too short. Length in bytes must be greater than 0
     #[fail(display = "Password too short. Length in bytes must be greater than 0")]
@@ -33,8 +35,8 @@ pub enum DataError {
     #[fail(display = "Salt too long. Length in bytes must be less than 2^32")]
     SaltTooLongError,
 
-    /// Attempted to hash without a secret key without having first opted out of using a secret key
-    #[fail(display = "Attempted to hash without a secret key without having first opted out of using a secret key")]
+    /// Secret key missing. Attempted to hash without a secret key without having first opted out of using a secret key
+    #[fail(display = "Secret key missing. Attempted to hash without a secret key without having first opted out of using a secret key")]
     SecretKeyMissingError,
 
     /// Secret key too long. Length in bytes must be less than 2^32

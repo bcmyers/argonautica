@@ -1,6 +1,19 @@
+use futures_cpupool::CpuPool;
 use num_cpus;
 
 use config::{Backend, Variant, Version};
+
+/// Returns a [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
+/// with the number of logical cores on your machine
+#[inline(always)]
+pub fn default_cpu_pool() -> CpuPool {
+    CpuPool::new(num_cpus::get())
+}
+
+#[cfg(feature = "serde")]
+pub(crate) fn default_cpu_pool_serde() -> Option<CpuPool> {
+    None
+}
 
 /// Returns the number of physical cores on your machine
 #[inline(always)]

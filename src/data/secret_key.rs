@@ -1,17 +1,8 @@
 use base64;
-#[cfg(feature = "serde")]
-use serde;
 
 use data::{Data, DataPrivate};
 use errors::{DataError, ParseError};
 use {Error, ErrorKind};
-
-// TODO: docs hidden
-impl Default for SecretKey {
-    fn default() -> SecretKey {
-        SecretKey { bytes: vec![] }
-    }
-}
 
 impl<'a> From<&'a [u8]> for SecretKey {
     fn from(bytes: &'a [u8]) -> Self {
@@ -68,16 +59,6 @@ impl Data for SecretKey {
     }
 }
 
-#[cfg(feature = "serde")]
-impl<'de> serde::Deserialize<'de> for SecretKey {
-    fn deserialize<D>(_deserializer: D) -> Result<SecretKey, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(SecretKey::none())
-    }
-}
-
 /// Type-safe struct representing the raw bytes of your secret key (if any)
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct SecretKey {
@@ -106,24 +87,18 @@ impl SecretKey {
 }
 
 impl SecretKey {
-    pub(crate) fn none() -> SecretKey {
-        SecretKey { bytes: vec![] }
+    pub(crate) fn validate(&self) -> Result<(), Error> {
+        // TODO: SecretKey too short?
+        if self.bytes.len() >= ::std::u32::MAX as usize {
+            return Err(ErrorKind::DataError(DataError::SecretKeyTooLongError).into());
+        }
+        Ok(())
     }
 }
 
 impl DataPrivate for SecretKey {
     fn as_mut_bytes(&mut self) -> &mut [u8] {
         &mut self.bytes
-    }
-    fn validate(&self, extra: Option<bool>) -> Result<(), Error> {
-        let opt_out_of_secret_key = extra.unwrap();
-        if !(opt_out_of_secret_key) && self.bytes.is_empty() {
-            return Err(ErrorKind::DataError(DataError::SecretKeyMissingError).into());
-        }
-        if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::DataError(DataError::SecretKeyTooLongError).into());
-        }
-        Ok(())
     }
 }
 

@@ -111,12 +111,8 @@ impl Salt {
     }
 }
 
-impl DataPrivate for Salt {
-    fn as_mut_bytes(&mut self) -> &mut [u8] {
-        &mut self.bytes
-    }
-    fn validate(&self, extra: Option<bool>) -> Result<(), Error> {
-        let opt_out_of_random_salt = extra.unwrap();
+impl Salt {
+    pub(crate) fn validate(&self) -> Result<(), Error> {
         let length = self.bytes.len();
         if length < 8 {
             return Err(ErrorKind::DataError(DataError::SaltTooShortError).into());
@@ -124,10 +120,13 @@ impl DataPrivate for Salt {
         if length >= ::std::u32::MAX as usize {
             return Err(ErrorKind::DataError(DataError::SaltTooLongError).into());
         }
-        if !(opt_out_of_random_salt) && !(self.is_random) {
-            return Err(ErrorKind::DataError(DataError::SaltNonRandomError).into());
-        }
         Ok(())
+    }
+}
+
+impl DataPrivate for Salt {
+    fn as_mut_bytes(&mut self) -> &mut [u8] {
+        &mut self.bytes
     }
 }
 

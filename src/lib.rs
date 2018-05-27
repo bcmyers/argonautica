@@ -18,15 +18,16 @@
 //! * to use sensible defaults, and
 //! * to (as much as possible) follow the [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 //!
-//! The library was built with a simple use-case in mind: hashing passwords for storage in a website's database.
-//! That said, `a2` is also feature-complete, meaning you should be able to to anything
-//! with `a2` that you can do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2)
-//! of Argon2.
+//! The library was built with a simple use-case in mind: hashing passwords for storage in a
+//! website's database. That said, `a2` is also feature-complete, meaning you should be able to
+//! to anything with `a2` that you can do with the cannonical
+//! [C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2.
 //!
 //! ## Hashing
 //!
-//! Hashing passwords with `a2` is simple.  Just instantiate a default [`Hasher`](struct.Hasher.html), provide it
-//! with a password and a secret key, and then call the [`hash`](struct.Hasher.html#method.hash) method.
+//! Hashing passwords with `a2` is simple.  Just instantiate a default
+//! [`Hasher`](struct.Hasher.html), provide it with a password and a secret key, and then
+//! call the [`hash`](struct.Hasher.html#method.hash) method.
 //! ```
 //! extern crate a2;
 //!
@@ -47,10 +48,10 @@
 //! ```
 //! ## Verifying
 //!
-//! Verifying passwords against a hash is equally as simple. Just instantiate a
-//! default [`Verifier`](struct.Verifier.html), provide it with the password and the hash you would like to compare,
-//! provide it with the secret key that was used to create the hash, and then call the [`verify`](struct.Verifier.html#method.verify)
-//! method.
+//! Verifying passwords against a hash is equally as simple. Just instantiate a default
+//! [`Verifier`](struct.Verifier.html), provide it with the password and the hash you would
+//! like to compare, provide it with the secret key that was used to create the hash, and
+//! then call the [`verify`](struct.Verifier.html#method.verify) method.
 //! ```
 //! extern crate a2;
 //!
@@ -75,13 +76,14 @@
 //! ```
 //! ## Configuration
 //!
-//! The default configurations for [`Hasher`](struct.Hasher.html) and [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for
-//! the general use-case of hashing passwords for storage in a website database, but if you want to use
+//! The default configurations for [`Hasher`](struct.Hasher.html) and
+//! [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for the general
+//! use-case of hashing passwords for storage in a website database, but if you want to use
 //! `a2` for a different use-case or if you just disagree with the chosen defaults, customizing
 //! `a2` to meet your needs should hopefully as easy and as intuitive as using the defaults.
 //!
-//! Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom configuration options. It provides
-//! color on each of the options.
+//! Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom
+//! configuration options. It provides color on each of the options.
 //! ```
 //! extern crate a2;
 //! extern crate futures_cpupool;
@@ -106,8 +108,9 @@
 //!         // methods `hash` and `hash_raw` do not use a 'CpuPool'; so if you are using only
 //!         // these blocking methods you can ignore this configuration entirely. If, however,
 //!         // you are using the non-blocking methods and would like to provide your own `CpuPool`
-//!         // instead of using the default, which is `CpuPool::new(num_cpus::get_physical())`,
-//!         // you can configure your `Hasher` with a custom `CpuPool` using this method. This
+//!         // instead of using the default, which is a lazily created `CpuPool` with the number
+//!         // of threads equal to the number of logical cores on your machine, you can
+//!         // configure your `Hasher` with a custom `CpuPool` using this method. This
 //!         // might be useful if, for example, you are writing code in an environment which
 //!         // makes heavy use of futures, the code you are writing uses both a `Hasher` and
 //!         // a `Verifier`, and you would like both of them to share the same underlying
@@ -189,11 +192,11 @@
 //!         // 👆 Argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
 //!         // Unless you have a very specific reason not to, you should use the latest
 //!         // version (0x13), which is also the default
-//!         .opt_out_of_random_salt()
+//!         .opt_out_of_random_salt(true)
 //!         // 👆 As a built-in "safety" mechanism, if you wish to use a non-random salt,
 //!         // which is generally not a good idea, you must explicity call this method
 //!         // in order to allow it
-//!         .opt_out_of_secret_key();
+//!         .opt_out_of_secret_key(true);
 //!         // 👆 As a built-in "safety" mechanism, if you wish to hash without a secret key,
 //!         // which is generally not a good idea, you must explicity call this method
 //!         // in order to allow it
@@ -222,29 +225,36 @@
 //!     (The optional serde feature allows you to serialize / deserialize structs and
 //!     enums from `a2` using the [serde](https://github.com/serde-rs/serde) ecosystem).
 //!
-//! That said, `a2` uses [cc](https://github.com/alexcrichton/cc-rs) to compile the cannonical
+//! That said, `a2` uses [cc](https://github.com/alexcrichton/cc-rs) and
+//! [bindgen](https://github.com/rust-lang-nursery/rust-bindgen) to compile the cannonical
 //! [C implemenation](https://github.com/P-H-C/phc-winner-argon2) of Argon2 into a
-//! static archive during the build process. This means that you need a C compiler on your
-//! machine in order to build `a2`. If `a2` fails to build on your machine, submit an issue and
-//! I'll try to look into it, but to be honest, compiling C programs is not really an area of expertise
-//! for me (so if anyone wants to help out in this area, that would be much appreciated!).
+//! static archive during the build process. This means you need a C compiler on your
+//! machine in order to build `a2`. More specifically, you need:
+//! * [LLVM/Clang](https://llvm.org/) (version 3.9 or higher)
+//!     * Mac OS: `brew install llvm`, which requires [Homebrew](https://brew.sh/)
+//!     * Debian-based linux: `apt-get install llvm-[version]-dev libclang-[version]-dev clang-[version]`
+//!     * Arch linux: `pacman -S clang`
+//!     * Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
 //!
 //! `a2` runs on stable Rust version 1.26.0 or greater.
 //!
 //! ## Alternatives
 //!
 //! If `a2` isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
-//! include [argon2rs](https://github.com/bryant/argon2rs) and [rust-argon2](https://github.com/sru-systems/rust-argon2).
-//! As already mentioned, there's also a cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2),
-//! which `a2` actually uses under the hood if you're using the C backend. Finally, if you're interesting
-//! in password hashing with a different algorithm, [rust-bcrypt](https://github.com/Keats/rust-bcrypt)
-//! might be worth checking out.
+//! include [argon2rs](https://github.com/bryant/argon2rs) and
+//! [rust-argon2](https://github.com/sru-systems/rust-argon2). As already mentioned, there's
+//! also a cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2), which `a2`
+//! actually uses under the hood if you're using the C backend. Finally, if you're interesting
+//! in password hashing with a different algorithm,
+//! [rust-bcrypt](https://github.com/Keats/rust-bcrypt) might be worth checking out.
 //!
-//! For what it's worth, besides API differences, one thing `a2` focuses on relative to other similar
-//! libraries is the ability to easily create hashes using a secret key. Your mileage may vary,
-//! but the crate's author found it somewhat difficult to hash with a secret key when
-//! experimenting with alternative Rust libraries. In addition, `a2` is the only Rust crate
-//! (as of 5/18) that has the newest Argon2 variant: Argon2id.
+//! For what it's worth, besides API differences, one thing `a2` focuses on relative to
+//! other similar libraries is the ability to easily create hashes using a secret key.
+//! Your mileage may vary, but the crate's author found it somewhat difficult to hash with
+//! a secret key when experimenting with alternative Rust libraries.
+//!
+//! In addition, `a2` is the only Rust crate (as of 5/18) that has the newest Argon2
+//! variant: Argon2id.
 //!
 //! ## License
 //!
@@ -254,7 +264,7 @@
 //!
 //! at your option.
 
-#![deny(missing_debug_implementations, missing_docs, unused_imports)]
+#![warn(missing_debug_implementations, missing_docs, unused_imports, unused_variables)] // TODO
 #![doc(html_root_url = "https://docs.rs/a2/0.1.0")]
 
 extern crate base64;
@@ -276,6 +286,8 @@ extern crate scopeguard;
 #[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde;
+#[cfg(all(test, feature = "serde"))]
+extern crate serde_json;
 
 mod backend;
 mod error;
@@ -294,14 +306,10 @@ pub mod output;
 pub mod utils;
 pub use verifier::Verifier;
 
+// TODO: Delete main
 // TODO: SQLite database for Actix-web example
-// TODO: Test with features
-// TODO: Required features: https://github.com/hyperium/hyper/blob/master/Cargo.toml
-// TODO: Missing docs
-// TODO: Clang
+// TODO: Move CpuPool to config
+// TODO: Check C types
 // TODO: MD5 and SHA2
-// TODO: bcrypt, scrypt
-// TODO: Argon2rs
 // TODO: Python
-// TODO: Git submodule
 // TODO: Logging

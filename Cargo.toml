@@ -27,6 +27,12 @@ nom = "4.0"
 num_cpus = "1.8"
 rand = "0.5"
 scopeguard = "0.3"
+serde = { version = "1.0", optional = true, features = ["derive"] }
+
+# benches
+argon2rs = { version = "0.2.5", optional = true }
+criterion = { version = "0.2", optional = true }
+rust-argon2 = { version = "0.3.0", optional = true }
 
 # development
 bindgen = { version = "0.37", optional = true }
@@ -37,10 +43,8 @@ actix-web = { version = "0.6", optional = true }
 env_logger = { version = "0.5", optional = true }
 futures-timer = { version = "0.1", optional = true }
 
-# serde
-serde = { version = "1.0", optional = true, features = ["derive"] }
-
 [features]
+benches = ["argon2rs", "criterion", "rust-argon2"]
 development = ["bindgen", "blake2-rfc"]
 example_actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
 
@@ -49,10 +53,7 @@ bindgen = "0.37"
 cc = { version = "1.0.15", features = ["parallel"] }
 
 [dev-dependencies]
-argon2rs = "0.2.5"
-criterion = "0.2"
 dotenv = "0.12"
-rust-argon2 = "0.3.0"
 serde_json = "1.0"
 
 [[example]]
@@ -77,6 +78,11 @@ name = "example_non_blocking"
 path = "examples/example_non_blocking.rs"
 
 [[example]]
+name = "example_serde"
+path = "examples/example_serde.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "example_simple"
 path = "examples/example_simple.rs"
 
@@ -91,18 +97,22 @@ path = "examples/generate_secret_key.rs"
 [[bench]]
 name = "bench_crates"
 harness = false
+required-features = ["benches"]
 
 [[bench]]
 name = "bench_fast_but_insecure"
 harness = false
+required-features = ["benches"]
 
 [[bench]]
 name = "bench_inputs"
 harness = false
+required-features = ["benches"]
 
 [[bench]]
 name = "bench_threads"
 harness = false
+required-features = ["benches"]
 
 [badges]
 travis-ci = { repository = "bcmyers/a2", branch = "master" }

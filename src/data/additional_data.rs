@@ -92,20 +92,17 @@ pub struct AdditionalData {
 }
 
 impl AdditionalData {
-    pub(crate) fn none() -> AdditionalData {
-        AdditionalData { bytes: vec![] }
+    pub(crate) fn validate(&self) -> Result<(), Error> {
+        if self.bytes.len() >= ::std::u32::MAX as usize {
+            return Err(ErrorKind::DataError(DataError::AdditionalDataTooLongError).into());
+        }
+        Ok(())
     }
 }
 
 impl DataPrivate for AdditionalData {
     fn as_mut_bytes(&mut self) -> &mut [u8] {
         &mut self.bytes
-    }
-    fn validate(&self, _extra: Option<bool>) -> Result<(), Error> {
-        if self.bytes.len() >= ::std::u32::MAX as usize {
-            return Err(ErrorKind::DataError(DataError::AdditionalDataTooLongError).into());
-        }
-        Ok(())
     }
 }
 

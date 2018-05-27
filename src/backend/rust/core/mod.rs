@@ -5,14 +5,18 @@ use std::mem;
 use blake2_rfc::blake2b::Blake2b;
 
 use Error;
-use data::{Data, DataPrivate, Salt};
+use data::{Data, Salt};
 use hasher::Hasher;
 
 fn h0(hasher: &mut Hasher) -> Result<[u8; 72], Error> {
     if hasher.salt().is_random() {
         let len = hasher.salt().len();
-        hasher.set_salt(Salt::random(len)?);
+        hasher.set_salt(Salt::random(len as u32)?);
     }
+    let additional_data = hasher.additional_data();
+    let password = hasher.password();
+    let salt = hasher.salt();
+    let secret_key = hasher.secret_key();
     let input = &[
         &u32_to_byte_array(hasher.config().lanes()),
         &u32_to_byte_array(hasher.config().hash_length()),
@@ -20,14 +24,14 @@ fn h0(hasher: &mut Hasher) -> Result<[u8; 72], Error> {
         &u32_to_byte_array(hasher.config().iterations()),
         &u32_to_byte_array(hasher.config().version() as u32),
         &u32_to_byte_array(hasher.config().variant() as u32),
-        &u32_to_byte_array(hasher.password().len()),
-        hasher.password().as_bytes(),
-        &u32_to_byte_array(hasher.salt().len()),
-        hasher.salt().as_bytes(),
-        &u32_to_byte_array(hasher.secret_key().len()),
-        hasher.secret_key().as_bytes(),
-        &u32_to_byte_array(hasher.additional_data().len()),
-        hasher.additional_data().as_bytes(),
+        &u32_to_byte_array(password.len() as u32),
+        password.as_bytes(),
+        &u32_to_byte_array(salt.len() as u32),
+        salt.as_bytes(),
+        &u32_to_byte_array(secret_key.len() as u32),
+        secret_key.as_bytes(),
+        &u32_to_byte_array(additional_data.len() as u32),
+        additional_data.as_bytes(),
     ];
     let mut blake2b = Blake2b::new(64);
     for i in input {

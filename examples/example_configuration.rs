@@ -104,11 +104,11 @@ fn main() {
         // 👆 Argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
         // Unless you have a very specific reason not to, you should use the latest
         // version (0x13), which is also the default
-        .opt_out_of_random_salt()
+        .opt_out_of_random_salt(true)
         // 👆 As a built-in "safety" mechanism, if you wish to use a non-random salt,
         // which is generally not a good idea, you must explicity call this method
         // in order to allow it
-        .opt_out_of_secret_key();
+        .opt_out_of_secret_key(true);
     // 👆 As a built-in "safety" mechanism, if you wish to hash without a secret key,
     // which is generally not a good idea, you must explicity call this method
     // in order to allow it

@@ -127,7 +127,7 @@ mod tests {
             .with_additional_data(additional_data)
             .with_salt(salt)
             .with_secret_key(secret_key)
-            .opt_out_of_random_salt();
+            .opt_out_of_random_salt(true);
 
         let hash_raw = hasher.with_password(password).hash_raw().unwrap();
         let hash1 = hash_raw.to_hash();

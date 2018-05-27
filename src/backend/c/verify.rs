@@ -1,26 +1,25 @@
 use std::ffi::CString;
 use std::os::raw::c_char;
 
-use backend::encode_rust;
 use config::Variant;
-use data::DataPrivate;
-use output::HashRaw;
-use verifier::{HashEnum, Verifier};
+use data::{Data, DataPrivate};
+use verifier::Verifier;
 use {ffi, Error, ErrorKind};
 
-pub(crate) fn verify_c(verifier: &Verifier) -> Result<bool, Error> {
-    let is_valid = match verifier.hash_enum() {
-        HashEnum::Encoded(ref s) => verify_hash(verifier, s)?,
-        HashEnum::Raw(ref hash_raw) => verify_hash_raw(verifier, hash_raw)?,
-        HashEnum::None => {
-            return Err(Error::new(ErrorKind::Bug)
-                .add_context("Attempting to verify without a hash. This should be unreachable"))
+pub(crate) fn verify_c(verifier: &mut Verifier) -> Result<bool, Error> {
+    let hash = {
+        match verifier.hash() {
+            Some(hash) => hash.to_string(),
+            None => {
+                return Err(Error::new(ErrorKind::Bug)
+                    .add_context("Attempting to verify without a hash. This should be unreachable"))
+            }
         }
     };
-    Ok(is_valid)
+    Ok(verify_hash(verifier, &hash)?)
 }
 
-fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, Error> {
+fn verify_hash(verifier: &mut Verifier, hash: &str) -> Result<bool, Error> {
     let max_len = hash.as_bytes().len();
     let mut buffer = vec![0u8; max_len];
     let mut salt = vec![0u8; max_len];
@@ -62,13 +61,13 @@ fn verify_hash(verifier: &Verifier, hash: &str) -> Result<bool, Error> {
     let desired_result_ptr = context.out as *const c_char;
 
     let mut buffer = vec![0u8; context.outlen as usize];
-    context.ad = verifier.additional_data().as_ptr() as *mut u8;
+    context.ad = verifier.additional_data_mut().as_mut_ptr();
     context.adlen = verifier.additional_data().len() as u32;
     context.out = buffer.as_mut_ptr();
     context.outlen = buffer.len() as u32;
-    context.pwd = verifier.password().as_ptr() as *mut u8;
+    context.pwd = verifier.password_mut().as_mut_ptr();
     context.pwdlen = verifier.password().len() as u32;
-    context.secret = verifier.secret_key().as_ptr() as *mut u8;
+    context.secret = verifier.secret_key_mut().as_mut_ptr();
     context.secretlen = verifier.secret_key().len() as u32;
 
     let context_ptr = &mut context as *mut ffi::argon2_context;
@@ -94,9 +93,3 @@ named!(parse_variant<&str, Variant>, do_parse!(
     variant: map_res!(take_until!("$"), |x: &str| x.parse::<Variant>()) >>
     (variant)
 ));
-
-fn verify_hash_raw(verifier: &Verifier, hash_raw: &HashRaw) -> Result<bool, Error> {
-    let hash = encode_rust(hash_raw);
-    let is_valid = verify_hash(verifier, &hash)?;
-    Ok(is_valid)
-}
