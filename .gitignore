@@ -6,5 +6,9 @@ bindings.rs
 Cargo.lock
 target/
 
+*.egg-info/
 .mypy_cache
+build/
+dist/
 venv/
+*.so

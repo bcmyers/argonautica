@@ -7,7 +7,7 @@ use libc;
 // TODO: Password clearing, secret key clearing, opt outs
 
 use config::{Backend, Variant, Version};
-use hasher::Hasher;
+use {Hasher, Verifier};
 
 /// Frees memory associated with a pointer that was previously returned from
 /// [`a2_hash`](function.a2_hash.html). See [`a2_hash`](function.a2_hash.html) below
@@ -72,11 +72,14 @@ pub unsafe extern "C" fn a2_hash(
         .configure_iterations(iterations)
         .configure_lanes(lanes)
         .configure_memory_size(memory_size)
+        .configure_password_clearing(false)
+        .configure_secret_key_clearing(false)
         .configure_threads(threads)
         .configure_variant(variant)
         .configure_version(version)
         .opt_out_of_random_salt(true)
-        .opt_out_of_secret_key(true);
+        .opt_out_of_secret_key(true)
+        .with_salt("somesalt"); // TODO
     let password = ::std::slice::from_raw_parts(password_ptr, password_len);
     let hash = match hasher.with_password(password).hash() {
         Ok(hash) => hash,
@@ -88,4 +91,46 @@ pub unsafe extern "C" fn a2_hash(
     let hash_cstring = CString::new(hash.as_bytes()).unwrap();
     *error_code_ptr = 0;
     hash_cstring.into_raw()
+}
+
+/// Verify function that can be called from C. Unlike [`a2_hash`](function.a2_hash.html), this
+/// function does <b>not</b> allocate memory that needs to be freed from C; so there is no need
+/// to call [`a2_free`](function.a2_free.html) after using this function
+#[no_mangle]
+pub unsafe extern "C" fn a2_verify(
+    hash_ptr: *const libc::c_char,
+    password_ptr: *const libc::uint8_t,
+    password_len: libc::size_t,
+    backend: libc::uint32_t,
+) -> libc::c_int {
+    let hash = match CStr::from_ptr(hash_ptr).to_str() {
+        Ok(hash) => hash,
+        Err(_) => return -1, // Utf-8 Error
+    };
+    let hash2 = "$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q";
+    assert_eq!(&hash, &hash2);
+    let password = ::std::slice::from_raw_parts(password_ptr, password_len);
+    let backend = match Backend::from_u32(backend) {
+        Ok(backend) => backend,
+        Err(_) => return -1,
+    };
+    let password2 = String::from_utf8(password.to_vec()).unwrap();
+    assert_eq!("P@ssw0rd", &password2);
+    let mut verifier = Verifier::default();
+    let is_valid = match verifier
+        .configure_backend(backend)
+        .configure_password_clearing(false)
+        .configure_secret_key_clearing(false)
+        .with_hash(hash)
+        .with_password(password)
+        .verify()
+    {
+        Ok(is_valid) => is_valid,
+        Err(_) => return -1,
+    };
+    if is_valid {
+        1
+    } else {
+        0
+    }
 }

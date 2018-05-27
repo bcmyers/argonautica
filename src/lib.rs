@@ -312,3 +312,4 @@ pub use verifier::Verifier;
 // TODO: SQLite database for Actix-web example
 // TODO: Python
 // TODO: Logging
+// TODO: Wasm?
