@@ -1,4 +1,4 @@
-from a2py import Hasher
+from a2py import Hasher, Verifier
 
 
 if __name__ == "__main__":

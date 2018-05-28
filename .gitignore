@@ -10,7 +10,8 @@ target/
 .mypy_cache
 build/
 dist/
-*.pyc
+*$py.class
+*.py[cod]
 __pycache__/
 *.so
 venv/
