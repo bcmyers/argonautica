@@ -12,6 +12,5 @@ rust:
   - beta
   - nightly
 script:
-  - cargo build --verbose --features serde
   - cargo test --verbose --features serde
 sudo: false
