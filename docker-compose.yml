@@ -1,0 +1,15 @@
+version: '3'
+services:
+  rust:
+    command: bash -c "cargo test --features serde"
+    build: .
+    environment:
+      - RUST_BACKTRACE=1
+    volumes:
+      - .:/code
+      - target:/code/target/
+    working_dir: /code
+
+volumes:
+  target:
+
