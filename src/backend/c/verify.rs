@@ -62,7 +62,7 @@ pub(crate) fn verify_c(verifier: &mut Verifier) -> Result<bool, Error> {
         }
         (context, variant)
     };
-    let desired_result_ptr = context.out as *const c_char;
+    let hash_ptr = context.out as *const c_char;
     let mut buffer = vec![0u8; context.outlen as usize];
     context.ad = verifier.additional_data_mut().as_mut_ptr();
     context.adlen = verifier.additional_data().len() as u32;
@@ -73,9 +73,7 @@ pub(crate) fn verify_c(verifier: &mut Verifier) -> Result<bool, Error> {
     context.secret = verifier.secret_key_mut().as_mut_ptr();
     context.secretlen = verifier.secret_key().len() as u32;
     let context_ptr = &mut context as *mut ffi::argon2_context;
-    let err = unsafe {
-        ffi::argon2_verify_ctx(context_ptr, desired_result_ptr, variant as ffi::argon2_type)
-    };
+    let err = unsafe { ffi::argon2_verify_ctx(context_ptr, hash_ptr, variant as ffi::argon2_type) };
     let is_valid = if err == 0 {
         true
     } else if err == ffi::Argon2_ErrorCodes_ARGON2_VERIFY_MISMATCH {

@@ -125,9 +125,9 @@ mod tests {
         hasher
             .configure_hash_length(32)
             .configure_iterations(3)
-            .configure_lanes(4)
+            .configure_lanes(2)
             .configure_memory_size(32)
-            .configure_threads(4)
+            .configure_threads(2)
             .with_additional_data(additional_data)
             .with_salt(salt)
             .with_secret_key(secret_key)

@@ -85,13 +85,27 @@ impl Hasher {
     /// defaults. On the developer's early-2014 Macbook Air, this configuration hashes
     /// "some document" in approximately 250 microseconds (on average)
     pub fn fast_but_insecure() -> Hasher {
+        fn memory_size(lanes: u32) -> u32 {
+            let mut counter = 1;
+            let memory_size = loop {
+                if 2u32.pow(counter) < 8 * lanes {
+                    counter += 1;
+                    continue;
+                } else {
+                    break 2u32.pow(counter);
+                }
+            };
+            memory_size
+        }
         let lanes = default_lanes();
         let mut hasher = Hasher::default();
         hasher
             .configure_hash_length(32)
             .configure_iterations(1)
-            .configure_memory_size(8 * lanes)
+            .configure_lanes(lanes)
+            .configure_memory_size(memory_size(lanes))
             .configure_password_clearing(false)
+            .configure_threads(lanes)
             .opt_out_of_random_salt(true)
             .opt_out_of_secret_key(true)
             .with_salt("somesalt");
