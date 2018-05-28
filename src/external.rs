@@ -140,6 +140,18 @@ mod tests {
     const PASSWORDS: [&str; 2] = ["P@ssw0rd", "😊"];
     const VARIANTS: [&str; 3] = ["argon2d", "argon2i", "argon2id"];
 
+    #[inline(always)]
+    fn memory_size(lanes: u32) -> u32 {
+        let mut counter = 1;
+        loop {
+            if 2u32.pow(counter) < 8 * lanes {
+                counter += 1;
+                continue;
+            }
+            break 2u32.pow(counter);
+        }
+    }
+
     fn test(hash_length: u32, iterations: u32, lanes: u32, password: &str, variant: &str) {
         let mut password_bytes = password.as_bytes().to_vec();
         let password_ptr = (&mut password_bytes).as_mut_ptr();
@@ -161,7 +173,7 @@ mod tests {
                 /* hash_length */ hash_length,
                 /* iterations */ iterations,
                 /* lanes */ lanes,
-                /* memory_size */ 128,
+                /* memory_size */ memory_size(lanes),
                 /* threads */ lanes,
                 /* variant_ptr */ variant_ptr,
                 /* version */ 19,
