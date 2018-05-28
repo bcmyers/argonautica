@@ -265,12 +265,13 @@ mod tests {
             let additional_data = vec![4u8; 12];
             let secret_key = vec![3u8; 8];
             let mut hasher = Hasher::default();
+            let lanes = 6;
             hasher
                 .configure_hash_length(32)
                 .configure_iterations(3)
-                .configure_lanes(2)
-                .configure_memory_size(32)
-                .configure_threads(2)
+                .configure_lanes(lanes)
+                .configure_memory_size(64)
+                .configure_threads(lanes)
                 .configure_variant(self.variant)
                 .configure_version(self.version)
                 .opt_out_of_random_salt(true)
