@@ -21,10 +21,10 @@ pub enum Backend {
     /// Backend using a
     /// [C implementation](https://github.com/P-H-C/phc-winner-argon2/tree/20171227)
     /// of the Argon2 algorithm
-    C,
+    C = 1,
     /// Placeholder for a currently-unavailable but planned-for-the-future Rust backend.
     /// *You will get an error if you use this backend now.*
-    Rust,
+    Rust = 2,
 }
 
 impl Backend {

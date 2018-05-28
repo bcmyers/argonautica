@@ -38,7 +38,7 @@ pub unsafe extern "C" fn a2_hash(
     let backend = match Backend::from_u32(backend) {
         Ok(backend) => backend,
         Err(_) => {
-            *error_code_ptr = -1;
+            *error_code_ptr = -2;
             return ::std::ptr::null();
         }
     };
@@ -46,22 +46,20 @@ pub unsafe extern "C" fn a2_hash(
         Ok(s) => match s.parse::<Variant>() {
             Ok(variant) => variant,
             Err(_) => {
-                *error_code_ptr = -1;
+                *error_code_ptr = -3;
                 return ::std::ptr::null();
             }
         },
         Err(_) => {
-            *error_code_ptr = -1;
+            *error_code_ptr = -4;
             return ::std::ptr::null();
         }
     };
     let version = match Version::from_u32(version) {
         Ok(version) => version,
         Err(_) => {
-            return {
-                *error_code_ptr = -1;
-                ::std::ptr::null()
-            }
+            *error_code_ptr = -5;
+            return ::std::ptr::null();
         }
     };
 
@@ -84,13 +82,13 @@ pub unsafe extern "C" fn a2_hash(
     let hash = match hasher.with_password(password).hash() {
         Ok(hash) => hash,
         Err(_) => {
-            *error_code_ptr = -1;
+            *error_code_ptr = -6;
             return ::std::ptr::null();
         }
     };
     let hash_cstring = CString::new(hash.as_bytes()).unwrap();
     *error_code_ptr = 0;
-    hash_cstring.into_raw()
+    hash_cstring.into_raw() as *const libc::c_char
 }
 
 /// Verify function that can be called from C. Unlike [`a2_hash`](function.a2_hash.html), this
@@ -107,15 +105,11 @@ pub unsafe extern "C" fn a2_verify(
         Ok(hash) => hash,
         Err(_) => return -1, // Utf-8 Error
     };
-    let hash2 = "$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q";
-    assert_eq!(&hash, &hash2);
     let password = ::std::slice::from_raw_parts(password_ptr, password_len);
     let backend = match Backend::from_u32(backend) {
         Ok(backend) => backend,
         Err(_) => return -1,
     };
-    let password2 = String::from_utf8(password.to_vec()).unwrap();
-    assert_eq!("P@ssw0rd", &password2);
     let mut verifier = Verifier::default();
     let is_valid = match verifier
         .configure_backend(backend)
@@ -132,5 +126,76 @@ pub unsafe extern "C" fn a2_verify(
         1
     } else {
         0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use config::Backend;
+
+    const HASH_LENGTHS: [u32; 2] = [8, 32];
+    const ITERATIONS: [u32; 7] = [1, 2, 4, 8, 32, 64, 128];
+    const LANES: [u32; 6] = [1, 2, 3, 4, 5, 6];
+    const PASSWORDS: [&str; 2] = ["P@ssw0rd", "😊"];
+    const VARIANTS: [&str; 3] = ["argon2d", "argon2i", "argon2id"];
+
+    fn test(hash_length: u32, iterations: u32, lanes: u32, password: &str, variant: &str) {
+        let mut password_bytes = password.as_bytes().to_vec();
+        let password_ptr = (&mut password_bytes).as_mut_ptr();
+        let password_len = password.as_bytes().len();
+
+        let variant_cstring = CString::new(variant).unwrap();
+        let variant_ptr = variant_cstring.as_ptr();
+
+        let mut error_code: libc::c_int = -1;
+        let error_code_ptr = &mut error_code as *mut libc::c_int;
+
+        let backend = Backend::C as u32;
+
+        let hash_ptr = unsafe {
+            a2_hash(
+                /* password_ptr */ password_ptr,
+                /* password_len */ password_len,
+                /* backend */ backend,
+                /* hash_length */ hash_length,
+                /* iterations */ iterations,
+                /* lanes */ lanes,
+                /* memory_size */ 128,
+                /* threads */ lanes,
+                /* variant_ptr */ variant_ptr,
+                /* version */ 19,
+                /* error_code_ptr */ error_code_ptr,
+            )
+        };
+        if hash_ptr == ::std::ptr::null_mut() {
+            panic!("Error code: {}", unsafe { *error_code_ptr });
+        }
+        let result = unsafe {
+            a2_verify(
+                hash_ptr as *const libc::c_char,
+                password_ptr as *const libc::uint8_t,
+                password_len,
+                backend,
+            )
+        };
+        unsafe { a2_free(hash_ptr as *mut libc::c_char) };
+        let is_valid = if result == 1 { true } else { false };
+        assert!(is_valid);
+    }
+
+    #[test]
+    fn test_external() {
+        for hash_length in &HASH_LENGTHS {
+            for iterations in &ITERATIONS {
+                for lanes in &LANES {
+                    for password in &PASSWORDS {
+                        for variant in &VARIANTS {
+                            test(*hash_length, *iterations, *lanes, *password, *variant);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
