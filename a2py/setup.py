@@ -1,14 +1,36 @@
 import os
 from setuptools import setup, find_packages
-from setuptools_rust import Binding, RustExtension
-
-import pypandoc
+import subprocess
+import sys
 
 here = os.path.abspath(os.path.dirname(__file__))
 
+try:
+    from setuptools_rust import Binding, RustExtension
+except ImportError:
+    try:
+        subprocess.check_call([
+            sys.executable, "-m", "pip", "install", "setuptools-rust",
+        ])
+        os.execvp(sys.executable, [sys.executable] + sys.argv)
+    except subprocess.CalledProcessError as e:
+        print("Please install the setuptools-rust package")
+        raise SystemExit(e.returncode)
+
 
 def long_description() -> str:
-    return pypandoc.convert('README.md', 'rst').replace("\r", "")
+    try:
+        import pypandoc
+        return pypandoc.convert('README.md', 'rst').replace("\r", "")
+    except ImportError:
+        try:
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install", "pypandoc",
+            ])
+            os.execvp(sys.executable, [sys.executable] + sys.argv)
+            return pypandoc.convert('README.md', 'rst').replace("\r", "")
+        except:
+            return ""
 
 
 setup(
@@ -39,11 +61,11 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
 
-    install_requires=['cffi'],
+    install_requires=['cffi>=1.11.5'],
 
     keywords="argon2 argon2d argon2i argon2id crypto cryptography hash hashing password security",
 
-    packages=find_packages(),
+    packages=find_packages(exclude=["docs.*", "tests.*"]),
 
     project_urls={
         "Documentation": "TODO",
@@ -58,6 +80,8 @@ setup(
         native=True,
         rust_version=">=1.26.0",
     )],
+
+    setup_requires=["setuptools-rust>=0.9.2"],
 
     zip_safe=False
 )

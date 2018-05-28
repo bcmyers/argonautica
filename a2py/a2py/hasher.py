@@ -10,7 +10,7 @@ class Hasher:
                  hash_length: int = 32,
                  iterations: int = 128,
                  lanes: int = 2,
-                 memory_size: int = 4_096,
+                 memory_size: int = 4096,
                  threads: int = 2,
                  variant: Variant = Variant.Argon2id,
                  version: Version = Version._0x13,
@@ -45,10 +45,10 @@ def hash(
     hash_length: int = 32,
     iterations: int = 128,
     lanes: int = 2,
-    memory_size: int = 4_096,
+    memory_size: int = 4096,
     threads: int = 2,
     variant: Variant = Variant.Argon2id,
-    version: Version = Version._0x13,
+    version: Version = Version._0x13
 ) -> str:
     error_code_ptr = ffi.new("int*", init=-1)
 
@@ -74,7 +74,7 @@ def hash(
     )
 
     if hash_ptr == ffi.NULL:
-        raise Exception(f"failed with error code {error_code_ptr[0]}")
+        raise Exception("failed with error code {}".format(error_code_ptr[0]))
 
     encoded = ffi.string(hash_ptr).decode("utf-8")
     a2.a2_free(hash_ptr)

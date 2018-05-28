@@ -10,5 +10,6 @@ target/
 .mypy_cache
 build/
 dist/
-venv/
+__pycache__/
 *.so
+venv/
