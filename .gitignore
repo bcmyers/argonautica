@@ -10,6 +10,7 @@ target/
 .mypy_cache
 build/
 dist/
+*.pyc
 __pycache__/
 *.so
 venv/
