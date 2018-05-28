@@ -313,3 +313,4 @@ pub use verifier::Verifier;
 // TODO: Python
 // TODO: Logging
 // TODO: Wasm?
+// TODO: ARGON2_SYNC_POINTS???

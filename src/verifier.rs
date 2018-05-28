@@ -268,14 +268,14 @@ mod tests {
             hasher
                 .configure_hash_length(32)
                 .configure_iterations(3)
-                .configure_lanes(4)
+                .configure_lanes(2)
                 .configure_memory_size(32)
-                .configure_threads(4)
+                .configure_threads(2)
                 .configure_variant(self.variant)
                 .configure_version(self.version)
                 .opt_out_of_random_salt(true)
-                .with_salt(vec![2; 16])
-                .opt_out_of_secret_key(true);
+                .opt_out_of_secret_key(true)
+                .with_salt(vec![2; 16]);
             let hash = hasher.with_password(self.password.as_str()).hash().unwrap();
 
             hasher.with_secret_key(secret_key.as_slice());
@@ -284,12 +284,12 @@ mod tests {
             hasher.with_additional_data(additional_data.as_slice());
             let hash3 = hasher.with_password(self.password.as_str()).hash().unwrap();
 
-            let mut verifier = Verifier::new();
+            let mut verifier = Verifier::default();
             verifier
                 .with_hash(&hash)
                 .with_password(self.password.as_str());
             let is_valid = verifier.verify().unwrap();
-            assert!(is_valid);
+            assert!(is_valid); // Failing
 
             verifier
                 .with_hash(&hash2)
