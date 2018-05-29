@@ -5,11 +5,14 @@ RUN set -eux; \
     apt-get update -y; \
     apt-get upgrade -y
 
-ARG RUST_VERSION=nightly
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH \
+    RUST_VERSION=1.26.0
 
 RUN set -eux; \
-    dpkgArch="$(dpkg --print-architecture)"; \
     \
+    dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
     amd64) rustArch='x86_64-unknown-linux-gnu'; rustupSha256='c9837990bce0faab4f6f52604311a19bb8d2cde989bea6a7b605c8e526db6f02' ;; \
     armhf) rustArch='armv7-unknown-linux-gnueabihf'; rustupSha256='297661e121048db3906f8c964999f765b4f6848632c0c2cfb6a1e93d99440732' ;; \
@@ -24,12 +27,13 @@ RUN set -eux; \
     chmod +x rustup-init; \
     ./rustup-init -y --no-modify-path --default-toolchain $RUST_VERSION; \
     rm rustup-init; \
-    chmod -R a+w /usr/local/rustup /usr/local/cargo; \
+    chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
     rustup --version; \
     cargo --version; \
     rustc --version;
 
-ENV PATH=/usr/local/cargo/bin:$PATH
+RUN set -eux; \
+    rustup toolchain install nightly;
 
 RUN set -eux; \
     apt-get install -y \

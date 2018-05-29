@@ -1,7 +1,7 @@
 version: '3'
 services:
   tests:
-    command: bash -c "cargo test test_c_version -- --nocapture"
+    command: bash -c "cargo test --features serde"
     build: .
     environment:
       - LD_LIBRARY_PATH=/usr/lib:/usr/local/lib

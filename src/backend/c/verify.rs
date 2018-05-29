@@ -13,12 +13,6 @@ pub(crate) fn verify_c(verifier: &mut Verifier) -> Result<bool, Error> {
             Error::new(ErrorKind::Bug)
                 .add_context("Attempting to verify without a hash. This should be unreachable")
         })?;
-        // TODO: Delete block below
-        {
-            use output::HashRaw;
-            let hash_raw: HashRaw = hash.parse().unwrap();
-            println!("Hash Raw:\n{:#?}", hash_raw);
-        }
         let max_len = hash.len();
         let mut buffer = vec![0u8; max_len];
         let mut salt = vec![0u8; max_len];
@@ -43,7 +37,6 @@ pub(crate) fn verify_c(verifier: &mut Verifier) -> Result<bool, Error> {
             flags: verifier.config().flags().bits(),
         };
         let context_ptr = &mut context as *mut ffi::argon2_context;
-        println!("context pointer: {:#?}", context_ptr);
         let hash_cstring = CString::new(hash).map_err(|_| {
             Error::new(ErrorKind::DataError(DataError::HashInvalidError)).add_context(format!(
                 "Hash cannot contain an interior null byte. Hash: {}",
@@ -63,15 +56,6 @@ pub(crate) fn verify_c(verifier: &mut Verifier) -> Result<bool, Error> {
         }
         (context, variant)
     };
-    // TODO: Delete block below
-    {
-        let out: &[u8] =
-            unsafe { ::std::slice::from_raw_parts(context.out, context.outlen as usize) };
-        println!("out after calling decode string: {:#?}", out);
-        let salt: &[u8] =
-            unsafe { ::std::slice::from_raw_parts(context.salt, context.saltlen as usize) };
-        println!("salt after calling decode string: {:#?}", salt);
-    }
     let hash_ptr = context.out as *const c_char;
     let mut buffer = vec![0u8; context.outlen as usize];
     context.ad = verifier.additional_data_mut().as_mut_ptr();
@@ -84,10 +68,6 @@ pub(crate) fn verify_c(verifier: &mut Verifier) -> Result<bool, Error> {
     context.secretlen = verifier.secret_key().len() as u32;
     context.flags = verifier.config().flags().bits();
     let context_ptr = &mut context as *mut ffi::argon2_context;
-    {
-        let context: &ffi::Argon2_Context = unsafe { &*context_ptr };
-        println!("Context: {:#?}", context);
-    }
     let err = unsafe { ffi::argon2_verify_ctx(context_ptr, hash_ptr, variant as ffi::argon2_type) };
     let is_valid = if err == 0 {
         true
