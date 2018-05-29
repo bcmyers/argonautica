@@ -6,9 +6,9 @@ services:
     environment:
       - RUST_BACKTRACE=1
     volumes:
-      - .:/code
-      - target:/code/target/
-    working_dir: /code
+      - .:/home/dev/a2
+      - target:/home/dev/a2/target
+    working_dir: /home/dev/a2
 
 volumes:
   target:

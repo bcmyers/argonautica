@@ -3,7 +3,7 @@ use futures_cpupool::CpuPool;
 use config::Backend;
 #[cfg(feature = "serde")]
 use config::default_cpu_pool_serde;
-use config::defaults::{DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING};
+use config::{Flags, DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING};
 
 /// Read-only configuration for [`Verifier`](../struct.Verifier.html). Can be obtained by calling
 /// the [`config`](../struct.Verifier.html#method.config) method on an instance of
@@ -50,6 +50,16 @@ impl VerifierConfig {
             password_clearing: DEFAULT_PASSWORD_CLEARING,
             secret_key_clearing: DEFAULT_SECRET_KEY_CLEARING,
         }
+    }
+    pub(crate) fn flags(&self) -> Flags {
+        let mut flags = Flags::default();
+        if self.password_clearing {
+            flags |= Flags::CLEAR_PASSWORD;
+        }
+        if self.secret_key_clearing {
+            flags |= Flags::CLEAR_SECRET_KEY;
+        }
+        flags
     }
     pub(crate) fn set_backend(&mut self, backend: Backend) {
         self.backend = backend;

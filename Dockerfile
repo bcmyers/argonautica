@@ -3,11 +3,14 @@ FROM buildpack-deps:trusty-scm
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH \
-    RUST_VERSION=1.26.0
+    RUST_VERSION=nightly
 
 RUN set -eux; \
-    \
+    apt-get update -y;
+
+RUN set -eux; \
     dpkgArch="$(dpkg --print-architecture)"; \
+    \
     case "${dpkgArch##*-}" in \
     amd64) rustArch='x86_64-unknown-linux-gnu'; rustupSha256='c9837990bce0faab4f6f52604311a19bb8d2cde989bea6a7b605c8e526db6f02' ;; \
     armhf) rustArch='armv7-unknown-linux-gnueabihf'; rustupSha256='297661e121048db3906f8c964999f765b4f6848632c0c2cfb6a1e93d99440732' ;; \
@@ -27,5 +30,14 @@ RUN set -eux; \
     cargo --version; \
     rustc --version;
 
-RUN apt-get update -y;\
-    apt-get install -y gcc llvm-3.9-dev libclang-3.9-dev clang-3.9;
+RUN set -eux; \
+    apt-get install -y clang-3.9 gcc git llvm-3.9-dev libclang-3.9-dev valgrind;
+
+WORKDIR /home/dev
+
+RUN set -eux; \
+    git clone https://github.com/P-H-C/phc-winner-argon2.git; \
+    cd pch-winner-argon2; \
+    make; \
+    make test; \
+    make install PREFIX=/usr/local;

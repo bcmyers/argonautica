@@ -329,7 +329,7 @@ mod tests {
         use serde_json;
 
         let password = "P@ssw0rd";
-        let secret_key = "secret";
+        let secret_key = "secret1";
 
         let mut hasher = Hasher::default();
         hasher
@@ -348,6 +348,17 @@ mod tests {
             .with_password(password)
             .with_secret_key(secret_key)
             .with_hash_raw(&hash_raw);
+        let is_valid = verifier1.verify().unwrap();
+        if !is_valid {
+            panic!(
+                "\nverifier1:\n{:#?}\nAdditional Data: {:?}\nHash: {}\nPasswod: {:?}\nSecret key: {:?}",
+                verifier1,
+                "additional data".as_bytes(),
+                hash_raw.to_hash(),
+                password.as_bytes(),
+                "secret1".as_bytes()
+            );
+        };
 
         // Serialize Verifier
         let j = serde_json::to_string_pretty(&verifier1).expect("failed to serialize verifier");
@@ -364,7 +375,9 @@ mod tests {
         // Add a secret key and ensure that verify returns is_valid
         verifier2.with_secret_key(secret_key);
         let is_valid = verifier2.verify().unwrap();
-        assert!(is_valid);
+        if !is_valid {
+            panic!("\nverifier2:\n{:#?}\n", verifier2);
+        };
     }
 
     #[test]
