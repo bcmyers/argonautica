@@ -264,8 +264,9 @@
 //!
 //! at your option.
 
-#![warn(missing_debug_implementations, missing_docs, unused_imports, unused_unsafe,
-        unused_variables)] // TODO
+#![warn(
+        missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
+)] // TODO
 #![doc(html_root_url = "https://docs.rs/a2/0.1.0")]
 
 extern crate base64;
@@ -314,3 +315,4 @@ pub use verifier::Verifier;
 // TODO: Logging
 // TODO: Wasm?
 // TODO: ARGON2_SYNC_POINTS???
+// TODO: 1.26.0

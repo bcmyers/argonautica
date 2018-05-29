@@ -100,12 +100,7 @@ mod tests {
         use hasher::Hasher;
         use rand::{RngCore, SeedableRng, StdRng};
 
-        let mut seed = [0u8; 32];
-        seed[0] = 1;
-        seed[1] = 2;
-        seed[2] = 3;
-        seed[3] = 4;
-        let mut rng: StdRng = SeedableRng::from_seed(seed);
+        let mut rng: StdRng = SeedableRng::from_seed([0u8; 32]);
         let mut password = vec![0u8; 12];
         let mut secret_key = vec![0u8; 32];
         for _ in 0..100 {
