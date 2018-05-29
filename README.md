@@ -1,8 +1,6 @@
 # a2
 
-## Work in progress
-
-This crate is a work in progress. Do <b>not</b> use.
+# This crate is a work in progress. Do <b>not</b> use.
 
 [![Build Status](https://travis-ci.org/bcmyers/a2.svg?branch=master)](https://travis-ci.org/bcmyers/a2)
 [![Crates.io](https://img.shields.io/crates/v/a2.svg)](https://crates.io/crates/a2)
