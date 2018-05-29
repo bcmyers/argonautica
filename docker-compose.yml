@@ -1,9 +1,10 @@
 version: '3'
 services:
-  rust:
-    command: bash -c "cargo test --features serde"
+  tests:
+    command: bash -c "cargo test test_c_version -- --nocapture"
     build: .
     environment:
+      - LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
       - RUST_BACKTRACE=1
     volumes:
       - .:/home/dev/a2

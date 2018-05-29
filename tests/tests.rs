@@ -2,6 +2,7 @@ extern crate a2;
 extern crate failure;
 extern crate rand;
 
+use std::path::Path;
 use std::process::Command;
 
 use a2::{Hasher, Verifier};
@@ -11,9 +12,20 @@ use rand::distributions::Alphanumeric;
 #[test]
 fn test_c_version() {
     // Build C
+    let build_dir = Path::new("tests/c/build");
+    if build_dir.exists() {
+        ::std::fs::remove_dir_all(&build_dir).unwrap();
+    }
+    ::std::fs::create_dir_all(&build_dir).unwrap();
+    let success = Command::new("cmake")
+        .arg("..")
+        .current_dir(&build_dir)
+        .status()
+        .unwrap()
+        .success();
+    assert!(success);
     let success = Command::new("make")
-        .arg("build")
-        .current_dir("./tests/c")
+        .current_dir(&build_dir)
         .status()
         .unwrap()
         .success();
@@ -21,30 +33,35 @@ fn test_c_version() {
 
     for _ in 0..20 {
         // Generate inputs
-        let password = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(32)
-            .collect::<String>();
+        let mut rng = rand::thread_rng();
+        let password = rng.sample_iter(&Alphanumeric).take(32).collect::<String>();
+        let salt = rng.sample_iter(&Alphanumeric).take(8).collect::<String>();
 
         // Run C
-        let output = Command::new("./test")
+        let output = Command::new("./tests")
             .arg(&password)
-            .current_dir("./tests/c")
+            .arg(&salt)
+            .current_dir(&build_dir)
             .output()
             .unwrap();
-        assert!(output.status.success());
+        if !output.status.success() {
+            panic!(
+                "\nC executable failed:\nstdout: {}\nstderr: {}\n",
+                String::from_utf8(output.stdout).unwrap(),
+                String::from_utf8(output.stderr).unwrap(),
+            )
+        }
         let hash1 = String::from_utf8(output.stderr).unwrap();
         println!("\n{}", &hash1);
 
         // Run Rust
-        let salt = "somesalt";
         let mut hasher = Hasher::default();
         hasher
             .configure_password_clearing(false)
             .opt_out_of_random_salt(true)
             .opt_out_of_secret_key(true)
             .with_password(&password)
-            .with_salt(salt);
+            .with_salt(&salt);
         let hash2 = hasher.hash().unwrap();
         println!("{}", &hash2);
 

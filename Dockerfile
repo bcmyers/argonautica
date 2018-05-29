@@ -1,12 +1,11 @@
 FROM buildpack-deps:trusty-scm
-
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:$PATH \
-    RUST_VERSION=nightly
+LABEL maintainer="Brian Myers<brian.carl.myers@gmail.com>"
 
 RUN set -eux; \
-    apt-get update -y;
+    apt-get update -y; \
+    apt-get upgrade -y
+
+ARG RUST_VERSION=nightly
 
 RUN set -eux; \
     dpkgArch="$(dpkg --print-architecture)"; \
@@ -25,19 +24,25 @@ RUN set -eux; \
     chmod +x rustup-init; \
     ./rustup-init -y --no-modify-path --default-toolchain $RUST_VERSION; \
     rm rustup-init; \
-    chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
+    chmod -R a+w /usr/local/rustup /usr/local/cargo; \
     rustup --version; \
     cargo --version; \
     rustc --version;
 
+ENV PATH=/usr/local/cargo/bin:$PATH
+
 RUN set -eux; \
-    apt-get install -y clang-3.9 gcc git llvm-3.9-dev libclang-3.9-dev valgrind;
+    apt-get install -y \
+    build-essential clang-3.9 cmake gcc git llvm-3.9-dev libclang-3.9-dev nano valgrind;
 
 WORKDIR /home/dev
 
 RUN set -eux; \
     git clone https://github.com/P-H-C/phc-winner-argon2.git; \
-    cd pch-winner-argon2; \
+    cd /home/dev/phc-winner-argon2; \
     make; \
     make test; \
     make install PREFIX=/usr/local;
+
+RUN echo "alias c=clear" >> /root/.bashrc; \
+    echo "alias ls='ls -a -l'" >> /root/.bashrc;
