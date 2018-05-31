@@ -6,8 +6,8 @@ use std::path::Path;
 use std::process::Command;
 
 use a2::{Hasher, Verifier};
-use rand::Rng;
 use rand::distributions::Alphanumeric;
+use rand::Rng;
 
 #[test]
 fn test_c_version() {
@@ -31,14 +31,14 @@ fn test_c_version() {
         .success();
     assert!(success);
 
-    for _ in 0..20 {
+    for _ in 0..10 {
         // Generate inputs
         let mut rng = rand::thread_rng();
         let password = rng.sample_iter(&Alphanumeric).take(32).collect::<String>();
         let salt = rng.sample_iter(&Alphanumeric).take(8).collect::<String>();
 
-        // Run C
-        let output = Command::new("./tests")
+        // Run C without simd
+        let output = Command::new("./test")
             .arg(&password)
             .arg(&salt)
             .current_dir(&build_dir)
@@ -54,6 +54,23 @@ fn test_c_version() {
         let hash1 = String::from_utf8(output.stderr).unwrap();
         println!("\n{}", &hash1);
 
+        // Run C with simd
+        let output = Command::new("./test_simd")
+            .arg(&password)
+            .arg(&salt)
+            .current_dir(&build_dir)
+            .output()
+            .unwrap();
+        if !output.status.success() {
+            panic!(
+                "C simd executable failed:\nstdout: {}\nstderr: {}\n",
+                String::from_utf8(output.stdout).unwrap(),
+                String::from_utf8(output.stderr).unwrap(),
+            )
+        }
+        let hash2 = String::from_utf8(output.stderr).unwrap();
+        println!("{}", &hash2);
+
         // Run Rust
         let mut hasher = Hasher::default();
         hasher
@@ -62,11 +79,12 @@ fn test_c_version() {
             .opt_out_of_secret_key(true)
             .with_password(&password)
             .with_salt(&salt);
-        let hash2 = hasher.hash().unwrap();
-        println!("{}", &hash2);
+        let hash3 = hasher.hash().unwrap();
+        println!("{}", &hash3);
 
         // Compare C and Rust
-        assert_eq!(hash1, hash2);
+        assert_eq!(&hash1, &hash3);
+        assert_eq!(&hash2, &hash3);
     }
 }
 

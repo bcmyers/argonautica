@@ -50,10 +50,12 @@ futures-timer = { version = "0.1", optional = true }
 benches = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2"]
 development = ["bindgen", "blake2-rfc"]
 example_actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
+without_simd = []
 
 [build-dependencies]
 bindgen = "0.37"
 cc = { version = "1.0.15", features = ["parallel"] }
+failure = "0.1"
 
 [dev-dependencies]
 dotenv = "0.12"
@@ -116,6 +118,15 @@ required-features = ["benches"]
 name = "bench_threads"
 harness = false
 required-features = ["benches"]
+
+[profile.bench]
+codegen-units = 1
+
+[profile.release]
+codegen-units = 1
+
+[profile.test]
+opt-level = 3
 
 [badges]
 travis-ci = { repository = "bcmyers/a2", branch = "master" }

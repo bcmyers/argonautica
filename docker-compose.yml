@@ -1,10 +1,10 @@
 version: '3'
 services:
   tests:
-    command: bash -c "cargo test --features serde"
+    command: bash -c "cargo test --release test_c_version -- --nocapture"
     build: .
     environment:
-      - LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
+      - LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu/
       - RUST_BACKTRACE=1
     volumes:
       - .:/home/dev/a2

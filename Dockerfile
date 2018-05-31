@@ -41,12 +41,12 @@ RUN set -eux; \
 
 WORKDIR /home/dev
 
-RUN set -eux; \
-    git clone https://github.com/P-H-C/phc-winner-argon2.git; \
-    cd /home/dev/phc-winner-argon2; \
-    make; \
-    make test; \
-    make install PREFIX=/usr/local;
+# RUN set -eux; \
+#     git clone https://github.com/P-H-C/phc-winner-argon2.git; \
+#     cd /home/dev/phc-winner-argon2; \
+#     make; \
+#     make test; \
+#     make install PREFIX=/usr/local;
 
 RUN echo "alias c=clear" >> /root/.bashrc; \
     echo "alias ls='ls -a -l'" >> /root/.bashrc;

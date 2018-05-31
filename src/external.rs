@@ -10,8 +10,7 @@ use config::{Backend, Variant, Version};
 use {Hasher, Verifier};
 
 /// Frees memory associated with a pointer that was previously returned from
-/// [`a2_hash`](function.a2_hash.html). See [`a2_hash`](function.a2_hash.html) below
-/// for more information
+/// [`a2_hash`](function.a2_hash.html)
 #[no_mangle]
 pub unsafe extern "C" fn a2_free(cstring_ptr: *mut libc::c_char) {
     CString::from_raw(cstring_ptr);
