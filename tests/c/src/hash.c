@@ -34,7 +34,7 @@ hash_result_t hash_low_level(hash_input_t* input)
     context.threads = input->threads;
     context.allocate_cbk = NULL;
     context.free_cbk = NULL;
-    context.flags = 0;
+    context.flags = input->flags;
     context.version = input->version;
 
     err = argon2_ctx(&context, input->variant);

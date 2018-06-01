@@ -63,6 +63,7 @@ fn parse_stderr_hash_c(
 struct Input {
     additional_data_len: usize,
     build_dir: PathBuf,
+    flags: u32,
     hash_length: u32,
     iterations: u32,
     lanes: u32,
@@ -98,6 +99,7 @@ fn generate_inputs(input: &Input) -> (String, String, String, String, Vec<String
         .take(input.salt_len)
         .collect::<String>();
 
+    let flags_string = format!("{}", input.flags);
     let hash_length_string = format!("{}", input.hash_length);
     let iterations_string = format!("{}", input.iterations);
     let lanes_string = format!("{}", input.lanes);
@@ -118,6 +120,7 @@ fn generate_inputs(input: &Input) -> (String, String, String, String, Vec<String
         salt,
         secret_key,
         vec![
+            flags_string,
             hash_length_string,
             iterations_string,
             lanes_string,
@@ -188,9 +191,11 @@ fn test_hash_c_single(input: &Input) {
     }
 }
 
+// TODO: Add flags
 #[test]
 fn test_hash_c() {
     let build_dir = build_c().unwrap();
+    let flags = [0b00]; // Note: for high level, cannot set flags
     let hash_lengths = [8, 32];
     let iterations = [8, 32];
     let lane_threads = [(1, 1), (4, 4)]; // Note: for high level, lanes and threads have to be the same
@@ -199,29 +204,32 @@ fn test_hash_c() {
     let salt_lens = [8, 32];
     let variants = [Variant::Argon2d, Variant::Argon2i, Variant::Argon2id];
     let versions = [Version::_0x10, Version::_0x13];
-    for hash_length in &hash_lengths {
-        for iterations in &iterations {
-            for lane_thread in &lane_threads {
-                for memory_size in &memory_sizes {
-                    for password_len in &password_lens {
-                        for salt_len in &salt_lens {
-                            for variant in &variants {
-                                for version in &versions {
-                                    let input = Input {
-                                        additional_data_len: 0, // Note: For high level, can't have additional data
-                                        build_dir: build_dir.clone(),
-                                        hash_length: *hash_length,
-                                        iterations: *iterations,
-                                        lanes: (*lane_thread).0,
-                                        memory_size: *memory_size,
-                                        password_len: *password_len,
-                                        salt_len: *salt_len,
-                                        secret_key_len: 0, // Note: For high level, can't have secret key
-                                        threads: (*lane_thread).1,
-                                        variant: *variant,
-                                        version: *version,
-                                    };
-                                    test_hash_c_single(&input);
+    for flags in &flags {
+        for hash_length in &hash_lengths {
+            for iterations in &iterations {
+                for lane_thread in &lane_threads {
+                    for memory_size in &memory_sizes {
+                        for password_len in &password_lens {
+                            for salt_len in &salt_lens {
+                                for variant in &variants {
+                                    for version in &versions {
+                                        let input = Input {
+                                            additional_data_len: 0, // Note: for high level, can't have additional data
+                                            build_dir: build_dir.clone(),
+                                            flags: *flags,
+                                            hash_length: *hash_length,
+                                            iterations: *iterations,
+                                            lanes: (*lane_thread).0,
+                                            memory_size: *memory_size,
+                                            password_len: *password_len,
+                                            salt_len: *salt_len,
+                                            secret_key_len: 0, // Note: for high level, can't have secret key
+                                            threads: (*lane_thread).1,
+                                            variant: *variant,
+                                            version: *version,
+                                        };
+                                        test_hash_c_single(&input);
+                                    }
                                 }
                             }
                         }

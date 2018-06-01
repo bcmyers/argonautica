@@ -17,6 +17,7 @@ typedef struct hash_input {
     size_t      salt_len;
     uint8_t*    secret_key;
     size_t      secret_key_len;
+    uint32_t    flags;
     size_t      hash_len;
     uint32_t    iterations;
     uint32_t    lanes;

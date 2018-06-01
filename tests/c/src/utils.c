@@ -2,26 +2,27 @@
 
 int parse_args(int argc, char** argv, bool is_secret_key, hash_input_t* input)
 {
-    if (argc != 12) {
+    if (argc != 13) {
         fprintf(stdout,
-            "Usage: [bin] [additional data] [password] [salt]"
-                   "[secret key] [hash_length] [iterations] [lanes]"
+            "Usage: [bin] [additional data] [password] [salt] [secret key]"
+                   "[flags] [hash_length] [iterations] [lanes]"
                    "[memory_cost] [threads] [variant] [version]\n"
         );
         return -1;
     }
 
-    const char* additional_data_str   = argv[1];
-    const char* password_str          = argv[2];
-    const char* salt_str              = argv[3];
-    const char* secret_key_str        = argv[4];
-    const char* hash_len_str          = argv[5];
-    const char* iterations_str        = argv[6];
-    const char* lanes_str             = argv[7];
-    const char* memory_cost_str       = argv[8];
-    const char* threads_str           = argv[9];
-    const char* variant_str           = argv[10];
-    const char* version_str           = argv[11];
+    const char* additional_data_str = argv[1];
+    const char* password_str        = argv[2];
+    const char* salt_str            = argv[3];
+    const char* secret_key_str      = argv[4];
+    const char* flags_str           = argv[5];
+    const char* hash_len_str        = argv[6];
+    const char* iterations_str      = argv[7];
+    const char* lanes_str           = argv[8];
+    const char* memory_cost_str     = argv[9];
+    const char* threads_str         = argv[10];
+    const char* variant_str         = argv[11];
+    const char* version_str         = argv[12];
 
     uint8_t* additional_data    = NULL;
     size_t additional_data_len  = 0;
@@ -42,6 +43,7 @@ int parse_args(int argc, char** argv, bool is_secret_key, hash_input_t* input)
         secret_key_len          = strlen(secret_key_str);
     }
 
+    uint32_t flags              = (uint32_t)(atoi(flags_str));
     size_t hash_len             = (size_t)(atoi(hash_len_str));
     uint32_t iterations         = (uint32_t)(atoi(iterations_str));
     uint32_t lanes              = (uint32_t)(atoi(lanes_str));
@@ -67,6 +69,7 @@ int parse_args(int argc, char** argv, bool is_secret_key, hash_input_t* input)
     input->salt_len             = salt_len;
     input->secret_key           = secret_key;
     input->secret_key_len       = secret_key_len;
+    input->flags                = flags;
     input->hash_len             = hash_len;
     input->iterations           = iterations;
     input->lanes                = lanes;
