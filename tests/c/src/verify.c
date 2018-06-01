@@ -4,33 +4,43 @@ static int my_argon2_compare(const uint8_t* b1,const uint8_t* b2, size_t len);
 static int my_argon2_ctx(argon2_context* context, argon2_type type);
 static int my_argon2_verify_ctx(argon2_context* context, const char* hash, argon2_type type);
 
-bool verify_high_level(verify_input_t* input) {
+verify_result_t verify_high_level(verify_input_t* input)
+{
     int err = argon2_verify(
         /* const char* encoded */ input->encoded,
         /* const void* pwd */ (void*)(input->password),
         /* const size_t pwdlen */ input->password_len,
         /* argon2_type type */ input->variant
     );
+    verify_result_t output = {};
+    output.err = err;
     if (err == ARGON2_OK) {
-        return true;
+        output.is_valid = true;
+        return output;
     } else {
-        return false;
+        output.is_valid = false;
+        return output;
     }
 }
 
-bool verify_low_level(verify_input_t* input) {
+verify_result_t verify_low_level(verify_input_t* input)
+{
+    verify_result_t output = {};
     if (input->password_len > ARGON2_MAX_PWD_LENGTH) {
-        // return ARGON2_PWD_TOO_LONG;
-        return false;
+        output.err = ARGON2_PWD_TOO_LONG;
+        output.is_valid = false;
+        return output;
     }
     if (input->encoded == NULL) {
-        // return ARGON2_DECODING_FAIL;
-        return false;
+        output.err = ARGON2_DECODING_FAIL;
+        output.is_valid = false;
+        return output;
     }
     size_t encoded_len = strlen(input->encoded);
     if (encoded_len > UINT32_MAX) {
-        // return ARGON2_DECODING_FAIL;
-        return false;
+        output.err = ARGON2_DECODING_FAIL;
+        output.is_valid = false;
+        return output;
     }
 
     argon2_context ctx = {};
@@ -42,8 +52,9 @@ bool verify_low_level(verify_input_t* input) {
     if (ctx.salt == NULL || ctx.out == NULL) {
         free(ctx.out);
         free(ctx.salt);
-        // return ARGON2_MEMORY_ALLOCATION_ERROR;
-        return false;
+        output.err = ARGON2_MEMORY_ALLOCATION_ERROR;
+        output.is_valid = false;
+        return output;
     }
 
     ctx.pwd = (uint8_t *)(input->password);
@@ -57,8 +68,9 @@ bool verify_low_level(verify_input_t* input) {
     if (err != ARGON2_OK) {
         free(ctx.out);
         free(ctx.salt);
-        // return err;
-        return false;
+        output.err = err;
+        output.is_valid = false;
+        return output;
     }
 
     uint8_t* desired_result = ctx.out;
@@ -67,8 +79,9 @@ bool verify_low_level(verify_input_t* input) {
         free(ctx.out);
         free(ctx.salt);
         free(desired_result);
-        // return ARGON2_MEMORY_ALLOCATION_ERROR;
-        return false;
+        output.err = ARGON2_MEMORY_ALLOCATION_ERROR;
+        output.is_valid = false;
+        return output;
     }
 
     err = my_argon2_verify_ctx(
@@ -80,15 +93,17 @@ bool verify_low_level(verify_input_t* input) {
         free(ctx.out);
         free(ctx.salt);
         free(desired_result);
-        // return err;
-        return false;
+        output.err = err;
+        output.is_valid = false;
+        return output;
     }
 
     free(ctx.out);
     free(ctx.salt);
     free(desired_result);
-    // return ARGON2_OK;
-    return true;
+    output.err = ARGON2_OK;
+    output.is_valid = true;
+    return output;
 }
 
 // Helper functions

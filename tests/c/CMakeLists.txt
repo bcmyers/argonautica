@@ -35,10 +35,10 @@ add_library(argon2simd STATIC
 )
 target_link_libraries (argon2simd ${CMAKE_THREAD_LIBS_INIT})
 
-set(CODE_TEST_HASH_NO_SECRET src/test_hash_no_secret.c src/hash.c src/utils.c src/verify.c)
+set(CODE_TEST_HASH_C src/test_hash_c.c src/hash.c src/utils.c src/verify.c)
 
-add_executable(test_hash_no_secret ${CODE_TEST_HASH_NO_SECRET})
-target_link_libraries (test_hash_no_secret argon2)
+add_executable(test_hash_c ${CODE_TEST_HASH_C})
+target_link_libraries (test_hash_c argon2)
 
-add_executable(test_hash_no_secret_simd ${CODE_TEST_HASH_NO_SECRET})
-target_link_libraries (test_hash_no_secret_simd argon2simd)
+add_executable(test_hash_c_simd ${CODE_TEST_HASH_C})
+target_link_libraries (test_hash_c_simd argon2simd)

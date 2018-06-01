@@ -1,7 +1,10 @@
 #include "test.h"
 
-hash_output_t hash_low_level(hash_input_t* input) {
-    hash_output_t output = {};
+static int validate_hash_input(const hash_input_t* input);
+
+hash_result_t hash_low_level(hash_input_t* input)
+{
+    hash_result_t output = {};
     int err = validate_hash_input(input);
     if (err != ARGON2_OK) {
         output.err = err;
@@ -91,8 +94,9 @@ hash_output_t hash_low_level(hash_input_t* input) {
     return output;
 }
 
-hash_output_t hash_high_level(hash_input_t* input) {
-    hash_output_t output = {};
+hash_result_t hash_high_level(hash_input_t* input)
+{
+    hash_result_t output = {};
     size_t encoded_len = argon2_encodedlen(
         /* uint32_t t_cost */       input->iterations,
         /* uint32_t m_cost */       input->memory_cost,
@@ -134,7 +138,8 @@ hash_output_t hash_high_level(hash_input_t* input) {
     return output;
 }
 
-int validate_hash_input(const hash_input_t* input) {
+static int validate_hash_input(const hash_input_t* input)
+{
     if (input->password_len > ARGON2_MAX_PWD_LENGTH) {
         return ARGON2_PWD_TOO_LONG;
     }

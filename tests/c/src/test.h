@@ -26,12 +26,12 @@ typedef struct hash_input {
     uint32_t    version;
 } hash_input_t;
 
-typedef struct hash_output {
-    char*       encoded;
-    int         err;
-    uint8_t*    hash;
-    size_t      hash_len;
-} hash_output_t;
+typedef struct hash_result {
+    char*               encoded;
+    argon2_error_codes  err;
+    uint8_t*            hash;
+    size_t              hash_len;
+} hash_result_t;
 
 typedef struct verify_input {
     char*           encoded;
@@ -44,12 +44,16 @@ typedef struct verify_input {
     argon2_type     variant;
 } verify_input_t;
 
-hash_output_t hash_low_level(hash_input_t* input);
-hash_output_t hash_high_level(hash_input_t* input);
-bool verify_high_level(verify_input_t* input);
-bool verify_low_level(verify_input_t* input);
+typedef struct verify_result {
+    argon2_error_codes  err;
+    bool                is_valid;
+} verify_result_t;
 
-int validate_hash_input(const hash_input_t* input);
+hash_result_t hash_low_level(hash_input_t* input);
+hash_result_t hash_high_level(hash_input_t* input);
+verify_result_t verify_high_level(verify_input_t* input);
+verify_result_t verify_low_level(verify_input_t* input);
 
+int parse_args(int argc, char** argv, bool is_secret_key, hash_input_t* input);
 void print_encoded(const char* encoded);
 void print_hash(const uint8_t* hash, const size_t hash_len);

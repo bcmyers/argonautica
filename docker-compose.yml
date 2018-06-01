@@ -1,7 +1,7 @@
 version: '3'
 services:
   tests:
-    command: bash -c "cargo test --release test_c_version -- --ignored --nocapture"
+    command: bash -c "cargo test --release test_hash_c -- --nocapture"
     build: .
     environment:
       - LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu/
