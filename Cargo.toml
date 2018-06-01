@@ -101,6 +101,11 @@ path = "examples/example_very_simple.rs"
 name = "generate_secret_key"
 path = "examples/generate_secret_key.rs"
 
+[[bin]]
+name = "generate_bindings"
+path = "src/bin/generate_bindings.rs"
+required-features = ["development"]
+
 [[bench]]
 name = "bench_crates"
 harness = false

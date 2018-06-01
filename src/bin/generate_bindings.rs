@@ -1,13 +1,12 @@
+extern crate bindgen;
 extern crate failure;
+extern crate tempdir;
 
-#[cfg(feature = "development")]
+use std::fs;
+use std::io::Write;
+use std::path::Path;
+
 fn main() -> Result<(), failure::Error> {
-    extern crate bindgen;
-    extern crate tempdir;
-    use std::fs;
-    use std::io::Write;
-    use std::path::Path;
-
     // Create temp dir
     let temp = tempdir::TempDir::new("a2")?;
     let temp_dir = temp.path();
@@ -62,9 +61,4 @@ fn main() -> Result<(), failure::Error> {
     bindings.write_to_file("./bindings.rs")?;
 
     Ok(())
-}
-
-#[cfg(not(feature = "development"))]
-fn main() -> Result<(), failure::Error> {
-    Err(failure::err_msg("Must run with --features development"))
 }
