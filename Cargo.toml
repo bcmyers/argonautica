@@ -40,6 +40,7 @@ sha2 = { version = "0.7.1", optional = true }
 # development
 bindgen = { version = "0.37", optional = true }
 blake2-rfc = { version = "0.2", optional = true }
+tempdir = { version = "0.3", optional = true }
 
 # example_actix_web
 actix-web = { version = "0.6", optional = true }
@@ -48,7 +49,7 @@ futures-timer = { version = "0.1", optional = true }
 
 [features]
 benches = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2"]
-development = ["bindgen", "blake2-rfc"]
+development = ["bindgen", "blake2-rfc", "tempdir"]
 example_actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
 without_simd = []
 
@@ -56,6 +57,7 @@ without_simd = []
 bindgen = "0.37"
 cc = { version = "1.0.15", features = ["parallel"] }
 failure = "0.1"
+tempdir = "0.3"
 
 [dev-dependencies]
 dotenv = "0.12"
