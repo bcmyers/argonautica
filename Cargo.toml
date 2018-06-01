@@ -60,7 +60,7 @@ failure = "0.1"
 tempdir = "0.3"
 
 [dev-dependencies]
-dotenv = "0.12"
+dotenv = "0.13"
 serde_json = "1.0"
 
 [[example]]

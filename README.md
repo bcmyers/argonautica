@@ -252,13 +252,22 @@ actually uses under the hood if you're using the C backend. Finally, if you're i
 in password hashing with a different algorithm,
 [rust-bcrypt](https://github.com/Keats/rust-bcrypt) might be worth checking out.
 
-For what it's worth, besides API differences, one thing `a2` focuses on relative to
-other similar libraries is the ability to easily create hashes using a secret key.
-Your mileage may vary, but the crate's author found it somewhat difficult to hash with
-a secret key when experimenting with alternative Rust libraries.
-
-In addition, `a2` is the only Rust crate (as of 5/18) that has the newest Argon2
-variant: Argon2id.
+For what it's worth, besides API differences, `a2` has three features that other
+Rust crates currently do not:
+* `a2` uses [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions by default if your
+processor has access to them, which can lead to significantly faster hashing times than
+implementations that do not take advantage of [SIMD](https://en.wikipedia.org/wiki/SIMD)
+    * For example, on default settings, `a2` runs ~30% faster than other Rust crates on the
+      developer's early-2014 Macbook, which has access to
+      [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
+      through
+      [AVX1.0](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
+    * <i>Note: If for some reason you would like to turn SIMD off, compile with the
+      </i>`without_simd`<i> feature enabled</i>
+* `a2` is the only Rust crate that implements the newest Argon2 variant: Argon2id
+* `a2` has the ability to create hashes with a secret key, which not even the
+[C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
+(for string encoded hashes at least)
 
 ### License
 
