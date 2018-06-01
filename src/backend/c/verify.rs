@@ -69,16 +69,7 @@ pub(crate) fn verify_c(verifier: &mut Verifier) -> Result<bool, Error> {
     context.flags = verifier.config().flags().bits();
     let context_ptr = &mut context as *mut ffi::argon2_context;
     let err = unsafe { ffi::argon2_verify_ctx(context_ptr, hash_ptr, variant as ffi::argon2_type) };
-    let is_valid = if err == 0 {
-        true
-    } else if err == ffi::Argon2_ErrorCodes_ARGON2_VERIFY_MISMATCH {
-        false
-    } else {
-        return Err(Error::new(ErrorKind::Bug).add_context(format!(
-            "Unhandled error from C code: {}. This should be unreachable. Verifier: {:?}",
-            err, verifier,
-        )));
-    };
+    let is_valid = if err == 0 { true } else { false };
     Ok(is_valid)
 }
 

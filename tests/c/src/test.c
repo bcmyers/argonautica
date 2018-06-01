@@ -1,8 +1,10 @@
 #include "test.h"
 
+static int parse_args(int argc, char** argv, hash_input_t* input);
+
 int main(int argc, char** argv)
 {
-    input_t input = {};
+    hash_input_t input = {};
     int err = parse_args(argc, argv, &input);
     if (err != 0) {
         exit(1);
@@ -11,6 +13,28 @@ int main(int argc, char** argv)
     hash_output_t result1 = hash_high_level(&input);
     if(result1.err != ARGON2_OK) {
         fprintf(stdout, "Error: %s\n", argon2_error_message(result1.err));
+        exit(1);
+    }
+
+    bool should_validate = verify_high_level(
+        result1.encoded,
+        input.password,
+        input.password_len,
+        input.variant
+    );
+    if (should_validate == false) {
+        fprintf(stdout, "Error: Hash failed when it should have been valid");
+        exit(1);
+    }
+
+    bool should_fail = verify_high_level(
+        "$argon2d$v=19$m=64,t=128,p=2$TTMzYlBCUHo$cNisumCX8KA",
+        input.password,
+        input.password_len,
+        input.variant
+    );
+    if (should_fail != false) {
+        fprintf(stdout, "Error: Hash valid when it should have failed");
         exit(1);
     }
 
@@ -33,158 +57,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-hash_output_t hash_high_level(input_t* input) {
-    hash_output_t output = {};
-    size_t encoded_len = argon2_encodedlen(
-        /* uint32_t t_cost */       input->iterations,
-        /* uint32_t m_cost */       input->memory_cost,
-        /* uint32_t parallelism */  input->threads,
-        /* uint32_t saltlen */      (uint32_t)(input->salt_len),
-        /* uint32_t hashlen */      (uint32_t)(input->hash_len),
-        /* argon2_type type */      input->variant
-    );
-    char* encoded = (char*)malloc(encoded_len * sizeof(char));
-    if (encoded == NULL) {
-        output.err = ARGON2_MEMORY_ALLOCATION_ERROR;
-        return output;
-    }
-    uint8_t* hash = (uint8_t*)malloc(input->hash_len * sizeof(uint8_t));
-    if (hash == NULL) {
-        output.err = ARGON2_MEMORY_ALLOCATION_ERROR;
-        free(encoded);
-        return output;
-    }
-    int err = argon2_hash(
-        /* const uint32_t */        input->iterations,
-        /* const uint32_t */        input->memory_cost,
-        /* const uint32_t */        input->threads,
-        /* const void* */           (void*)(input->password),
-        /* const size_t */          input->password_len,
-        /* const void* */           (void*)(input->salt),
-        /* const size_t */          input->salt_len,
-        /* void* */                 (void*)hash,
-        /* const size_t */          input->hash_len,
-        /* char* */                 encoded,
-        /* const size_t */          encoded_len,
-        /* argon2_type */           input->variant,
-        /* const uint32_t */        input->version
-    );
-    output.encoded = encoded;
-    output.err = err;
-    output.hash = hash;
-    output.hash_len = input->hash_len;
-    return output;
-}
-
-hash_output_t hash_low_level(input_t* input) {
-    hash_output_t output = {};
-    int err = validate_input(input);
-    if (err != ARGON2_OK) {
-        output.err = err;
-        return output;
-    }
-
-    uint8_t* out = malloc(input->hash_len);
-    if (out == NULL) {
-        output.err = ARGON2_MEMORY_ALLOCATION_ERROR;
-        return output;
-    }
-
-    argon2_context context = {};
-    context.out = (uint8_t*)out;
-    context.outlen = (uint32_t)(input->hash_len);
-    context.pwd = (uint8_t*)(input->password);
-    context.pwdlen = (uint32_t)(input->password_len);
-    context.salt = (uint8_t*)(input->salt);
-    context.saltlen = (uint32_t)(input->salt_len);
-    context.secret = (uint8_t*)(input->secret_key);
-    context.secretlen = (uint32_t)(input->secret_key_len);
-    context.ad = (uint8_t*)(input->additional_data);
-    context.adlen = (uint32_t)(input->additional_data_len);
-    context.t_cost = input->iterations;
-    context.m_cost = input->memory_cost;
-    context.lanes = input->lanes;
-    context.threads = input->threads;
-    context.allocate_cbk = NULL;
-    context.free_cbk = NULL;
-    context.flags = 0;
-    context.version = input->version;
-
-    err = argon2_ctx(&context, input->variant);
-    if (err != ARGON2_OK) {
-        clear_internal_memory(out, input->hash_len);
-        free(out);
-        output.err = err;
-        return output;
-    }
-
-    size_t encoded_len = argon2_encodedlen(
-        /* uint32_t t_cost */       input->iterations,
-        /* uint32_t m_cost */       input->memory_cost,
-        /* uint32_t parallelism */  input->threads,
-        /* uint32_t saltlen */      (uint32_t)(input->salt_len),
-        /* uint32_t hashlen */      (uint32_t)(input->hash_len),
-        /* argon2_type type */      input->variant
-    );
-    char* encoded = (char*)malloc(encoded_len * sizeof(char));
-    if (encoded == NULL) {
-        clear_internal_memory(out, input->hash_len);
-        free(out);
-        output.err = ARGON2_MEMORY_ALLOCATION_ERROR;
-        return output;
-    }
-    uint8_t* hash = (uint8_t*)malloc(input->hash_len * sizeof(uint8_t));
-    if (hash == NULL) {
-        clear_internal_memory(encoded, encoded_len);
-        clear_internal_memory(out, input->hash_len);
-        free(encoded);
-        free(out);
-        output.err = ARGON2_MEMORY_ALLOCATION_ERROR;
-        return output;
-    }
-
-    memcpy(hash, out, input->hash_len);
-
-    err = encode_string(encoded, encoded_len, &context, input->variant);
-    if (err != ARGON2_OK) {
-        clear_internal_memory(encoded, encoded_len);
-        clear_internal_memory(hash, input->hash_len);
-        clear_internal_memory(out, input->hash_len);
-        free(encoded);
-        free(hash);
-        free(out);
-        output.err = err;
-        return output;
-    }
-
-    clear_internal_memory(out, input->hash_len);
-    free(out);
-
-    output.encoded = encoded;
-    output.err = ARGON2_OK;
-    output.hash = hash;
-    output.hash_len = input->hash_len;
-    return output;
-}
-
-void print_encoded(char* encoded) {
-    fprintf(stderr, "%s\n", encoded);
-}
-
-void print_hash(uint8_t* hash, size_t hash_len) {
-    int i;
-    for (i = 0; i < hash_len; i++) {
-        if (i == 0) {
-            fprintf(stderr, "[%d,", hash[i]);
-        } else if (i == hash_len - 1) {
-            fprintf(stderr, "%d]\n", hash[i]);
-        } else {
-            fprintf(stderr, "%d,", hash[i]);
-        }
-    }
-}
-
-int parse_args(int argc, char** argv, input_t* input)
+static int parse_args(int argc, char** argv, hash_input_t* input)
 {
     if (argc != 12) {
         fprintf(stdout,
@@ -195,17 +68,17 @@ int parse_args(int argc, char** argv, input_t* input)
         return -1;
     }
 
-    char* additional_data_str   = argv[1];
-    char* password_str          = argv[2];
-    char* salt_str              = argv[3];
-    char* secret_key_str        = argv[4];
-    char* hash_len_str          = argv[5];
-    char* iterations_str        = argv[6];
-    char* lanes_str             = argv[7];
-    char* memory_cost_str       = argv[8];
-    char* threads_str           = argv[9];
-    char* variant_str           = argv[10];
-    char* version_str           = argv[11];
+    const char* additional_data_str   = argv[1];
+    const char* password_str          = argv[2];
+    const char* salt_str              = argv[3];
+    const char* secret_key_str        = argv[4];
+    const char* hash_len_str          = argv[5];
+    const char* iterations_str        = argv[6];
+    const char* lanes_str             = argv[7];
+    const char* memory_cost_str       = argv[8];
+    const char* threads_str           = argv[9];
+    const char* variant_str           = argv[10];
+    const char* version_str           = argv[11];
 
     uint8_t* additional_data    = (uint8_t*)additional_data_str;
     size_t additional_data_len  = strlen(additional_data_str);
@@ -266,18 +139,3 @@ int parse_args(int argc, char** argv, input_t* input)
     return 0;
 }
 
-int validate_input(input_t* input) {
-    if (input->password_len > ARGON2_MAX_PWD_LENGTH) {
-        return ARGON2_PWD_TOO_LONG;
-    }
-    if (input->salt_len > ARGON2_MAX_SALT_LENGTH) {
-        return ARGON2_SALT_TOO_LONG;
-    }
-    if (input->hash_len > ARGON2_MAX_OUTLEN) {
-        return ARGON2_OUTPUT_TOO_LONG;
-    }
-    if (input->hash_len < ARGON2_MIN_OUTLEN) {
-        return ARGON2_OUTPUT_TOO_SHORT;
-    }
-    return ARGON2_OK;
-}

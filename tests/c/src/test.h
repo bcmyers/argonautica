@@ -1,10 +1,13 @@
+#include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include "argon2.h"
+#include "blake2-impl.h"
 #include "encoding.h"
 
-typedef struct input {
+typedef struct hash_input {
     uint8_t*    additional_data;
     size_t      additional_data_len;
     uint8_t*    password;
@@ -20,7 +23,7 @@ typedef struct input {
     uint32_t    threads;
     argon2_type variant;
     uint32_t    version;
-} input_t;
+} hash_input_t;
 
 typedef struct hash_output {
     char*       encoded;
@@ -29,14 +32,21 @@ typedef struct hash_output {
     size_t      hash_len;
 } hash_output_t;
 
-hash_output_t hash_low_level(input_t* input);
-hash_output_t hash_high_level(input_t* input);
+// typedef struct verify_output {
+//     bool is_valid;
+//     int err;
+// } verify_output_t;
 
-void print_encoded(char* encoded);
-void print_hash(uint8_t* hash, size_t hash_len);
-int parse_args(int argc, char** argv, input_t* input);
-int validate_input(input_t* input);
+hash_output_t hash_low_level(hash_input_t* input);
+hash_output_t hash_high_level(hash_input_t* input);
+bool verify_high_level(
+    const char* encoded,
+    const uint8_t* password,
+    size_t password_len,
+    argon2_type variant
+);
 
-///
+int validate_hash_input(const hash_input_t* input);
 
-void clear_internal_memory(void *v, size_t n);
+void print_encoded(const char* encoded);
+void print_hash(const uint8_t* hash, const size_t hash_len);

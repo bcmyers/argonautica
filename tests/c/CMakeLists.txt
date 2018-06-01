@@ -5,37 +5,40 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS "-std=c89 -pthread -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-std=c11 -pthread -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 include_directories("src")
-include_directories("src/blake2")
+include_directories("src/argon2")
+include_directories("src/argon2/blake2")
 
 find_package (Threads)
 
 add_library(argon2 STATIC
-    src/argon2.c
-    src/blake2/blake2b.c
-    src/core.c
-    src/encoding.c
-    src/ref.c
-    src/thread.c
+    src/argon2/argon2.c
+    src/argon2/blake2/blake2b.c
+    src/argon2/core.c
+    src/argon2/encoding.c
+    src/argon2/ref.c
+    src/argon2/thread.c
 )
 target_link_libraries (argon2 ${CMAKE_THREAD_LIBS_INIT})
 
 add_library(argon2simd STATIC
-    src/argon2.c
-    src/blake2/blake2b.c
-    src/core.c
-    src/encoding.c
-    src/opt.c
-    src/thread.c
+    src/argon2/argon2.c
+    src/argon2/blake2/blake2b.c
+    src/argon2/core.c
+    src/argon2/encoding.c
+    src/argon2/opt.c
+    src/argon2/thread.c
 )
 target_link_libraries (argon2simd ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(test src/test.c)
+set(CODE src/test.c src/hash.c src/utils.c src/verify.c)
+
+add_executable(test ${CODE})
 target_link_libraries (test argon2)
 
-add_executable(test_simd src/test.c)
+add_executable(test_simd ${CODE})
 target_link_libraries (test_simd argon2simd)
