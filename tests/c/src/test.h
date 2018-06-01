@@ -5,6 +5,7 @@
 
 #include "argon2.h"
 #include "blake2-impl.h"
+#include "core.h"
 #include "encoding.h"
 
 typedef struct hash_input {
@@ -32,19 +33,21 @@ typedef struct hash_output {
     size_t      hash_len;
 } hash_output_t;
 
-// typedef struct verify_output {
-//     bool is_valid;
-//     int err;
-// } verify_output_t;
+typedef struct verify_input {
+    char*           encoded;
+    uint8_t*        additional_data;
+    size_t          additional_data_len;
+    uint8_t*        password;
+    size_t          password_len;
+    uint8_t*        secret_key;
+    size_t          secret_key_len;
+    argon2_type     variant;
+} verify_input_t;
 
 hash_output_t hash_low_level(hash_input_t* input);
 hash_output_t hash_high_level(hash_input_t* input);
-bool verify_high_level(
-    const char* encoded,
-    const uint8_t* password,
-    size_t password_len,
-    argon2_type variant
-);
+bool verify_high_level(verify_input_t* input);
+bool verify_low_level(verify_input_t* input);
 
 int validate_hash_input(const hash_input_t* input);
 

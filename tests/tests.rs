@@ -89,12 +89,10 @@ fn test_hasher_without_secret_key<P: AsRef<Path>>(
     };
 
     // Run C without simd
-    let output = Command::new("./test")
+    let output = Command::new("./test_hash_no_secret")
         .args(&[
-            "",
             &password,
             &salt,
-            "",
             &hash_length_string,
             &iterations_string,
             &lanes_string,
@@ -116,12 +114,10 @@ fn test_hasher_without_secret_key<P: AsRef<Path>>(
     let (encoded1, encoded2, hash1, hash2) = parse_c_stderr(&output.stderr).unwrap();
 
     // Run C with simd
-    let output = Command::new("./test_simd")
+    let output = Command::new("./test_hash_no_secret_simd")
         .args(&[
-            "",
             &password,
             &salt,
-            "",
             &hash_length_string,
             &iterations_string,
             &lanes_string,

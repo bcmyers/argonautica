@@ -196,6 +196,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_external() {
         for hash_length in &HASH_LENGTHS {
             for iterations in &ITERATIONS {

@@ -12,5 +12,5 @@ rust:
   - beta
   - nightly
 script:
-  - cargo test --release -- --nocapture
+  - cargo test --release test_c_version -- --ignored --nocapture
 sudo: false
