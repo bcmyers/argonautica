@@ -1,16 +1,27 @@
 extern crate a2;
 extern crate failure;
+#[macro_use]
+extern crate lazy_static;
 extern crate rand;
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::Mutex;
 
 use a2::config::{Variant, Version};
 use a2::Hasher;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 
+lazy_static! {
+    static ref BUILD_EXISTS: Mutex<bool> = Mutex::new(false);
+}
+
 fn build_c<P: AsRef<Path>>(build_dir: P) {
+    let mut build_exists = BUILD_EXISTS.lock().unwrap();
+    if *build_exists {
+        return;
+    }
     let build_dir = build_dir.as_ref();
     if build_dir.exists() {
         ::std::fs::remove_dir_all(build_dir).expect("unable to remove build dir");
@@ -34,6 +45,7 @@ fn build_c<P: AsRef<Path>>(build_dir: P) {
     if !success {
         panic!("make failed");
     }
+    *build_exists = true;
 }
 
 fn parse_stderr_hash(stderr: &[u8]) -> (String, Vec<u8>) {
