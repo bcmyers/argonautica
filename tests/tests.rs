@@ -2,22 +2,23 @@ extern crate a2;
 extern crate failure;
 extern crate rand;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use a2::config::{Variant, Version};
+use a2::Hasher;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 
-fn build_c() -> PathBuf {
-    let build_dir = PathBuf::from("tests/c/build");
+fn build_c<P: AsRef<Path>>(build_dir: P) {
+    let build_dir = build_dir.as_ref();
     if build_dir.exists() {
-        ::std::fs::remove_dir_all(&build_dir).expect("unable to remove build dir");
+        ::std::fs::remove_dir_all(build_dir).expect("unable to remove build dir");
     }
-    ::std::fs::create_dir_all(&build_dir).expect("unable to create build dir");
+    ::std::fs::create_dir_all(build_dir).expect("unable to create build dir");
     let success = Command::new("cmake")
         .arg("..")
-        .current_dir(&build_dir)
+        .current_dir(build_dir)
         .status()
         .unwrap()
         .success();
@@ -26,14 +27,13 @@ fn build_c() -> PathBuf {
     }
     assert!(success);
     let success = Command::new("make")
-        .current_dir(&build_dir)
+        .current_dir(build_dir)
         .status()
         .unwrap()
         .success();
     if !success {
         panic!("make failed");
     }
-    build_dir
 }
 
 fn parse_stderr_hash(stderr: &[u8]) -> (String, Vec<u8>) {
@@ -53,13 +53,11 @@ fn parse_stderr_hash(stderr: &[u8]) -> (String, Vec<u8>) {
     (encoded, hash)
 }
 
-fn parse_stderr_hash_c(
-    stderr: &[u8],
-) -> Result<(String, String, Vec<u8>, Vec<u8>), failure::Error> {
-    let stderr = ::std::str::from_utf8(stderr)?;
+fn parse_stderr_hash_c(stderr: &[u8]) -> (String, String, Vec<u8>, Vec<u8>) {
+    let stderr = ::std::str::from_utf8(stderr).expect("stderr from C is invalid utf-8");
     let v = stderr.trim().split("\n").collect::<Vec<&str>>();
     if v.len() != 4 {
-        return Err(failure::err_msg("invalid stderr from C"));
+        panic!("invalid stderr from C: {}", stderr);
     }
     let encoded1 = v[0].to_string();
     let encoded2 = v[1].to_string();
@@ -68,14 +66,16 @@ fn parse_stderr_hash_c(
         .split(",")
         .into_iter()
         .map(|s| Ok::<_, failure::Error>(s.parse::<u8>()?))
-        .collect::<Result<Vec<u8>, failure::Error>>()?;
+        .collect::<Result<Vec<u8>, failure::Error>>()
+        .expect("unable to parse hash from C stderr");
     let hash2 = v[3].replace("[", "")
         .replace("]", "")
         .split(",")
         .into_iter()
         .map(|s| Ok::<_, failure::Error>(s.parse::<u8>()?))
-        .collect::<Result<Vec<u8>, failure::Error>>()?;
-    Ok((encoded1, encoded2, hash1, hash2))
+        .collect::<Result<Vec<u8>, failure::Error>>()
+        .expect("unable to parse hash from C stderr");
+    (encoded1, encoded2, hash1, hash2)
 }
 
 #[derive(Debug)]
@@ -95,7 +95,7 @@ struct Input {
     version: Version,
 }
 
-fn generate_inputs(input: &Input) -> (String, String, String, String, Vec<String>) {
+fn generate_args(input: &Input) -> Vec<String> {
     let mut rng = rand::thread_rng();
     let additional_data = if input.additional_data_len == 0 {
         "".to_string()
@@ -133,118 +133,115 @@ fn generate_inputs(input: &Input) -> (String, String, String, String, Vec<String
         Version::_0x10 => "16".to_string(),
         Version::_0x13 => "19".to_string(),
     };
-    (
+    vec![
         additional_data,
         password,
         salt,
         secret_key,
-        vec![
-            flags_string,
-            hash_length_string,
-            iterations_string,
-            lanes_string,
-            memory_size_string,
-            threads_string,
-            variant_string,
-            version_string,
-        ],
-    )
+        flags_string,
+        hash_length_string,
+        iterations_string,
+        lanes_string,
+        memory_size_string,
+        threads_string,
+        variant_string,
+        version_string,
+    ]
 }
 
-fn test_hash_single(input: &Input) {
-    let (additional_data, password, salt, secret_key, other_args) = generate_inputs(input);
+fn run_c(exe: &str, dir: &Path, args: &[&str]) -> Vec<u8> {
+    let output = Command::new(exe)
+        .args(args)
+        .current_dir(dir)
+        .output()
+        .unwrap();
+    if !output.status.success() {
+        panic!(
+            "\nC executable failed:\nstdout: {}stderr: {}",
+            String::from_utf8(output.stdout).unwrap(),
+            String::from_utf8(output.stderr).unwrap(),
+        )
+    }
+    output.stderr
+}
+
+fn test_hash(input: &Input) {
+    let args = generate_args(input);
+    let args = args.iter().map(|s| (*s).as_ref()).collect::<Vec<&str>>();
 
     // Run C without simd
-    let output = Command::new("./test_hash")
-        .arg(&additional_data)
-        .arg(&password)
-        .arg(&salt)
-        .arg(&secret_key)
-        .args(&other_args)
-        .current_dir(&input.build_dir)
-        .output()
-        .unwrap();
-    if !output.status.success() {
-        panic!(
-            "\nC executable failed:\nstdout: {}\nstderr: {}\n",
-            String::from_utf8(output.stdout).unwrap(),
-            String::from_utf8(output.stderr).unwrap(),
-        )
-    }
-    let (encoded1, hash1) = parse_stderr_hash(&output.stderr);
+    let stderr = run_c("./test_hash", &input.build_dir, &args);
+    let (encoded1, hash1) = parse_stderr_hash(&stderr);
 
     // Run C with simd
-    let output = Command::new("./test_hash_simd")
-        .arg(&additional_data)
-        .arg(&password)
-        .arg(&salt)
-        .arg(&secret_key)
-        .args(&other_args)
-        .current_dir(&input.build_dir)
-        .output()
-        .unwrap();
-    if !output.status.success() {
-        panic!(
-            "C simd executable failed:\nstdout: {}\nstderr: {}\n",
-            String::from_utf8(output.stdout).unwrap(),
-            String::from_utf8(output.stderr).unwrap(),
-        )
+    let stderr = run_c("./test_hash_simd", &input.build_dir, &args);
+    let (encoded2, hash2) = parse_stderr_hash(&stderr);
+
+    // Run Rust
+    let password_clearing = (input.flags & 0b01) == 1;
+    let secret_key_clearing = ((input.flags >> 1) & 0b1) == 1;
+    let mut hasher = Hasher::default();
+    hasher
+        .configure_hash_length(input.hash_length)
+        .configure_iterations(input.iterations)
+        .configure_lanes(input.lanes)
+        .configure_memory_size(input.memory_size)
+        .configure_password_clearing(password_clearing)
+        .configure_secret_key_clearing(secret_key_clearing)
+        .configure_threads(input.threads)
+        .configure_variant(input.variant)
+        .configure_version(input.version)
+        .opt_out_of_random_salt(true)
+        .opt_out_of_secret_key(false)
+        .with_additional_data(args[0])
+        .with_password(args[1])
+        .with_salt(args[2])
+        .with_secret_key(args[3]);
+    let encoded3 = hasher.hash().unwrap();
+    if password_clearing && secret_key_clearing {
+        assert!(hasher.hash().is_err());
+        hasher.with_password(args[1]).with_secret_key(args[3]);
+    } else if password_clearing {
+        assert!(hasher.hash().is_err());
+        hasher.with_password(args[1]);
+    } else if secret_key_clearing {
+        assert!(hasher.hash().is_err());
+        hasher.with_secret_key(args[3]);
     }
-    let (encoded2, hash2) = parse_stderr_hash(&output.stderr);
+    hasher.with_password(args[1]).with_secret_key(args[3]);
+    let hash3 = hasher.hash_raw().unwrap().raw_hash_bytes().to_vec();
 
     // Print results
     println!("{}", &encoded1);
     println!("{}", &encoded2);
+    println!("{}", &encoded3);
     println!("{:?}", &hash1);
     println!("{:?}", &hash2);
+    println!("{:?}", &hash3);
     println!();
 
     // Compare results
-    if (&encoded1 != &encoded2) || (&hash1 != &hash2) {
-        panic!("\nFailed with input:\n{:#?}\n", &input);
+    if (&encoded1 != &encoded2) || (&encoded2 != &encoded3) || (&hash1 != &hash2)
+        || (&hash2 != &hash3)
+    {
+        panic!(
+            "\nCompare failed:\n{:#?}\n{}\n{}\n{}\n{:?}\n{:?}\n{:?}\n",
+            &input, &encoded1, &encoded2, &encoded3, &hash1, &hash2, &hash3,
+        );
     }
 }
 
-fn test_hash_c_single(input: &Input) {
-    let (additional_data, password, salt, secret_key, other_args) = generate_inputs(input);
+fn test_hash_c(input: &Input) {
+    let args = generate_args(input);
+    let args = args.iter().map(|s| (*s).as_ref()).collect::<Vec<&str>>();
 
     // Run C without simd
-    let output = Command::new("./test_hash_c")
-        .arg(&additional_data)
-        .arg(&password)
-        .arg(&salt)
-        .arg(&secret_key)
-        .args(&other_args)
-        .current_dir(&input.build_dir)
-        .output()
-        .unwrap();
-    if !output.status.success() {
-        panic!(
-            "\nC executable failed:\nstdout: {}\nstderr: {}\n",
-            String::from_utf8(output.stdout).unwrap(),
-            String::from_utf8(output.stderr).unwrap(),
-        )
-    }
-    let (encoded1, encoded2, hash1, hash2) = parse_stderr_hash_c(&output.stderr).unwrap();
+    let stderr = run_c("./test_hash_c", &input.build_dir, &args);
+    let (encoded1, encoded2, hash1, hash2) = parse_stderr_hash_c(&stderr);
 
     // Run C with simd
-    let output = Command::new("./test_hash_c_simd")
-        .arg(&additional_data)
-        .arg(&password)
-        .arg(&salt)
-        .arg(&secret_key)
-        .args(&other_args)
-        .current_dir(&input.build_dir)
-        .output()
-        .unwrap();
-    if !output.status.success() {
-        panic!(
-            "C simd executable failed:\nstdout: {}\nstderr: {}\n",
-            String::from_utf8(output.stdout).unwrap(),
-            String::from_utf8(output.stderr).unwrap(),
-        )
-    }
-    let (encoded3, encoded4, hash3, hash4) = parse_stderr_hash_c(&output.stderr).unwrap();
+    let stderr = run_c("./test_hash_c_simd", &input.build_dir, &args);
+    let (encoded3, encoded4, hash3, hash4) = parse_stderr_hash_c(&stderr);
 
     // Print results
     println!("{}", &encoded1);
@@ -261,14 +258,17 @@ fn test_hash_c_single(input: &Input) {
     if (&encoded1 != &encoded2) || (&encoded2 != &encoded3) || (&encoded3 != &encoded4)
         || (&hash1 != &hash2) || (&hash2 != &hash3) || (&hash3 != &hash4)
     {
-        panic!("\nFailed with input:\n{:#?}\n", &input);
+        panic!(
+            "\nCompare failed:\n{:#?}\n{}\n{}\n{}\n{}\n{:?}\n{:?}\n{:?}\n{:?}\n",
+            &input, &encoded1, &encoded2, &encoded3, &encoded4, &hash1, &hash2, &hash3, &hash4,
+        );
     }
 }
 
-// TODO: Rename
 #[test]
-fn test_stuff_and_things() {
-    let build_dir = build_c();
+fn test_integration_hash1() {
+    let build_dir = PathBuf::from("tests/c/build");
+    build_c(&build_dir);
     let flags = [0b00, 0b01, 0b10];
     let hash_lengths = [8, 32];
     let iterations = [8, 32];
@@ -302,7 +302,7 @@ fn test_stuff_and_things() {
                                             variant: *variant,
                                             version: *version,
                                         };
-                                        test_hash_single(&input);
+                                        test_hash(&input);
                                     }
                                 }
                             }
@@ -315,8 +315,9 @@ fn test_stuff_and_things() {
 }
 
 #[test]
-fn test_hash_c() {
-    let build_dir = build_c();
+fn test_integration_hash2() {
+    let build_dir = PathBuf::from("tests/c/build");
+    build_c(&build_dir);
     let flags = [0b00]; // Note: for high level, cannot set flags
     let hash_lengths = [8, 32];
     let iterations = [8, 32];
@@ -350,7 +351,7 @@ fn test_hash_c() {
                                             variant: *variant,
                                             version: *version,
                                         };
-                                        test_hash_c_single(&input);
+                                        test_hash_c(&input);
                                     }
                                 }
                             }
