@@ -102,6 +102,10 @@ name = "generate_secret_key"
 path = "examples/generate_secret_key.rs"
 
 [[bin]]
+name = "foo"
+path = "src/bin/foo.rs"
+
+[[bin]]
 name = "generate_bindings"
 path = "src/bin/generate_bindings.rs"
 required-features = ["development"]

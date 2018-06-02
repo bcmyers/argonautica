@@ -42,7 +42,7 @@ int main(int argc, char** argv)
         fprintf(
             stdout,
             "Argon2 error: %s\n",
-            argon2_error_message(hash_result1.err)
+            argon2_error_message(hash_result2.err)
         );
         exit(1);
     }
@@ -59,10 +59,10 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    print_encoded(hash_result1.encoded);
-    print_encoded(hash_result2.encoded);
-    print_hash(hash_result1.hash, hash_result1.hash_len);
-    print_hash(hash_result2.hash, hash_result2.hash_len);
+    print_string(stderr, hash_result1.encoded);
+    print_string(stderr, hash_result2.encoded);
+    print_bytes(stderr, hash_result1.hash, hash_result1.hash_len);
+    print_bytes(stderr, hash_result2.hash, hash_result2.hash_len);
 
     free(hash_result1.encoded);
     free(hash_result1.hash);

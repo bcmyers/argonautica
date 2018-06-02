@@ -57,7 +57,7 @@ verify_result_t verify_low_level(verify_input_t* input)
         return output;
     }
 
-    ctx.pwd = (uint8_t *)(input->password);
+    ctx.pwd = (uint8_t*)(input->password);
     ctx.pwdlen = (uint32_t)(input->password_len);
 
     int err = decode_string( // Note: Located in encoding.c
@@ -83,6 +83,12 @@ verify_result_t verify_low_level(verify_input_t* input)
         output.is_valid = false;
         return output;
     }
+
+    // TODO: This is my code
+    ctx.ad = input->additional_data;
+    ctx.adlen = (size_t)(input->additional_data_len);
+    ctx.secret = input->secret_key;
+    ctx.secretlen = (size_t)(input->secret_key_len);
 
     err = my_argon2_verify_ctx(
         /* argon2_context* context */ &ctx,
@@ -152,7 +158,7 @@ static int my_argon2_ctx(
     uint32_t segment_length = memory_blocks / (context->lanes * ARGON2_SYNC_POINTS);
     memory_blocks = segment_length * (context->lanes * ARGON2_SYNC_POINTS);
 
-    argon2_instance_t instance ={};
+    argon2_instance_t instance = {};
     instance.version = context->version;
     instance.memory = NULL;
     instance.passes = context->t_cost;

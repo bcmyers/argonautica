@@ -55,6 +55,7 @@ hash_result_t hash_high_level(hash_input_t* input);
 verify_result_t verify_high_level(verify_input_t* input);
 verify_result_t verify_low_level(verify_input_t* input);
 
+uint8_t* copy_bytes(uint8_t* source, size_t n);
 int parse_args(int argc, char** argv, bool is_secret_key, hash_input_t* input);
-void print_encoded(const char* encoded);
-void print_hash(const uint8_t* hash, const size_t hash_len);
+void print_string(FILE* file, const char* encoded);
+void print_bytes(FILE* file, const uint8_t* hash, const size_t hash_len);

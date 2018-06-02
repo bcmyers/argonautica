@@ -1,5 +1,19 @@
 #include "test.h"
 
+uint8_t* copy_bytes(uint8_t* source, size_t n)
+{
+    uint8_t* destination = (uint8_t*)malloc(n * sizeof(uint8_t));
+    if (destination == NULL) {
+        return NULL;
+    }
+    memcpy(
+        /* void* dest */        (void*)destination,
+        /* const void* src */   (void*)source,
+        /* size_t n */          n
+    );
+    return destination;
+}
+
 int parse_args(int argc, char** argv, bool is_secret_key, hash_input_t* input)
 {
     if (argc != 13) {
@@ -81,21 +95,21 @@ int parse_args(int argc, char** argv, bool is_secret_key, hash_input_t* input)
     return 0;
 }
 
-void print_encoded(const char* encoded)
+void print_string(FILE* file, const char* encoded)
 {
-    fprintf(stderr, "%s\n", encoded);
+    fprintf(file, "%s\n", encoded);
 }
 
-void print_hash(const uint8_t* hash, const size_t hash_len)
+void print_bytes(FILE* file, const uint8_t* hash, const size_t hash_len)
 {
     int i;
     for (i = 0; i < (int)hash_len; i++) {
         if (i == 0) {
-            fprintf(stderr, "[%d,", hash[i]);
+            fprintf(file, "[%d,", hash[i]);
         } else if (i == (int)hash_len - 1) {
-            fprintf(stderr, "%d]\n", hash[i]);
+            fprintf(file, "%d]\n", hash[i]);
         } else {
-            fprintf(stderr, "%d,", hash[i]);
+            fprintf(file, "%d,", hash[i]);
         }
     }
 }
