@@ -1,9 +1,11 @@
 use futures_cpupool::CpuPool;
 
-use config::Backend;
 #[cfg(feature = "serde")]
 use config::default_cpu_pool_serde;
-use config::{Flags, DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING};
+use config::Backend;
+use config::{
+    default_threads, DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING,
+};
 
 /// Read-only configuration for [`Verifier`](../struct.Verifier.html). Can be obtained by calling
 /// the [`config`](../struct.Verifier.html#method.config) method on an instance of
@@ -13,11 +15,14 @@ use config::{Flags, DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_K
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct VerifierConfig {
     backend: Backend,
-    #[cfg_attr(feature = "serde",
-               serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde")
+    )]
     cpu_pool: Option<CpuPool>,
     password_clearing: bool,
     secret_key_clearing: bool,
+    threads: u32,
 }
 
 impl VerifierConfig {
@@ -40,6 +45,10 @@ impl VerifierConfig {
     pub fn secret_key_clearing(&self) -> bool {
         self.secret_key_clearing
     }
+    #[allow(missing_docs)]
+    pub fn threads(&self) -> u32 {
+        self.threads
+    }
 }
 
 impl VerifierConfig {
@@ -49,17 +58,8 @@ impl VerifierConfig {
             cpu_pool: None,
             password_clearing: DEFAULT_PASSWORD_CLEARING,
             secret_key_clearing: DEFAULT_SECRET_KEY_CLEARING,
+            threads: default_threads(),
         }
-    }
-    pub(crate) fn flags(&self) -> Flags {
-        let mut flags = Flags::default();
-        if self.password_clearing {
-            flags |= Flags::CLEAR_PASSWORD;
-        }
-        if self.secret_key_clearing {
-            flags |= Flags::CLEAR_SECRET_KEY;
-        }
-        flags
     }
     pub(crate) fn set_backend(&mut self, backend: Backend) {
         self.backend = backend;
@@ -72,6 +72,9 @@ impl VerifierConfig {
     }
     pub(crate) fn set_secret_key_clearing(&mut self, boolean: bool) {
         self.secret_key_clearing = boolean;
+    }
+    pub(crate) fn set_threads(&mut self, threads: u32) {
+        self.threads = threads;
     }
 }
 

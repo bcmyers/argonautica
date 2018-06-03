@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
-use Error;
 use backend::{decode_rust, encode_rust};
 use config::{Variant, Version};
+use Error;
 
 impl FromStr for HashRaw {
     ///
@@ -96,79 +96,6 @@ impl HashRaw {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hasher::Hasher;
-    use verifier::Verifier;
-
-    #[test]
-    fn test_decode() {
-        for hash in &[
-            "$argon2d$v=16$m=32,t=3,p=1$c29tZXNhbHQ$F9F9xbKM80M",
-            "$argon2d$v=19$m=32,t=3,p=1$c29tZXNhbHQ$8M5O+AL7X7g",
-            "$argon2i$v=16$m=32,t=3,p=1$c29tZXNhbHQ$Kq7eFUPUZVI",
-            "$argon2i$v=19$m=32,t=3,p=1$c29tZXNhbHQ$4QLWhz5VaKk",
-            "$argon2id$v=16$m=32,t=3,p=1$c29tZXNhbHQ$tfZjSAPJqZ0",
-            "$argon2id$v=19$m=32,t=3,p=1$c29tZXNhbHQ$lYNMBkRT0DI",
-        ] {
-            let hash_raw = hash.parse::<HashRaw>().unwrap();
-            println!("{:?}", &hash_raw);
-        }
-    }
-
-    #[test]
-    fn test_encode() {
-        let additional_data = "some additional data";
-        let password = "P@ssw0rd";
-        let salt = "somesalt";
-        let secret_key = "secret";
-
-        let mut hasher = Hasher::default();
-        hasher
-            .configure_hash_length(32)
-            .configure_iterations(3)
-            .configure_lanes(2)
-            .configure_memory_size(32)
-            .configure_threads(2)
-            .with_additional_data(additional_data)
-            .with_salt(salt)
-            .with_secret_key(secret_key)
-            .opt_out_of_random_salt(true);
-
-        let hash_raw = hasher.with_password(password).hash_raw().unwrap();
-        let hash1 = hash_raw.to_hash();
-
-        let hash2 = hasher.with_password(password).hash().unwrap();
-
-        assert_eq!(&hash1, &hash2);
-
-        let mut verifier = Verifier::default();
-
-        let is_valid = verifier
-            .with_additional_data(additional_data)
-            .with_hash_raw(&hash_raw)
-            .with_password(password)
-            .with_secret_key(secret_key)
-            .verify()
-            .unwrap();
-        assert!(is_valid);
-
-        let is_valid = verifier
-            .with_additional_data(additional_data)
-            .with_hash(&hash1)
-            .with_password(password)
-            .with_secret_key(secret_key)
-            .verify()
-            .unwrap();
-        assert!(is_valid);
-
-        let is_valid = verifier
-            .with_additional_data(additional_data)
-            .with_hash(&hash2)
-            .with_password(password)
-            .with_secret_key(secret_key)
-            .verify()
-            .unwrap();
-        assert!(is_valid);
-    }
 
     #[test]
     fn test_send() {

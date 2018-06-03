@@ -5,8 +5,7 @@ extern crate num_cpus;
 
 use a2::config::{
     Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
-    DEFAULT_PASSWORD_CLEARING, DEFAULT_SALT_LENGTH, DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VARIANT,
-    DEFAULT_VERSION,
+    DEFAULT_SALT_LENGTH, DEFAULT_VARIANT, DEFAULT_VERSION,
 };
 use a2::data::{Salt, SecretKey};
 use a2::Hasher;
@@ -18,8 +17,6 @@ const BASE64_ENCODED_SECRET_KEY: &str = "t9nGEsDxjWtJYdYeExdB6/HU0vg+rT6czv6HSjV
 const HASH_LENGTH: u32 = DEFAULT_HASH_LENGTH;
 const SALT_LENGTH: u32 = DEFAULT_SALT_LENGTH;
 const PASSWORD: &str = "P@ssw0rd";
-const PASSWORD_CLEARING: bool = DEFAULT_PASSWORD_CLEARING;
-const SECRET_KEY_CLEARING: bool = DEFAULT_SECRET_KEY_CLEARING;
 const THREADS: [u32; 3] = [1, 2, 4];
 const VARIANT: Variant = DEFAULT_VARIANT;
 const VERSION: Version = DEFAULT_VERSION;
@@ -40,8 +37,8 @@ impl Bench {
             .configure_lanes(self.threads)
             .configure_iterations(self.iterations)
             .configure_memory_size(self.memory_size)
-            .configure_password_clearing(PASSWORD_CLEARING)
-            .configure_secret_key_clearing(SECRET_KEY_CLEARING)
+            .configure_password_clearing(false)
+            .configure_secret_key_clearing(false)
             .configure_threads(self.threads)
             .configure_variant(VARIANT)
             .configure_version(VERSION)

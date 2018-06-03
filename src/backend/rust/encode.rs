@@ -20,14 +20,14 @@ pub(crate) fn encode_rust(hash_raw: &HashRaw) -> String {
 
 #[cfg(test)]
 mod tests {
+    use rand::{RngCore, SeedableRng, StdRng};
+
     use super::*;
+    use backend::encode_c;
+    use hasher::Hasher;
 
     #[test]
     fn test_encode_against_c() {
-        use backend::c::encode_c;
-        use hasher::Hasher;
-        use rand::{RngCore, SeedableRng, StdRng};
-
         let mut rng: StdRng = SeedableRng::from_seed([0u8; 32]);
         let mut password = vec![0u8; 12];
         let mut secret_key = vec![0u8; 32];
@@ -40,6 +40,8 @@ mod tests {
                     .configure_hash_length(*hash_length)
                     .configure_iterations(1)
                     .configure_memory_size(32)
+                    .configure_password_clearing(false)
+                    .configure_secret_key_clearing(false)
                     .configure_threads(1)
                     .configure_lanes(1)
                     .with_secret_key(&secret_key[..])

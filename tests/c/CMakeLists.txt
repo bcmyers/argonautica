@@ -35,18 +35,18 @@ add_library(argon2simd STATIC
 )
 target_link_libraries (argon2simd ${CMAKE_THREAD_LIBS_INIT})
 
-# TEST_HASH
+# TEST_LOW_LEVEL
 
-set(CODE_TEST_HASH src/test_hash.c src/hash.c src/utils.c src/verify.c)
-add_executable(test_hash ${CODE_TEST_HASH})
-target_link_libraries (test_hash argon2)
-add_executable(test_hash_simd ${CODE_TEST_HASH})
-target_link_libraries (test_hash_simd argon2simd)
+set(CODE_TEST_LOW_LEVEL src/test_low_level.c src/hash.c src/utils.c src/verify.c)
+add_executable(test_low_level ${CODE_TEST_LOW_LEVEL})
+target_link_libraries (test_low_level argon2)
+add_executable(test_low_level_simd ${CODE_TEST_LOW_LEVEL})
+target_link_libraries (test_low_level_simd argon2simd)
 
-# TEST_HASH_C
+# TEST_HIGH_LEVEL
 
-set(CODE_TEST_HASH_C src/test_hash_c.c src/hash.c src/utils.c src/verify.c)
-add_executable(test_hash_c ${CODE_TEST_HASH_C})
-target_link_libraries (test_hash_c argon2)
-add_executable(test_hash_c_simd ${CODE_TEST_HASH_C})
-target_link_libraries (test_hash_c_simd argon2simd)
+set(CODE_TEST_HIGH_LEVEL src/test_high_level.c src/hash.c src/utils.c src/verify.c)
+add_executable(test_high_level ${CODE_TEST_HIGH_LEVEL})
+target_link_libraries (test_high_level argon2)
+add_executable(test_high_level_simd ${CODE_TEST_HIGH_LEVEL})
+target_link_libraries (test_high_level_simd argon2simd)

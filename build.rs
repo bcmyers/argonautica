@@ -62,6 +62,7 @@ fn main() -> Result<(), failure::Error> {
         .header(format!("{}/encoding.h", temp_dir_str))
         .whitelist_function("argon2_ctx")
         .whitelist_function("argon2_encodedlen")
+        .whitelist_function("argon2_error_message")
         .whitelist_function("argon2_verify_ctx")
         .whitelist_function("decode_string")
         .whitelist_function("encode_string")

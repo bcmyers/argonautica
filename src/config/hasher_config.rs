@@ -2,10 +2,12 @@ use futures_cpupool::CpuPool;
 
 #[cfg(feature = "serde")]
 use config::default_cpu_pool_serde;
-use config::{default_lanes, default_threads, Backend, Flags, Variant, Version,
-             DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
-             DEFAULT_OPT_OUT_OF_RANDOM_SALT, DEFAULT_OPT_OUT_OF_SECRET_KEY,
-             DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION};
+use config::{
+    default_lanes, default_threads, Backend, Flags, Variant, Version, DEFAULT_HASH_LENGTH,
+    DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_RANDOM_SALT,
+    DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING,
+    DEFAULT_VERSION,
+};
 use errors::ConfigurationError;
 use {Error, ErrorKind};
 
@@ -19,8 +21,10 @@ const PANIC_WARNING: &str = "Your program will error if you use this configurati
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct HasherConfig {
     backend: Backend,
-    #[cfg_attr(feature = "serde",
-               serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde"))]
+    #[cfg_attr(
+        feature = "serde",
+        serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde")
+    )]
     cpu_pool: Option<CpuPool>,
     hash_length: u32,
     iterations: u32,
@@ -220,7 +224,7 @@ fn validate_hash_length(hash_length: u32) -> Result<(), Error> {
 fn validate_iterations(iterations: u32) -> Result<(), Error> {
     if iterations == 0 {
         return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::HashLengthTooShortError,
+            ConfigurationError::IterationsTooFewError,
         )).add_context(format!("Iterations: {}", iterations)));
     }
     Ok(())

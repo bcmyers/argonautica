@@ -1,12 +1,16 @@
 use futures::Future;
 use futures_cpupool::CpuPool;
 use scopeguard;
+#[cfg(feature = "serde")]
+use serde;
+#[cfg(feature = "serde")]
+use serde::ser::SerializeStruct;
 
 use config::{default_cpu_pool, Backend, VerifierConfig};
 use data::{AdditionalData, Password, SecretKey};
-use errors::{ConfigurationError, DataError};
+use errors::DataError;
 use output::HashRaw;
-use {Error, ErrorKind};
+use {Error, ErrorKind, Hasher};
 
 impl Default for Verifier {
     /// Same as the [`new`](struct.Verifier.html#method.new) method
@@ -15,20 +19,52 @@ impl Default for Verifier {
             additional_data: None,
             config: VerifierConfig::default(),
             hash: None,
+            hash_raw: None,
+            latest: Latest::default(),
             password: None,
             secret_key: None,
         }
     }
 }
 
+#[cfg(feature = "serde")]
+impl serde::ser::Serialize for Verifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        let mut state = serializer.serialize_struct("Verifier", 3)?;
+        state.serialize_field("additionalData", &self.additional_data)?;
+        state.serialize_field("config", &self.config)?;
+        match self.latest {
+            Latest::Hash => state.serialize_field("hash", &self.hash)?,
+            Latest::HashRaw => match self.hash_raw {
+                Some(ref hash_raw) => {
+                    let thing_to_serialize = Some(hash_raw.to_hash());
+                    state.serialize_field("hash", &thing_to_serialize)?;
+                }
+                None => {
+                    let thing_to_serialize: Option<&str> = None;
+                    state.serialize_field("hash", &thing_to_serialize)?
+                }
+            },
+        }
+        state.end()
+    }
+}
+
 /// <b><u>One of the two main structs.</u></b> Use it to verify passwords against hashes
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct Verifier {
     additional_data: Option<AdditionalData>,
     config: VerifierConfig,
     hash: Option<String>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
+    hash_raw: Option<HashRaw>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
+    latest: Latest,
     #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     password: Option<Password>,
     #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
@@ -89,6 +125,14 @@ impl Verifier {
         self.config.set_secret_key_clearing(boolean);
         self
     }
+    /// Allows you to configure [`Verifier`](struct.Verifier.html) to use a custom number of
+    /// threads. The default is the number of physical cores on your machine. If you choose
+    /// a number of threads that is greater than the lanes configuration of your hash,
+    /// [`Verifier`](struct.Verifier.html) will use the minimum of the two.
+    pub fn configure_threads(&mut self, threads: u32) -> &mut Verifier {
+        self.config.set_threads(threads);
+        self
+    }
     /// <b><u>The primary method (blocking version)</u></b>
     ///
     /// After you have configured [`Verifier`](struct.Verifier.html) to your liking and provided
@@ -101,7 +145,6 @@ impl Verifier {
     /// call this method to verify that the password matches the hash or
     /// [`HashRaw`](output/struct.HashRaw.html)
     pub fn verify(&mut self) -> Result<bool, Error> {
-        use backend::verify_c;
         // ensure password and/or secret_key clearing code will run
         let mut verifier = scopeguard::guard(self, |verifier| {
             if verifier.config.password_clearing() {
@@ -113,16 +156,59 @@ impl Verifier {
         });
         // validate inputs
         verifier.validate()?;
+
         // calculate is_valid
-        let is_valid = match verifier.config.backend() {
-            Backend::C => verify_c(&mut verifier)?,
-            Backend::Rust => {
-                return Err(ErrorKind::ConfigurationError(
-                    ConfigurationError::BackendUnsupportedError,
-                ).into())
+        let hash_raw = verifier.hash_raw.as_ref().unwrap(); // Safe unwrap because of validation above
+        let mut hasher = Hasher::default();
+        hasher
+            .configure_backend(verifier.config.backend())
+            .configure_hash_length(hash_raw.raw_hash_bytes().len() as u32)
+            .configure_iterations(hash_raw.iterations())
+            .configure_lanes(hash_raw.lanes())
+            .configure_memory_size(hash_raw.memory_size())
+            .configure_password_clearing(verifier.config.password_clearing())
+            .configure_secret_key_clearing(verifier.config.secret_key_clearing())
+            .configure_threads(verifier.config.threads())
+            .configure_variant(hash_raw.variant())
+            .configure_version(hash_raw.version())
+            .opt_out_of_random_salt(true)
+            .opt_out_of_secret_key(true)
+            .with_salt(hash_raw.raw_salt_bytes());
+
+        if verifier.additional_data.is_some() {
+            hasher.with_additional_data(verifier.additional_data().unwrap());
+        }
+        if verifier.config.password_clearing() {
+            // Safe unwrap because of validation above
+            let password: Password = verifier.password().unwrap().clone();
+            hasher.with_password(password);
+        } else {
+            // Safe unwrap because of validation above
+            let password: &Password = verifier.password().unwrap();
+            hasher.with_password(password);
+        }
+        if verifier.secret_key.is_some() {
+            if verifier.config.secret_key_clearing() {
+                // Safe unwrap because of is_some above
+                let secret_key: SecretKey = verifier.secret_key().unwrap().clone();
+                hasher
+                    .with_secret_key(secret_key)
+                    .opt_out_of_secret_key(false);
+            } else {
+                // Safe unwrap because of is_some above
+                let secret_key: &SecretKey = verifier.secret_key().unwrap();
+                hasher
+                    .with_secret_key(secret_key)
+                    .opt_out_of_secret_key(false);
             }
-        };
-        Ok(is_valid)
+        }
+
+        let hash_raw2 = hasher.hash_raw()?;
+        if hash_raw.raw_hash_bytes() == hash_raw2.raw_hash_bytes() {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
     /// <b><u>The primary method (non-blocking version)</u></b>
     ///
@@ -163,6 +249,7 @@ impl Verifier {
     /// methods on [`Hasher`](struct.Hasher.html))
     pub fn with_hash(&mut self, hash: &str) -> &mut Verifier {
         self.hash = Some(hash.to_string());
+        self.latest = Latest::Hash;
         self
     }
     /// Allows you to provide [`Verifier`](struct.Verifier.html) with the hash to verify
@@ -172,7 +259,9 @@ impl Verifier {
     /// methods on [`Hasher`](struct.Hasher.html))
     pub fn with_hash_raw(&mut self, hash_raw: &HashRaw) -> &mut Verifier {
         use backend::encode_rust;
+        self.hash_raw = Some(hash_raw.clone());
         self.hash = Some(encode_rust(hash_raw));
+        self.latest = Latest::HashRaw;
         self
     }
     /// Allows you to provide [`Verifier`](struct.Verifier.html) with the password
@@ -204,8 +293,39 @@ impl Verifier {
         &self.config
     }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s hash, if any
-    pub fn hash(&self) -> Option<&str> {
-        self.hash.as_ref().map(|s| s.as_ref())
+    pub fn hash(&mut self) -> Option<&str> {
+        use backend::encode_rust;
+        match self.latest {
+            Latest::Hash => self.hash.as_ref().map(|s| s.as_ref()),
+            Latest::HashRaw => match self.hash_raw {
+                Some(ref hash_raw) => {
+                    self.hash = Some(encode_rust(hash_raw));
+                    self.hash.as_ref().map(|s| s.as_ref())
+                }
+                None => None,
+            },
+        }
+    }
+    /// Read-only access to the [`Verifier`](struct.Verifier.html)'s HashRaw, if any.
+    /// This method will return None if you never stored a hash or HashRaw in the
+    /// [`Verifier`](struct.Verifier.html). It will also return None if you stored a
+    /// hash in [`Verifier`](struct.Verifier.html) that was invalid (i.e. a hash that could
+    /// not be decoded into a HashRaw)
+    pub fn hash_raw(&mut self) -> Option<&HashRaw> {
+        match self.latest {
+            Latest::Hash => match self.hash {
+                None => None,
+                Some(ref hash) => {
+                    let hash_raw = match hash.parse::<HashRaw>() {
+                        Ok(hash_raw) => hash_raw,
+                        Err(_) => return None,
+                    };
+                    self.hash_raw = Some(hash_raw);
+                    self.hash_raw.as_ref()
+                }
+            },
+            Latest::HashRaw => self.hash_raw.as_ref(),
+        }
     }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s
     /// [`Password`](data/struct.Password.html), if any
@@ -220,120 +340,56 @@ impl Verifier {
 }
 
 impl Verifier {
-    pub(crate) fn additional_data_mut(&mut self) -> Option<&mut AdditionalData> {
-        self.additional_data.as_mut()
-    }
-    pub(crate) fn password_mut(&mut self) -> Option<&mut Password> {
-        self.password.as_mut()
-    }
-    pub(crate) fn secret_key_mut(&mut self) -> Option<&mut SecretKey> {
-        self.secret_key.as_mut()
-    }
-    pub(crate) fn validate(&self) -> Result<(), Error> {
-        if self.hash.is_none() {
-            return Err(ErrorKind::DataError(DataError::HashMissingError).into());
+    pub(crate) fn validate(&mut self) -> Result<(), Error> {
+        match self.latest {
+            Latest::Hash => match self.hash {
+                Some(ref hash) => {
+                    let hash_raw = hash.parse::<HashRaw>()?;
+                    self.hash_raw = Some(hash_raw);
+                }
+                None => return Err(ErrorKind::DataError(DataError::HashMissingError).into()),
+            },
+            Latest::HashRaw => {
+                if self.hash_raw.is_none() {
+                    return Err(ErrorKind::DataError(DataError::HashMissingError).into());
+                }
+            }
         }
-        match self.password {
-            Some(ref password) => password.validate()?,
-            None => return Err(ErrorKind::DataError(DataError::PasswordMissingError).into()),
-        }
-        if let Some(ref secret_key) = self.secret_key {
-            secret_key.validate()?;
+        if self.password.is_none() {
+            return Err(ErrorKind::DataError(DataError::PasswordMissingError).into());
         }
         Ok(())
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+enum Latest {
+    Hash,
+    HashRaw,
+}
+
+impl Default for Latest {
+    fn default() -> Latest {
+        Latest::Hash
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use config::{Variant, Version};
-    use hasher::Hasher;
-
-    pub const PASSWORDS: [&str; 2] = ["P@ssw0rd", "😊"];
-    pub const VARIANTS: [Variant; 3] = [Variant::Argon2d, Variant::Argon2i, Variant::Argon2id];
-    pub const VERSIONS: [Version; 2] = [Version::_0x10, Version::_0x13];
-
-    struct Test {
-        password: String,
-        variant: Variant,
-        version: Version,
-    }
-
-    impl Test {
-        fn run(self) {
-            let additional_data = vec![4u8; 12];
-            let secret_key = vec![3u8; 8];
-            let mut hasher = Hasher::default();
-            let lanes = 6;
-            hasher
-                .configure_hash_length(32)
-                .configure_iterations(3)
-                .configure_lanes(lanes)
-                .configure_memory_size(64)
-                .configure_threads(lanes)
-                .configure_variant(self.variant)
-                .configure_version(self.version)
-                .opt_out_of_random_salt(true)
-                .opt_out_of_secret_key(true)
-                .with_salt(vec![2; 16]);
-            let hash = hasher.with_password(self.password.as_str()).hash().unwrap();
-
-            hasher.with_secret_key(secret_key.as_slice());
-            let hash2 = hasher.with_password(self.password.as_str()).hash().unwrap();
-
-            hasher.with_additional_data(additional_data.as_slice());
-            let hash3 = hasher.with_password(self.password.as_str()).hash().unwrap();
-
-            let mut verifier = Verifier::default();
-            verifier
-                .with_hash(&hash)
-                .with_password(self.password.as_str());
-            let is_valid = verifier.verify().unwrap();
-            assert!(is_valid); // Failing
-
-            verifier
-                .with_hash(&hash2)
-                .with_password(self.password.as_str())
-                .with_secret_key(secret_key.as_slice());
-            let is_valid = verifier.verify().unwrap();
-            assert!(is_valid);
-
-            verifier
-                .with_additional_data(additional_data.as_slice())
-                .with_hash(&hash3)
-                .with_password(self.password.as_str());
-            let is_valid = verifier.verify().unwrap();
-            assert!(is_valid);
-        }
-    }
-
-    #[test]
-    fn test_verifier() {
-        for password in &PASSWORDS {
-            for variant in &VARIANTS {
-                for version in &VERSIONS {
-                    Test {
-                        password: password.to_string(),
-                        variant: *variant,
-                        version: *version,
-                    }.run();
-                }
-            }
-        }
-    }
 
     #[cfg(feature = "serde")]
     #[test]
-    fn test_serialization() {
+    fn test_verifier_serialization() {
         use serde_json;
 
         let password = "P@ssw0rd";
-        let secret_key = "secret1";
+        let secret_key = "secret";
 
         let mut hasher = Hasher::default();
         hasher
             .configure_password_clearing(false)
+            .configure_secret_key_clearing(false)
             .opt_out_of_random_salt(true)
             .with_additional_data("additional data")
             .with_password(password)
@@ -344,6 +400,7 @@ mod tests {
         let mut verifier1 = Verifier::default();
         verifier1
             .configure_password_clearing(false)
+            .configure_secret_key_clearing(false)
             .with_additional_data("additional data")
             .with_password(password)
             .with_secret_key(secret_key)
@@ -356,7 +413,7 @@ mod tests {
                 "additional data".as_bytes(),
                 hash_raw.to_hash(),
                 password.as_bytes(),
-                "secret1".as_bytes()
+                "secret".as_bytes()
             );
         };
 
@@ -366,8 +423,8 @@ mod tests {
         let mut verifier2: Verifier =
             serde_json::from_str(&j).expect("failed to deserialize verifier");
         // Assert that password and secret key have been erased
-        assert_eq!(verifier2.password(), None);
-        assert_eq!(verifier2.secret_key(), None);
+        assert!(verifier2.password().is_none());
+        assert!(verifier2.secret_key().is_none());
         // Add a password and ensure that verify doesn't return an error
         verifier2.with_password(password);
         let is_valid = verifier2.verify().unwrap();

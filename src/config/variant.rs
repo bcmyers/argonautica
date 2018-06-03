@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use config::defaults::DEFAULT_VARIANT;
-use errors::ParseError;
+use errors::EncodingError;
 use {Error, ErrorKind};
 
 impl Default for Variant {
@@ -26,7 +26,7 @@ impl FromStr for Variant {
             "argon2i" => Ok(Variant::Argon2i),
             "argon2id" => Ok(Variant::Argon2id),
             _ => Err(
-                Error::new(ErrorKind::ParseError(ParseError::VariantParseError))
+                Error::new(ErrorKind::EncodingError(EncodingError::VariantEncodeError))
                     .add_context(format!("String: {}", s)),
             ),
         }

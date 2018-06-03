@@ -32,16 +32,19 @@
 //! extern crate a2;
 //!
 //! fn main() {
+//!     let password = "P@ssw0rd".to_string();
+//!     let secret_key = "\
+//!         secret key that you should really store in \
+//!         an environment variable instead of in code, \
+//!         but this is just an example".to_string();
+//!
 //!     let mut hasher = a2::Hasher::default();
 //!     let hash = hasher
-//!         .with_password("P@ssw0rd")
-//!         .with_secret_key("\
-//!             secret key that you should really store in \
-//!             an environment variable instead of in code, \
-//!             but this is just an example\
-//!         ")
+//!         .with_password(password)
+//!         .with_secret_key(secret_key)
 //!         .hash()
 //!         .unwrap();
+//!
 //!     println!("{}", &hash);
 //!     // 👆 prints a hash, which will be random since the default Hasher uses a random salt
 //! }
@@ -56,21 +59,24 @@
 //! extern crate a2;
 //!
 //! fn main() {
+//!     let password = "P@ssw0rd".to_string();
+//!     let secret_key = "\
+//!         secret key that you should really store in \
+//!         an environment variable instead of in code, \
+//!         but this is just an example".to_string();
+//!
 //!     let mut verifier = a2::Verifier::default();
 //!     let is_valid = verifier
-//!         .with_hash("\
-//!            $argon2id$v=19$m=4096,t=128,p=2\
-//!            $IyOw2pHShVfLBeCtdpQbtzLrlL9mxdUhwtMbSqow4u8\
-//!            $w9SjhB3X2Dzbz62eJNqN/FcoHslse27cmGfuxzofHDc\
+//!         .with_hash("
+//!             $argon2id$v=19$m=4096,t=128,p=2$\
+//!             539gu1a/qkTRCHKPuECV7jcRgWH/hRDjxidNdQJ7cKs$\
+//!             On6oPYf4jttaWb4kRCyyffDVYkBF+R4cEBl8WADZhw0\
 //!         ")
-//!         .with_password("P@ssw0rd")
-//!         .with_secret_key("\
-//!             secret key that you should really store in \
-//!             an environment variable instead of in code, \
-//!             but this is just an example\
-//!         ")
+//!         .with_password(password)
+//!         .with_secret_key(secret_key)
 //!         .verify()
 //!         .unwrap();
+//!
 //!     assert!(is_valid);
 //! }
 //! ```
@@ -89,18 +95,19 @@
 //! extern crate futures_cpupool;
 //!
 //! use a2::config::{Backend, Variant, Version};
+//! use futures_cpupool::CpuPool;
 //!
 //! fn main() {
 //!     let mut hasher = a2::Hasher::default();
 //!     hasher
-//!         .configure_backend(Backend::C)
+//!         .configure_backend(Backend::C) // Default is `Backend::C`
 //!         // 👆 a2 was designed to support multiple backends (meaning multiple implementations
 //!         // of the underlying Argon2 algorithm). Currently only the C backend is supported,
 //!         // which uses the cannonical Argon2 library written in C to actually do the work.
 //!         // In the future hopefully a Rust backend will also be supported, but, for the
 //!         // moment, you must use Backend::C, which is the default. Using Backend::Rust will
 //!         // result in an error (again, for the moment).
-//!         .configure_cpu_pool(futures_cpupool::CpuPool::new(2))
+//!         .configure_cpu_pool(CpuPool::new(2)) // See below for description of default
 //!         // 👆 There are two non-blocking methods on `Hasher` that perform computation on
 //!         // a separate thread and return a `Future` instead of a `Result` (`hash_non_blocking`
 //!         // and `hash_raw_non_blocking`). These methods allows `a2` to play nice with
@@ -115,10 +122,10 @@
 //!         // makes heavy use of futures, the code you are writing uses both a `Hasher` and
 //!         // a `Verifier`, and you would like both of them to share the same underlying
 //!         // `CpuPool`.
-//!         .configure_hash_length(32)
+//!         .configure_hash_length(32) // Default is `32`
 //!         // 👆 The hash length in bytes is configurable. The default is 32. This is probably
 //!         // a good number to use. 16 is also probably fine. You probably shouldn't go below 16
-//!         .configure_iterations(128)
+//!         .configure_iterations(128) // Default is `128`
 //!         // 👆 Argon2 has a notion of "iterations" or "time cost". All else equal and generally
 //!         // speaking, the greater the number of iterations, the longer it takes to perform the
 //!         // hash and the more secure the resulting hash. More iterations basically means more
@@ -131,14 +138,14 @@
 //!         // parameter) in order to increase the time it takes to hash to the maximum you can
 //!         // reasonably allow for your use-case (e.g. to probably about 500 milliseconds
 //!         // for the use-case of hashing user passwords for a website)
-//!         .configure_lanes(2)
+//!         .configure_lanes(2) // Default is number of physical cores on your machine
 //!         // 👆 Argon2 can break up its work into one or more "lanes" during some parts of
 //!         // the hashing algorithm. If you configure it with multiple lanes and you also
 //!         // use multiple threads (see below) the hashing algorithm will performed its
 //!         // work in parallel in some parts, potentially speeding up the time it takes to
 //!         // produce a hash without diminishing the security of the result. By default,
 //!         // the number of lanes is set to the number of physical cores on your machine
-//!         .configure_memory_size(4096)
+//!         .configure_memory_size(4096) // Default is `4096`
 //!         // 👆 Argon2 has a notion of "memory size" or "memory cost" (in kibibytes). All else
 //!         // equal and generally speaking, the greater the memory size, the longer it takes to
 //!         // perform the hash and the more secure the resulting hash. More memory size basically
@@ -152,32 +159,41 @@
 //!         // it takes to hash to the maximum you can reasonably allow for your use-case
 //!         // (e.g. to probably about 500 milliseconds for the use-case of hashing user passwords
 //!         // for a website)
-//!         .configure_password_clearing(true)
+//!         .configure_password_clearing(false) // Default is `true`
 //!         // 👆 By default, every time you call hash or hash_raw on a Hasher, the underying
 //!         // bytes of the password you provided are completely erased, meaning you can no
 //!         // longer access them and will have to provide a new password to Hasher in order
 //!         // to call hash or hash_raw again. This is a security measure designed to
 //!         // to prevent you from keeping the password bytes around for longer than you have to.
-//!         // Using this method, however, you can turn off this security feature by passing
-//!         // false. This is not recommended
-//!         .configure_secret_key_clearing(false)
+//!         // This means that when "password clearing" is set to `true`, you will *not* be able
+//!         // to use Hasher if you provided it with a borrowed (as opposed to owned) password
+//!         // Hasher cannot erase the bytes of a value it does not own. If you pass Hasher a
+//!         // borrowed password with "password clearing" set to `true` and try to call hash
+//!         // or hash_raw, they will return a `PasswordUnownedError`. Using the above
+//!         // configuration method, however, you can turn this security feature off by passing
+//!         // `false`. This is not recommended. See the documentation for the `Password` type
+//!         // in the `data` module for more details
+//!         .configure_secret_key_clearing(false) // Default is `false`
 //!         // 👆 It is also possible to have the underlying bytes of the secret key you provided
 //!         // to a Hasher be erased after each call to hash or hash_raw. Unlike with
-//!         // password clearing, however, this option is not turned on by default. Typically,
+//!         // password clearing, however, this option is turned off by default. Typically,
 //!         // you'll want to use the same Hasher instance to hash multiple passwords. With
-//!         // the default setting of secret key clearing set to false, you can provide your
+//!         // the default setting of secret key clearing set to `false`, you can provide your
 //!         // Hasher with your secret key once and use it for multiple passwords. If you want
 //!         // to be extra secure and force yourself to provide the secret key to Hasher every
-//!         // time you hash a password, you can turn this feature on by passing true to this
-//!         // method
-//!         .configure_threads(2)
+//!         // time you hash a password, you can turn this feature on by passing `true` to this
+//!         // method, but if you do so you can only give Hasher an owned (as opposed to borrowed)
+//!         // secret key value, otherwise calling the hash or hash_raw methods will return a
+//!         // `SecretKeyUnownedError`. See the documentation for the `SecretKey` type in the
+//!         // `data` module for more details
+//!         .configure_threads(2) // Default is number of physical cores on your machine
 //!         // 👆 If you have configured a Hasher to use more than one lane (see above), you
 //!         // can get the hashing algorithm to run in parallel during some parts of the
 //!         // computation by setting the number of threads to be greater than one as well,
 //!         // potentially speeding up the time it takes to produce a hash without diminishing
 //!         // the security of the result. By default, the number of threads is set to the number
 //!         // of physical cores on your machine
-//!         .configure_variant(Variant::Argon2id)
+//!         .configure_variant(Variant::Argon2id) // Default is `Variant::Argon2id`
 //!         // 👆 Argon2 has three variants: Argon2d, Argon2i, and Argon2id. Here is how these
 //!         // variants are explained in the RFC: "Argon2 has one primary variant: Argon2id,
 //!         // and two supplementary variants: Argon2d and Argon2i. Argon2d uses data-dependent
@@ -188,24 +204,25 @@
 //!         // as Argon2d for the rest, thus providing both side-channel attack protection and
 //!         // brute-force cost savings due to time-memory tradeoffs." If you do not know which
 //!         // variant to use, use the default, which is Argon2id
-//!         .configure_version(Version::_0x13)
+//!         .configure_version(Version::_0x13) // Default is `Version::_0x13`
 //!         // 👆 Argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
 //!         // Unless you have a very specific reason not to, you should use the latest
 //!         // version (0x13), which is also the default
-//!         .opt_out_of_random_salt(true)
+//!         .opt_out_of_random_salt(true) // Default is `false`
 //!         // 👆 As a built-in "safety" mechanism, if you wish to use a non-random salt,
 //!         // which is generally not a good idea, you must explicity call this method
 //!         // with `true` in order to allow it
-//!         .opt_out_of_secret_key(true);
+//!         .opt_out_of_secret_key(true); // Default is `false`
 //!         // 👆 As a built-in "safety" mechanism, if you wish to hash without a secret key,
 //!         // which is generally not a good idea, you must explicity call this method
 //!         // with `true` in order to allow it
 //!
 //!     let hash = hasher
 //!         .with_password("P@ssw0rd")
+//!         // 👆 OK to pass a borrowed value because we set "password clearing" to `false`
 //!         .with_salt("somesalt")
 //!         // 👆 A non-random salt, which is a bad idea, but possible
-//!         // because we configured this Hasher with opt_out_of_random_salt(true)
+//!         // because we configured this Hasher with `opt_out_of_random_salt(true)`
 //!         .hash()
 //!         // 👆 Notice we did not include a secret key, which is also a bad idea, but possible
 //!         // because we configured this Hasher with opt_out_of_secret_key(true)
@@ -274,7 +291,7 @@
 //! at your option.
 
 #![warn(
-        missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
+    missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
 )] // TODO
 #![doc(html_root_url = "https://docs.rs/a2/0.1.0")]
 
@@ -319,9 +336,9 @@ pub mod output;
 pub mod utils;
 pub use verifier::Verifier;
 
-// TODO: SQLite database for Actix-web example
+// TODO: Change password clearing default
 // TODO: Python
+// TODO: External
 // TODO: Logging
+// TODO: SQLite database for Actix-web example
 // TODO: Wasm?
-// TODO: ARGON2_SYNC_POINTS???
-// TODO: 1.26.0

@@ -3,10 +3,10 @@ use futures_cpupool::CpuPool;
 use scopeguard;
 
 use config::{default_cpu_pool, default_lanes, Backend, HasherConfig, Variant, Version};
-use data::{AdditionalData, Data, DataPrivate, Password, Salt, SecretKey};
+use data::{AdditionalData, Data, Password, Salt, SecretKey};
 use errors::{ConfigurationError, DataError};
 use output::HashRaw;
-use {ffi, Error, ErrorKind};
+use {Error, ErrorKind};
 
 impl Default for Hasher {
     /// Same as the [`new`](struct.Hasher.html#method.new) method
@@ -105,6 +105,7 @@ impl Hasher {
             .configure_lanes(lanes)
             .configure_memory_size(memory_size(lanes))
             .configure_password_clearing(false)
+            .configure_secret_key_clearing(false)
             .configure_threads(lanes)
             .opt_out_of_random_salt(true)
             .opt_out_of_secret_key(true)
@@ -411,33 +412,14 @@ impl Hasher {
 }
 
 impl Hasher {
-    pub(crate) fn context(&mut self, buffer: &mut [u8]) -> ffi::Argon2_Context {
-        ffi::Argon2_Context {
-            out: buffer.as_mut_ptr(),
-            outlen: buffer.len() as u32,
-            pwd: self.password_mut().as_mut_ptr(),
-            pwdlen: self.password().len() as u32,
-            salt: self.salt.as_mut_ptr(),
-            saltlen: self.salt.len() as u32,
-            secret: self.secret_key_mut().as_mut_ptr(),
-            secretlen: self.secret_key().len() as u32,
-            ad: self.additional_data_mut().as_mut_ptr(),
-            adlen: self.additional_data().len() as u32,
-            t_cost: self.config.iterations(),
-            m_cost: self.config.memory_size(),
-            lanes: self.config.lanes(),
-            threads: self.config.threads(),
-            version: self.config.version() as u32,
-            allocate_cbk: None,
-            free_cbk: None,
-            flags: self.config.flags().bits(),
-        }
-    }
     pub(crate) fn additional_data_mut(&mut self) -> Option<&mut AdditionalData> {
         self.additional_data.as_mut()
     }
     pub(crate) fn password_mut(&mut self) -> Option<&mut Password> {
         self.password.as_mut()
+    }
+    pub(crate) fn salt_mut(&mut self) -> &mut Salt {
+        &mut self.salt
     }
     pub(crate) fn secret_key_mut(&mut self) -> Option<&mut SecretKey> {
         self.secret_key.as_mut()
@@ -457,7 +439,14 @@ impl Hasher {
             additional_data.validate()?;
         }
         match self.password {
-            Some(ref password) => password.validate()?,
+            Some(ref password) => {
+                password.validate()?;
+                if self.config.password_clearing() && password.constructed_from_borrow() {
+                    return Err(Error::new(ErrorKind::DataError(
+                        DataError::PasswordUnownedError,
+                    )));
+                }
+            }
             None => {
                 return Err(Error::new(ErrorKind::DataError(
                     DataError::PasswordMissingError,
@@ -471,7 +460,14 @@ impl Hasher {
             )));
         }
         match self.secret_key {
-            Some(ref secret_key) => secret_key.validate()?,
+            Some(ref secret_key) => {
+                secret_key.validate()?;
+                if self.config.secret_key_clearing() && secret_key.constructed_from_borrow() {
+                    return Err(Error::new(ErrorKind::DataError(
+                        DataError::SecretKeyUnownedError,
+                    )));
+                }
+            }
             None => {
                 if !self.config.opt_out_of_secret_key() {
                     return Err(Error::new(ErrorKind::DataError(
@@ -596,111 +592,57 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
-    fn test_config_hash_length_too_short() {
+    fn test_hasher_clearing() {
+        // Password is cleared and secret key remains
         let mut hasher = Hasher::default();
-        hasher.configure_hash_length(3).with_secret_key("secret");
-        let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_config_memory_not_power_of_two() {
-        let mut hasher = Hasher::default();
-        hasher.configure_memory_size(9).with_secret_key("secret");
-        let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_config_memory_too_short() {
-        let mut hasher = Hasher::default();
-        hasher.configure_memory_size(4).with_secret_key("secret");
-        let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_config_no_opt_of_random_salt() {
-        let mut hasher = Hasher::default();
-        hasher.with_secret_key("secret").with_salt("somesalt");
-        let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_config_no_opt_of_secret_key() {
-        let mut hasher = Hasher::default();
-        let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
-    }
-
-    #[test]
-    fn test_config_opt_of_secret_key() {
-        let mut hasher = Hasher::default();
-        hasher.opt_out_of_secret_key(true);
-        let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
-    }
-
-    #[test]
-    fn test_config_opt_of_random_salt() {
-        let mut hasher = Hasher::default();
-        hasher
+        let hash = hasher
+            .configure_password_clearing(true)
+            .configure_secret_key_clearing(false)
+            .opt_out_of_random_salt(true)
+            .opt_out_of_secret_key(true)
+            .with_password("password")
             .with_secret_key("secret")
-            .with_salt("somesalt")
-            .opt_out_of_random_salt(true);
-        let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
-    }
+            .hash();
+        match hash {
+            Ok(_) => panic!("Should return an error"),
+            Err(e) => assert_eq!(
+                e,
+                Error::new(ErrorKind::DataError(DataError::PasswordUnownedError))
+            ),
+        }
+        assert!(hasher.password().is_none());
+        assert!(hasher.secret_key().is_some());
 
-    #[test]
-    #[should_panic]
-    fn test_data_password_is_empty() {
+        // Secret key is cleared and password remains
         let mut hasher = Hasher::default();
-        hasher.with_secret_key("secret");
-        let _ = hasher.with_password("").hash().unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_data_salt_too_short() {
-        let mut hasher = Hasher::default();
-        hasher
+        let hash = hasher
+            .configure_password_clearing(false)
+            .configure_secret_key_clearing(true)
+            .opt_out_of_random_salt(true)
+            .opt_out_of_secret_key(true)
+            .with_password("password")
             .with_secret_key("secret")
-            .with_salt("1234567")
-            .opt_out_of_random_salt(true);
-        let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
+            .hash();
+        match hash {
+            Ok(_) => panic!("Should return an error"),
+            Err(e) => assert_eq!(
+                e,
+                Error::new(ErrorKind::DataError(DataError::SecretKeyUnownedError))
+            ),
+        }
+        assert!(hasher.password().is_some());
+        assert!(hasher.secret_key().is_none());
     }
 
     #[test]
-    fn test_fast_but_insecure() {
+    fn test_hasher_fast_but_insecure() {
         let mut hasher = Hasher::fast_but_insecure();
         let _ = hasher.with_password("P@ssw0rd").hash().unwrap();
     }
 
-    #[test]
-    fn test_random() {
-        use rand::{RngCore, SeedableRng, StdRng};
-
-        let mut rng: StdRng = SeedableRng::from_seed([0u8; 32]);
-        let mut password = vec![0u8; 12];
-        for _ in 0..1_000 {
-            rng.fill_bytes(&mut password);
-            let mut hasher = Hasher::default();
-            hasher
-                .configure_hash_length(8)
-                .configure_iterations(1)
-                .configure_memory_size(32)
-                .configure_threads(1)
-                .configure_lanes(1)
-                .with_secret_key("somesecret")
-                .with_password(&password[..])
-                .hash()
-                .unwrap();
-        }
-    }
-
     #[cfg(feature = "serde")]
     #[test]
-    fn test_serialization() {
+    fn test_hasher_serialization() {
         use serde_json;
 
         let password = "P@ssw0rd";

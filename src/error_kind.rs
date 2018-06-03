@@ -1,4 +1,6 @@
-use errors::{ConfigurationError, DataError, ParseError};
+// TODO: Tests
+
+use errors::{ConfigurationError, DataError, EncodingError};
 
 /// Enum representing the various kinds of errors
 #[derive(Fail, Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -17,13 +19,21 @@ pub enum ErrorKind {
     #[fail(display = "{}", _0)]
     DataError(DataError),
 
+    /// Wrapper for a [`EncodingError`](errors/enum.EncodingError.html)
+    #[fail(display = "{}", _0)]
+    EncodingError(EncodingError),
+
+    /// C code attempted to allocate memory (using malloc) and failed
+    #[fail(display = "C code attempted to allocate memory (using malloc) and failed")]
+    MemoryAllocationError,
+
     /// Failed to access OS random number generator
     #[fail(display = "Failed to access OS random number generator")]
     OsRngError,
 
-    /// Wrapper for a [`ParseError`](errors/enum.ParseError.html)
-    #[fail(display = "{}", _0)]
-    ParseError(ParseError),
+    /// C code reported a "Threading failure" error
+    #[fail(display = "C code reported a \"Threading failure\" error")]
+    ThreadError,
 
     #[doc(hidden)]
     #[fail(display = "__Nonexaustive variant")]

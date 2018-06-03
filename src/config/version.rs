@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use config::defaults::DEFAULT_VERSION;
-use errors::ParseError;
+use errors::EncodingError;
 use {Error, ErrorKind};
 
 impl Default for Version {
@@ -24,7 +24,7 @@ impl FromStr for Version {
             "16" => Ok(Version::_0x10),
             "19" => Ok(Version::_0x13),
             _ => Err(
-                Error::new(ErrorKind::ParseError(ParseError::VersionParseError))
+                Error::new(ErrorKind::EncodingError(EncodingError::VersionEncodeError))
                     .add_context(format!("String: {}", s)),
             ),
         }
@@ -64,7 +64,7 @@ impl Version {
             16 => Ok(Version::_0x10),
             19 => Ok(Version::_0x13),
             _ => Err(
-                Error::new(ErrorKind::ParseError(ParseError::VersionParseError))
+                Error::new(ErrorKind::EncodingError(EncodingError::VersionEncodeError))
                     .add_context(format!("Int: {}", x)),
             ),
         }

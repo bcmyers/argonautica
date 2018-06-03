@@ -4,9 +4,9 @@ use std::mem;
 
 use blake2_rfc::blake2b::Blake2b;
 
-use Error;
 use data::{Data, Salt};
 use hasher::Hasher;
+use Error;
 
 fn h0(hasher: &mut Hasher) -> Result<[u8; 72], Error> {
     if hasher.salt().is_random() {

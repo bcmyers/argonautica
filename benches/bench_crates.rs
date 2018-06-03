@@ -14,13 +14,14 @@ use rand::rngs::OsRng;
 use rand::RngCore;
 
 const PASSWORD: &str = "P@ssw0rd";
-const SAMPLE_SIZE: usize = 10;
+const SAMPLE_SIZE: usize = 20;
 
 fn bench_crates(c: &mut Criterion) {
     // a2
     let mut hasher = a2::Hasher::default();
     hasher
         .configure_variant(a2::config::Variant::Argon2i)
+        .configure_password_clearing(false)
         .opt_out_of_secret_key(true);
     let a2 = Fun::new("a2", move |b, _| {
         b.iter(|| {

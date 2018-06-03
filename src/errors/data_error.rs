@@ -1,3 +1,5 @@
+// TODO: Tests
+
 /// Enum representing data or input errors
 #[derive(Fail, Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -11,12 +13,10 @@ pub enum DataError {
     #[fail(display = "Hash missing. Attempted to verify without first having provided a hash")]
     HashMissingError,
 
-    /// Hash invalid
-    #[fail(display = "Hash invalid")]
-    HashInvalidError,
-
     /// Password missing. Attempted to verify without first having provided a password
-    #[fail(display = "Password missing. Attempted to verify without first having provided a password")]
+    #[fail(
+        display = "Password missing. Attempted to verify without first having provided a password"
+    )]
     PasswordMissingError,
 
     /// Password too short. Length in bytes must be greater than 0
@@ -27,8 +27,16 @@ pub enum DataError {
     #[fail(display = "Password too long. Length in bytes must be less than 2^32")]
     PasswordTooLongError,
 
+    /// Password unowned error. You attempted to hash or verify with a borrowed password and 'password clearing' set to true, which is not possible because with a borrowed value a2 cannot zero out the password bytes. To prevent this error, either pass Hasher or Verifier an owned password or set 'password clearing' to false
+    #[fail(
+        display = "Password unowned error. You attempted to hash or verify with a borrowed password and 'password clearing' set to true, which is not possible because with a borrowed value a2 cannot zero out the password bytes. To prevent this error, either pass Hasher or Verifier an owned password or set 'password clearing' to false"
+    )]
+    PasswordUnownedError,
+
     /// Attempted to use a non-random salt without first having opted out of random salt
-    #[fail(display = "Attempted to use a non-random salt without first having opted out of random salt")]
+    #[fail(
+        display = "Attempted to use a non-random salt without first having opted out of random salt"
+    )]
     SaltNonRandomError,
 
     /// Salt too short. Length in bytes must be at least 8
@@ -40,12 +48,20 @@ pub enum DataError {
     SaltTooLongError,
 
     /// Secret key missing. Attempted to hash without a secret key without having first opted out of using a secret key
-    #[fail(display = "Secret key missing. Attempted to hash without a secret key without having first opted out of using a secret key")]
+    #[fail(
+        display = "Secret key missing. Attempted to hash without a secret key without having first opted out of using a secret key"
+    )]
     SecretKeyMissingError,
 
     /// Secret key too long. Length in bytes must be less than 2^32
     #[fail(display = "Secret key too long. Length in bytes must be less than 2^32")]
     SecretKeyTooLongError,
+
+    /// Secret key unowned error. You attempted to hash or verify with a borrowed secret key and 'secret key clearing' set to true, which is not possible because with a borrowed value a2 cannot zero out the secret key bytes. To prevent this error, either pass Hasher or Verifier an owned secret key or set 'secret key clearing' to false
+    #[fail(
+        display = "Secret key unowned error. You attempted to hash or verify with a borrowed secret key and 'secret key clearing' set to true, which is not possible because with a borrowed value a2 cannot zero out the secret key bytes. To prevent this error, either pass Hasher or Verifier an owned secret key or set 'secret key clearing' to false"
+    )]
+    SecretKeyUnownedError,
 
     #[doc(hidden)]
     #[fail(display = "__Nonexaustive variant")]
