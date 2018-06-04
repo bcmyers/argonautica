@@ -21,6 +21,7 @@ mod additional_data;
 #[cfg_attr(feature = "cargo-clippy", allow(module_inception))]
 mod data;
 mod password;
+mod salt_new;
 mod salt;
 mod secret_key;
 
@@ -31,3 +32,5 @@ pub use self::secret_key::SecretKey;
 
 pub use self::data::Data;
 pub(crate) use self::data::DataPrivate;
+
+pub use self::salt_new::SaltNew;
