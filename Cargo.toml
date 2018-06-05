@@ -76,10 +76,6 @@ path = "examples/example_actix_web.rs"
 required-features = ["actix_web"]
 
 [[example]]
-name = "example_configuration"
-path = "examples/example_configuration.rs"
-
-[[example]]
 name = "example_custom"
 path = "examples/example_custom.rs"
 

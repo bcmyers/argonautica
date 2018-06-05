@@ -1,0 +1,17 @@
+.DS_Store
+.vscode/
+
+**/*.rs.bk
+bindings.rs
+Cargo.lock
+target/
+
+*.egg-info/
+.mypy_cache
+build/
+dist/
+*$py.class
+*.py[cod]
+__pycache__/
+*.so
+venv/
