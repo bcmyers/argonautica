@@ -82,6 +82,34 @@
 //!
 //!     assert!(is_valid);
 //! }
+//!
+//! ## Alternatives
+//!
+//! If <b>jasonus</b> isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
+//! include [argon2rs](https://github.com/bryant/argon2rs) and
+//! [rust-argon2](https://github.com/sru-systems/rust-argon2). If you're interesting
+//! in password hashing with a different algorithm,
+//! [rust-bcrypt](https://github.com/Keats/rust-bcrypt) might be worth checking out.
+//!
+//! For what it's worth, besides API differences, <b>jasonus</b> has three key features that other
+//! Rust crates currently do not:
+//! * <b>jasonus</b> has the ability to create hashes with a secret key, which not even the
+//!   [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
+//! * <b>jasonus</b> is the only Rust crate that implements the newest Argon2 variant: Argon2id
+//! * <b>jasonus</b> uses [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions by default if your
+//!   processor has access to them, which can lead to significantly faster hashing times
+//!     * For example, on default settings, <b>jasonus</b> runs ~30% faster than other Rust crates on the
+//!       developer's early-2014 Macbook, which has access to
+//!       [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
+//!       through
+//!       [AVX1.0](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
+//!     * <i>Note: If for some reason you would like to turn SIMD off, compile with the
+//!       </i>`without_simd`<i> feature enabled, which will be necessary if you're compiling
+//!       for machines other than your own</i>
+//!     * <i>Further note: [argon2rs](https://github.com/bryant/argon2rs) has a
+//!       [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently
+//!       available on nightly Rust only</i>
+//!
 //! ```
 //! ## Configuration
 //!
@@ -250,33 +278,6 @@
 //!     * Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
 //!
 //! <b>jasonus</b> runs on stable Rust version 1.26.0 or greater.
-//!
-//! ## Alternatives
-//!
-//! If <b>jasonus</b> isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
-//! include [argon2rs](https://github.com/bryant/argon2rs) and
-//! [rust-argon2](https://github.com/sru-systems/rust-argon2). If you're interesting
-//! in password hashing with a different algorithm,
-//! [rust-bcrypt](https://github.com/Keats/rust-bcrypt) might be worth checking out.
-//!
-//! For what it's worth, besides API differences, <b>jasonus</b> has three key features that other
-//! Rust crates currently do not:
-//! * <b>jasonus</b> has the ability to create hashes with a secret key, which not even the
-//!   [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
-//! * <b>jasonus</b> is the only Rust crate that implements the newest Argon2 variant: Argon2id
-//! * <b>jasonus</b> uses [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions by default if your
-//!   processor has access to them, which can lead to significantly faster hashing times
-//!     * For example, on default settings, <b>jasonus</b> runs ~30% faster than other Rust crates on the
-//!       developer's early-2014 Macbook, which has access to
-//!       [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
-//!       through
-//!       [AVX1.0](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
-//!     * <i>Note: If for some reason you would like to turn SIMD off, compile with the
-//!       </i>`without_simd`<i> feature enabled, which will be necessary if you're compiling
-//!       for machines other than your own</i>
-//!     * <i>Further note: [argon2rs](https://github.com/bryant/argon2rs) has a
-//!       [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently
-//!       available on nightly Rust only</i>
 //!
 //! ## License
 //!
