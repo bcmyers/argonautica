@@ -17,14 +17,14 @@
 //! * to have robust, beginner-friendly documentation, and
 //! * to (as much as possible) follow the [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 //!
-//! The library was built with a simple use-case in mind: hashing passwords for storage in a
-//! website's database. That said, <b>jasonus</b> is "feature-complete," meaning anything you can
+//! <b>jasonus</b> was built with a simple use-case in mind: hashing passwords for storage in a
+//! website's database. That said, <b>jasonus</b> is <u>"feature-complete"</u>, meaning anything you can
 //! do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of
-//! Argon2 you should able to do with <b>jasonus</b>*.
+//! Argon2 you should able to do with <b>jasonus</b>\*.
 //!
 //! <i>\*Indeed, jasonus even has a feature that even the cannonical C implementation currently lacks,
-//! namely hashing with secret keys (the C implementation implements this under the hood, but
-//! doesn't expose it publicly)</i>
+//! namely hashing with secret keys (the C implementation implements this, but doesn't expose it
+//! publicly)</i>
 //!
 //! ## Hashing
 //!
@@ -111,7 +111,7 @@
 //!         // In the future hopefully a Rust backend will also be supported, but, for the
 //!         // moment, you must use `Backend::C`, which is the default. Using `Backend::Rust` will
 //!         // result in an error (again, for the moment).
-//!         .configure_cpu_pool(CpuPool::new(2)) // See below for description of the default
+//!         .configure_cpu_pool(CpuPool::new(2))
 //!         // 👆 There are two non-blocking methods on `Hasher` that perform computation on
 //!         // a separate thread and return a `Future` instead of a `Result` (`hash_non_blocking`
 //!         // and `hash_raw_non_blocking`). These methods allow jasonus to play nicely with
