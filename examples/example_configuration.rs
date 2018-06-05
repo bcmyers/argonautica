@@ -1,1 +1,2 @@
 // TODO:
+fn main() {}

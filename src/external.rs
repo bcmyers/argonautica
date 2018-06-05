@@ -128,86 +128,87 @@ pub unsafe extern "C" fn jasonus_verify(
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use config::Backend;
+// TODO:
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use config::Backend;
 
-    const HASH_LENGTHS: [u32; 2] = [8, 32];
-    const ITERATIONS: [u32; 7] = [1, 2, 4, 8, 32, 64, 128];
-    const LANES: [u32; 6] = [1, 2, 3, 4, 5, 6];
-    const PASSWORDS: [&str; 2] = ["P@ssw0rd", "😊"];
-    const VARIANTS: [&str; 3] = ["argon2d", "argon2i", "argon2id"];
+//     const HASH_LENGTHS: [u32; 2] = [8, 32];
+//     const ITERATIONS: [u32; 7] = [1, 2, 4, 8, 32, 64, 128];
+//     const LANES: [u32; 6] = [1, 2, 3, 4, 5, 6];
+//     const PASSWORDS: [&str; 2] = ["P@ssw0rd", "😊"];
+//     const VARIANTS: [&str; 3] = ["argon2d", "argon2i", "argon2id"];
 
-    #[inline(always)]
-    fn memory_size(lanes: u32) -> u32 {
-        let mut counter = 1;
-        loop {
-            if 2u32.pow(counter) < 8 * lanes {
-                counter += 1;
-                continue;
-            }
-            break 2u32.pow(counter);
-        }
-    }
+//     #[inline(always)]
+//     fn memory_size(lanes: u32) -> u32 {
+//         let mut counter = 1;
+//         loop {
+//             if 2u32.pow(counter) < 8 * lanes {
+//                 counter += 1;
+//                 continue;
+//             }
+//             break 2u32.pow(counter);
+//         }
+//     }
 
-    fn test(hash_length: u32, iterations: u32, lanes: u32, password: &str, variant: &str) {
-        let mut password_bytes = password.as_bytes().to_vec();
-        let password_ptr = (&mut password_bytes).as_mut_ptr();
-        let password_len = password.as_bytes().len();
+//     fn test(hash_length: u32, iterations: u32, lanes: u32, password: &str, variant: &str) {
+//         let mut password_bytes = password.as_bytes().to_vec();
+//         let password_ptr = (&mut password_bytes).as_mut_ptr();
+//         let password_len = password.as_bytes().len();
 
-        let variant_cstring = CString::new(variant).unwrap();
-        let variant_ptr = variant_cstring.as_ptr();
+//         let variant_cstring = CString::new(variant).unwrap();
+//         let variant_ptr = variant_cstring.as_ptr();
 
-        let mut error_code: libc::c_int = -1;
-        let error_code_ptr = &mut error_code as *mut libc::c_int;
+//         let mut error_code: libc::c_int = -1;
+//         let error_code_ptr = &mut error_code as *mut libc::c_int;
 
-        let backend = Backend::C as u32;
+//         let backend = Backend::C as u32;
 
-        let hash_ptr = unsafe {
-            jasonus_hash(
-                /* password_ptr */ password_ptr,
-                /* password_len */ password_len,
-                /* backend */ backend,
-                /* hash_length */ hash_length,
-                /* iterations */ iterations,
-                /* lanes */ lanes,
-                /* memory_size */ memory_size(lanes),
-                /* threads */ lanes,
-                /* variant_ptr */ variant_ptr,
-                /* version */ 19,
-                /* error_code_ptr */ error_code_ptr,
-            )
-        };
-        if hash_ptr == ::std::ptr::null_mut() {
-            panic!("Error code: {}", unsafe { *error_code_ptr });
-        }
-        let result = unsafe {
-            jasonus_verify(
-                hash_ptr as *const libc::c_char,
-                password_ptr as *const libc::uint8_t,
-                password_len,
-                backend,
-            )
-        };
-        unsafe { jasonus_free(hash_ptr as *mut libc::c_char) };
-        let is_valid = if result == 1 { true } else { false };
-        assert!(is_valid);
-    }
+//         let hash_ptr = unsafe {
+//             jasonus_hash(
+//                 /* password_ptr */ password_ptr,
+//                 /* password_len */ password_len,
+//                 /* backend */ backend,
+//                 /* hash_length */ hash_length,
+//                 /* iterations */ iterations,
+//                 /* lanes */ lanes,
+//                 /* memory_size */ memory_size(lanes),
+//                 /* threads */ lanes,
+//                 /* variant_ptr */ variant_ptr,
+//                 /* version */ 19,
+//                 /* error_code_ptr */ error_code_ptr,
+//             )
+//         };
+//         if hash_ptr == ::std::ptr::null_mut() {
+//             panic!("Error code: {}", unsafe { *error_code_ptr });
+//         }
+//         let result = unsafe {
+//             jasonus_verify(
+//                 hash_ptr as *const libc::c_char,
+//                 password_ptr as *const libc::uint8_t,
+//                 password_len,
+//                 backend,
+//             )
+//         };
+//         unsafe { jasonus_free(hash_ptr as *mut libc::c_char) };
+//         let is_valid = if result == 1 { true } else { false };
+//         assert!(is_valid);
+//     }
 
-    #[test]
-    #[ignore] // TODO:
-    fn test_external() {
-        for hash_length in &HASH_LENGTHS {
-            for iterations in &ITERATIONS {
-                for lanes in &LANES {
-                    for password in &PASSWORDS {
-                        for variant in &VARIANTS {
-                            test(*hash_length, *iterations, *lanes, *password, *variant);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+//     #[test]
+//     #[ignore] // TODO:
+//     fn test_external() {
+//         for hash_length in &HASH_LENGTHS {
+//             for iterations in &ITERATIONS {
+//                 for lanes in &LANES {
+//                     for password in &PASSWORDS {
+//                         for variant in &VARIANTS {
+//                             test(*hash_length, *iterations, *lanes, *password, *variant);
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }

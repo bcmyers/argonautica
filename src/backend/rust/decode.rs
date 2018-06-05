@@ -14,15 +14,15 @@ pub(crate) fn decode_rust(hash: &str) -> Result<HashRaw, Error> {
         Error::new(ErrorKind::EncodingError(EncodingError::HashDecodeError))
             .add_context(format!("Hash: {}", &hash))
     })?;
-    let hash_raw = HashRaw::new(
-        /* iterations */ intermediate.iterations,
-        /* lanes */ intermediate.lanes,
-        /* memory_size */ intermediate.memory_size,
-        /* raw_hash_bytes */ raw_hash_bytes,
-        /* raw_salt_bytes */ intermediate.raw_salt_bytes,
-        /* variant */ intermediate.variant,
-        /* version */ intermediate.version,
-    );
+    let hash_raw = HashRaw {
+        iterations: intermediate.iterations,
+        lanes: intermediate.lanes,
+        memory_size: intermediate.memory_size,
+        raw_hash_bytes: raw_hash_bytes,
+        raw_salt_bytes: intermediate.raw_salt_bytes,
+        variant: intermediate.variant,
+        version: intermediate.version,
+    };
     Ok(hash_raw)
 }
 

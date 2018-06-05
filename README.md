@@ -1,7 +1,5 @@
 # jasonus
 
-# This crate is a work in progress. Do <b>not</b> use.
-
 [![Build Status](https://travis-ci.org/bcmyers/jasonus.svg?branch=master)](https://travis-ci.org/bcmyers/jasonus)
 [![Crates.io](https://img.shields.io/crates/v/jasonus.svg)](https://crates.io/crates/jasonus)
 [![Documentation](https://docs.rs/jasonus/badge.svg)](https://docs.rs/jasonus/)
@@ -10,33 +8,35 @@
 
 ### Overview
 
-`jasonus` is a Rust crate for hashing passwords using the cryptographically-secure
+<b>jasonus</b> is a Rust crate for hashing passwords using the cryptographically-secure
 [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03),
 which won the [Password Hashing Competition](https://password-hashing.net/) in 2015 and is
 comparable to other secure hashing algorithms such as [bcrypt](https://en.wikipedia.org/wiki/Bcrypt)
 and [scrypt](https://en.wikipedia.org/wiki/Scrypt).
 
-`jasonus` was designed:
+<b>jasonus</b> was designed:
 * to be easy to use,
 * to have robust, beginner-friendly documentation,
 * to use sensible defaults, and
 * to (as much as possible) follow the [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 
 The library was built with a simple use-case in mind: hashing passwords for storage in a
-website's database. That said, `jasonus` is also feature-complete, meaning you should be able to
-to anything with `jasonus` that you can do with the cannonical
+website's database. That said, <b>jasonus</b> is also feature-complete, meaning you should be able to
+to anything with <b>jasonus</b> that you can do with the cannonical
 [C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2.
 
 ### Hashing
 
-Hashing passwords with `jasonus` is simple.  Just instantiate a default
+Hashing passwords with <b>jasonus</b> is simple.  Just instantiate a default
 [`Hasher`](struct.Hasher.html), provide it with a password and a secret key, and then
 call the [`hash`](struct.Hasher.html#method.hash) method.
 ```rust
 extern crate jasonus;
 
+use jasonus::Hasher;
+
 fn main() {
-    let mut hasher = jasonus::Hasher::default();
+    let mut hasher = Hasher::default();
     let hash = hasher
         .with_password("P@ssw0rd")
         .with_secret_key("\
@@ -60,8 +60,10 @@ then call the [`verify`](struct.Verifier.html#method.verify) method.
 ```rust
 extern crate jasonus;
 
+use jasonus::Verifier;
+
 fn main() {
-    let mut verifier = jasonus::Verifier::default();
+    let mut verifier = Verifier::default();
     let is_valid = verifier
         .with_hash("
             $argon2id$v=19$m=4096,t=128,p=2$\
@@ -85,8 +87,8 @@ fn main() {
 The default configurations for [`Hasher`](struct.Hasher.html) and
 [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for the general
 use-case of hashing passwords for storage in a website database, but if you want to use
-`jasonus` for different reasons or if you just disagree with the chosen defaults, customizing
-`jasonus` to meet your needs should hopefully be as easy and as intuitive as using the defaults.
+<b>jasonus</b> for different reasons or if you just disagree with the chosen defaults, customizing
+<b>jasonus</b> to meet your needs should hopefully be as easy and as intuitive as using the defaults.
 
 Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom
 configuration options. It provides color on each of the options.
@@ -94,11 +96,12 @@ configuration options. It provides color on each of the options.
 extern crate jasonus;
 extern crate futures_cpupool;
 
+use jasonus::Hasher;
 use jasonus::config::{Backend, Variant, Version};
 use futures_cpupool::CpuPool;
 
 fn main() {
-    let mut hasher = jasonus::Hasher::default();
+    let mut hasher = Hasher::default();
     hasher
         .configure_backend(Backend::C) // Default is `Backend::C`
         // 👆 jasonus was designed to support multiple backends (meaning multiple implementations
@@ -110,7 +113,7 @@ fn main() {
         .configure_cpu_pool(CpuPool::new(2)) // See below for description of the default
         // 👆 There are two non-blocking methods on `Hasher` that perform computation on
         // a separate thread and return a `Future` instead of a `Result` (`hash_non_blocking`
-        // and `hash_raw_non_blocking`). These methods allow `jasonus` to play nicely with
+        // and `hash_raw_non_blocking`). These methods allow jasonus to play nicely with
         // futures-heavy code, but need a `CpuPool` in order to work. The blocking
         // methods `hash` and `hash_raw` do not use a 'CpuPool'; so if you are using only
         // these blocking methods you can ignore this configuration entirely. If, however,
@@ -134,7 +137,7 @@ fn main() {
         // 128 iterations, which was chosen because, along with the default memory size of
         // 4096, this leads to a hashing time of approximately 500 milliseconds on the
         // early-2014 Macbook Air that is the developer's machine. If you're going to use
-        // `jasonus` in production, you should probably tweak this parameter (and the memory size
+        // jasonus in production, you should probably tweak this parameter (and the memory size
         // parameter) in order to increase the time it takes to hash to the maximum you can
         // reasonably allow for your use-case (e.g. to probably about 500 milliseconds
         // for the use-case of hashing user passwords for a website)
@@ -154,7 +157,7 @@ fn main() {
         // security of your hash. The default is 4096 kibibytes, which was chosen because,
         // again, along with the default iterations of 128, this leads to a hashing time of
         // approximately 500 milliseconds on the early-2014 Macbook Air that is the
-        // developer's machine. If you're going to use `jasonus` in production, you should probably
+        // developer's machine. If you're going to use jasonus in production, you should probably
         // tweak this parameter (and the iterations parameter) in order to increase the time
         // it takes to hash to the maximum you can reasonably allow for your use-case
         // (e.g. to probably about 500 milliseconds for the use-case of hashing user passwords
@@ -226,43 +229,45 @@ fn main() {
 ```
 ### Installation
 
-`jasonus` should be relatively straightforward to include in your Rust project:
+<b>jasonus</b> should be relatively straightforward to include in your Rust project:
 * Place `extern crate jasonus;` in your code (typically in either `lib.rs` or `main.rs`)
 * Place the following in the `[dependencies]` section of your `Cargo.toml`:
     * `jasonus = "0.1.0"`, or
     * `jasonus = { version = "0.1.0", features = ["serde"] }`</br>
     (The optional serde feature allows you to serialize / deserialize structs and
-    enums from `jasonus` using the [serde](https://github.com/serde-rs/serde) ecosystem).
+    enums from <b>jasonus</b> using the [serde](https://github.com/serde-rs/serde) ecosystem).
 
-That said, `jasonus` uses [cc](https://github.com/alexcrichton/cc-rs) and
+That said, <b>jasonus</b> uses [cc](https://github.com/alexcrichton/cc-rs) and
 [bindgen](https://github.com/rust-lang-nursery/rust-bindgen) to compile the cannonical
 [C implemenation](https://github.com/P-H-C/phc-winner-argon2) of Argon2 into a
 static archive during the build process. This means you need a C compiler on your
-machine in order to build `jasonus`. More specifically, you need:
+machine in order to build <b>jasonus</b>. More specifically, you need:
 * [LLVM/Clang](https://llvm.org/) (version 3.9 or higher)
     * Mac OS: `brew install llvm`, which requires [Homebrew](https://brew.sh/)
     * Debian-based linux: `apt-get install llvm-[version]-dev libclang-[version]-dev clang-[version]`
     * Arch linux: `pacman -S clang`
     * Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
 
-`jasonus` runs on stable Rust version 1.26.0 or greater.
+<b>jasonus</b> runs on stable Rust version 1.26.0 or greater.
 
 ### Alternatives
 
-If `jasonus` isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
+If <b>jasonus</b> isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
 include [argon2rs](https://github.com/bryant/argon2rs) and
 [rust-argon2](https://github.com/sru-systems/rust-argon2). As already mentioned, there's
-also a cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2), which `jasonus`
+also a cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2), which <b>jasonus</b>
 actually uses under the hood if you're using the C backend. Finally, if you're interesting
 in password hashing with a different algorithm,
 [rust-bcrypt](https://github.com/Keats/rust-bcrypt) might be worth checking out.
 
-For what it's worth, besides API differences, `jasonus` has three features that other
+For what it's worth, besides API differences, <b>jasonus</b> has three features that other
 Rust crates currently do not:
-* `jasonus` uses [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions by default if your
+* <b>jasonus</b> has the ability to create hashes with a secret key, which not even the
+  [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
+* <b>jasonus</b> uses [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions by default if your
   processor has access to them, which can lead to significantly faster hashing times than
   implementations that do not take advantage of [SIMD](https://en.wikipedia.org/wiki/SIMD)
-    * For example, on default settings, `jasonus` runs ~30% faster than other Rust crates on the
+    * For example, on default settings, <b>jasonus</b> runs ~30% faster than other Rust crates on the
       developer's early-2014 Macbook, which has access to
       [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
       through
@@ -274,16 +279,15 @@ Rust crates currently do not:
       [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently only
       available on nightly Rust; if you run [argon2rs](https://github.com/bryant/argon2rs)
       on nightly Rust with the [SIMD](https://en.wikipedia.org/wiki/SIMD) feature enabled,
-      it performs roughly in line with `jasonus`</i>
-* `jasonus` is the only Rust crate that implements the newest Argon2 variant: Argon2id
-* `jasonus` has the ability to create hashes with a secret key, which not even the
-  [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
-  (for string encoded hashes at least)
+      it performs roughly in line with <b>jasonus</b></i>
+* <b>jasonus</b> is the only Rust crate that implements the newest Argon2 variant: Argon2id
 
 ### License
 
-`jasonus` is licensed under either of:
+<b>jasonus</b> is licensed under either of:
 * [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
 * [The MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
+
+License: MIT/Apache-2.0

@@ -1,8 +1,8 @@
 extern crate argon2;
 extern crate argon2rs;
-extern crate jasonus;
 #[macro_use]
 extern crate criterion;
+extern crate jasonus;
 extern crate rand;
 
 use criterion::{Criterion, Fun};
@@ -15,18 +15,6 @@ const PASSWORD: &str = "P@ssw0rd";
 const SAMPLE_SIZE: usize = 10;
 
 fn bench_crates(c: &mut Criterion) {
-    // jasonus
-    let mut hasher = jasonus::Hasher::default();
-    hasher
-        .configure_variant(jasonus::config::Variant::Argon2i)
-        .configure_password_clearing(false)
-        .opt_out_of_secret_key(true);
-    let jasonus = Fun::new("jasonus", move |b, _| {
-        b.iter(|| {
-            let _ = hasher.with_password(PASSWORD).hash_raw().unwrap();
-        })
-    });
-
     // argon2rs
     let hasher = argon2rs::Argon2::new(
         /* passes */ DEFAULT_ITERATIONS,
@@ -54,6 +42,18 @@ fn bench_crates(c: &mut Criterion) {
         });
     });
 
+    // jasonus
+    let mut hasher = jasonus::Hasher::default();
+    hasher
+        .configure_variant(jasonus::config::Variant::Argon2i)
+        .configure_password_clearing(false)
+        .opt_out_of_secret_key(true);
+    let jasonus = Fun::new("jasonus", move |b, _| {
+        b.iter(|| {
+            let _ = hasher.with_password(PASSWORD).hash_raw().unwrap();
+        })
+    });
+
     // rust-argon2
     let config = argon2::Config {
         variant: argon2::Variant::Argon2i,
@@ -78,7 +78,7 @@ fn bench_crates(c: &mut Criterion) {
         });
     });
 
-    let functions = vec![jasonus, argon2rs, rust_argon2];
+    let functions = vec![argon2rs, jasonus, rust_argon2];
     c.bench_functions("bench_crates", functions, 0);
 }
 

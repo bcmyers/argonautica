@@ -1,13 +1,12 @@
-extern crate jasonus;
 #[macro_use]
 extern crate criterion;
+extern crate jasonus;
 extern crate num_cpus;
 
 use criterion::Criterion;
 use jasonus::config::{Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS,
                       DEFAULT_MEMORY_SIZE, DEFAULT_SALT_LENGTH, DEFAULT_VARIANT, DEFAULT_VERSION};
 use jasonus::data::{Salt, SecretKey};
-use jasonus::Hasher;
 
 const SAMPLE_SIZE: usize = 25;
 

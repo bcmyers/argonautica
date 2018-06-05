@@ -5,7 +5,7 @@ extern crate num_cpus;
 use std::time::Instant;
 
 use jasonus::config::{Variant, Version};
-use jasonus::data::{Salt, SecretKey};
+use jasonus::input::{Salt, SecretKey};
 
 pub const HASH_LENGTH: u32 = 32;
 pub const ITERATIONS: [u32; 7] = [32, 64, 96, 128, 192, 256, 512];

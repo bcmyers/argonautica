@@ -32,13 +32,13 @@ impl FromStr for HashRaw {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct HashRaw {
-    iterations: u32,
-    lanes: u32,
-    memory_size: u32,
-    raw_hash_bytes: Vec<u8>,
-    raw_salt_bytes: Vec<u8>,
-    variant: Variant,
-    version: Version,
+    pub(crate) iterations: u32,
+    pub(crate) lanes: u32,
+    pub(crate) memory_size: u32,
+    pub(crate) raw_hash_bytes: Vec<u8>,
+    pub(crate) raw_salt_bytes: Vec<u8>,
+    pub(crate) variant: Variant,
+    pub(crate) version: Version,
 }
 
 impl HashRaw {
@@ -73,28 +73,6 @@ impl HashRaw {
     /// Obtian the version configuration that was used to produce this hash
     pub fn version(&self) -> Version {
         self.version
-    }
-}
-
-impl HashRaw {
-    pub(crate) fn new(
-        iterations: u32,
-        lanes: u32,
-        memory_size: u32,
-        raw_hash_bytes: Vec<u8>,
-        raw_salt_bytes: Vec<u8>,
-        variant: Variant,
-        version: Version,
-    ) -> HashRaw {
-        HashRaw {
-            iterations,
-            lanes,
-            memory_size,
-            raw_hash_bytes,
-            raw_salt_bytes,
-            variant,
-            version,
-        }
     }
 }
 

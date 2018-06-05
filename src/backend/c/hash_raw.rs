@@ -30,15 +30,15 @@ pub(crate) fn hash_raw_c(hasher: &mut Hasher) -> Result<HashRaw, Error> {
     let variant = hasher.config().variant() as ffi::argon2_type;
     let err = unsafe { ffi::argon2_ctx(context_ptr, variant) };
     check_error(err)?;
-    Ok(HashRaw::new(
-        /* iterations: */ hasher.config().iterations(),
-        /* lanes: */ hasher.config().lanes(),
-        /* memory_size: */ hasher.config().memory_size(),
-        /* raw_hash_bytes: */ buffer,
-        /* raw_salt_bytes: */ hasher.salt().as_bytes().to_vec(),
-        /* variant: */ hasher.config().variant(),
-        /* version: */ hasher.config().version(),
-    ))
+    Ok(HashRaw {
+        iterations: hasher.config().iterations(),
+        lanes: hasher.config().lanes(),
+        memory_size: hasher.config().memory_size(),
+        raw_hash_bytes: buffer,
+        raw_salt_bytes: hasher.salt().as_bytes().to_vec(),
+        variant: hasher.config().variant(),
+        version: hasher.config().version(),
+    })
 }
 
 fn check_error(err: ffi::Argon2_ErrorCodes) -> Result<(), Error> {

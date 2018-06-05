@@ -1,6 +1,7 @@
+extern crate failure;
 extern crate jasonus;
 
-fn main() -> Result<(), jasonus::Error> {
+fn main() -> Result<(), failure::Error> {
     let mut hasher = jasonus::Hasher::default();
     let hash = hasher
         .with_password("P@ssw0rd")

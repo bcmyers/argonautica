@@ -260,7 +260,6 @@ fn test(input: &Input) {
 }
 
 #[test]
-#[ignore] // TODO: Change
 fn test_integration() {
     let build_dir = PathBuf::from("tests/c/build");
     build_c(&build_dir);

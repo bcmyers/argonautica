@@ -1,13 +1,13 @@
 extern crate dotenv;
-extern crate jasonus;
 #[macro_use]
 extern crate failure;
+extern crate jasonus;
 
 use std::collections::HashMap;
 use std::env;
 
 use jasonus::config::{Variant, Version};
-use jasonus::data::{Salt, SecretKey};
+use jasonus::input::{Salt, SecretKey};
 
 // Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey, failure::Error> {

@@ -1,6 +1,6 @@
-extern crate jasonus;
 #[macro_use]
 extern crate criterion;
+extern crate jasonus;
 extern crate md5;
 extern crate sha2;
 
