@@ -1,13 +1,13 @@
-extern crate a2;
 extern crate dotenv;
+extern crate jasonus;
 #[macro_use]
 extern crate failure;
 
 use std::collections::HashMap;
 use std::env;
 
-use a2::config::{Variant, Version};
-use a2::data::{Salt, SecretKey};
+use jasonus::config::{Variant, Version};
+use jasonus::data::{Salt, SecretKey};
 
 // Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey, failure::Error> {
@@ -21,7 +21,7 @@ fn load_secret_key() -> Result<SecretKey, failure::Error> {
 
 fn main() -> Result<(), failure::Error> {
     let secret_key = load_secret_key()?;
-    let mut hasher = a2::Hasher::default();
+    let mut hasher = jasonus::Hasher::default();
     hasher
         .configure_hash_length(32)
         .configure_iterations(128)
@@ -32,7 +32,7 @@ fn main() -> Result<(), failure::Error> {
         .configure_threads(1)
         .configure_variant(Variant::Argon2id)
         .configure_version(Version::_0x13)
-        .with_salt(Salt::random(16)?)
+        .with_salt(Salt::random(16))
         .with_secret_key(&secret_key)
         .opt_out_of_random_salt(true);
 
@@ -43,7 +43,7 @@ fn main() -> Result<(), failure::Error> {
         dictionary.insert(password.to_string(), hash);
     }
 
-    let mut verifier = a2::Verifier::new();
+    let mut verifier = jasonus::Verifier::new();
     verifier.with_secret_key(&secret_key);
 
     for (password, hash) in dictionary.iter() {

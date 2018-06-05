@@ -1,12 +1,12 @@
-extern crate a2;
 extern crate failure;
+extern crate jasonus;
 extern crate serde;
 extern crate serde_json;
 
 fn serialize_hasher() -> Result<String, failure::Error> {
     let additional_data = [1u8, 2, 3, 4];
     let salt = [1u8, 2, 3, 4, 5, 6, 7, 8];
-    let mut hasher = a2::Hasher::default();
+    let mut hasher = jasonus::Hasher::default();
     hasher
         .with_additional_data(&additional_data[..])
         .with_password("P@ssw0rd") // note: for security reasons, password is never serialized
@@ -40,8 +40,8 @@ fn serialize_hasher() -> Result<String, failure::Error> {
     Ok(j)
 }
 
-fn deserialize_hasher(j: &str) -> Result<a2::Hasher, failure::Error> {
-    let hasher: a2::Hasher = serde_json::from_str(&j)?;
+fn deserialize_hasher(j: &str) -> Result<jasonus::Hasher, failure::Error> {
+    let hasher: jasonus::Hasher = serde_json::from_str(&j)?;
     println!("*** Deserialized Hasher ***");
     println!("{:#?}\n", &hasher);
     // *** Deserialized hasher ***
@@ -75,7 +75,7 @@ fn deserialize_hasher(j: &str) -> Result<a2::Hasher, failure::Error> {
 
 fn serialize_verifier() -> Result<String, failure::Error> {
     let additional_data = [1u8, 2, 3, 4];
-    let mut verifier = a2::Verifier::default();
+    let mut verifier = jasonus::Verifier::default();
     verifier
         .with_additional_data(&additional_data[..])
         .with_hash("$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q")
@@ -97,8 +97,8 @@ fn serialize_verifier() -> Result<String, failure::Error> {
     Ok(j)
 }
 
-fn deserialize_verifier(j: &str) -> Result<a2::Verifier, failure::Error> {
-    let verifier: a2::Verifier = serde_json::from_str(&j)?;
+fn deserialize_verifier(j: &str) -> Result<jasonus::Verifier, failure::Error> {
+    let verifier: jasonus::Verifier = serde_json::from_str(&j)?;
     println!("*** Deserialized Verifier ***");
     println!("{:#?}\n", &verifier);
     Ok(verifier)

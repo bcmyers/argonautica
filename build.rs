@@ -14,7 +14,7 @@ const BLAKE2_IMPLEMENTATION: &str = "phc-winner-argon2/src/ref.c";
 const BLAKE2_IMPLEMENTATION: &str = "phc-winner-argon2/src/opt.c";
 
 fn main() -> Result<(), failure::Error> {
-    let temp = tempdir::TempDir::new("a2")?;
+    let temp = tempdir::TempDir::new("jasonus")?;
     let temp_dir = temp.path();
     let temp_dir_str = temp_dir.to_str().unwrap();
     for header_path_str in &[

@@ -3,8 +3,8 @@ use futures_cpupool::CpuPool;
 use scopeguard;
 
 use config::{default_cpu_pool, default_lanes, Backend, HasherConfig, Variant, Version};
-use data::{AdditionalData, Data, Password, Salt, SecretKey};
 use errors::{ConfigurationError, DataError};
+use input::{AdditionalData, Password, Salt, SecretKey};
 use output::HashRaw;
 use {Error, ErrorKind};
 
@@ -21,8 +21,7 @@ impl Default for Hasher {
     }
 }
 
-/// <b><u>One of the two main structs.</u></b> Use it to turn passwords into hashes that
-/// are safe to store in a database
+/// <b><u>One of the two main structs.</u></b> Use it to turn passwords into hashes
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -49,7 +48,7 @@ impl Hasher {
     /// options for your machine that produce hashing times between 375 and 625 milliseconds
     /// (Don't forget to run it with the `--release` flag). Alternatively, you can clone the
     /// repository and run the benchmark suite with
-    /// `cargo bench --features benches -- bench_inputs`, which will take longer but which runs
+    /// `cargo bench --features benches -- inputs`, which will take longer but which runs
     /// many iterations for each configuration scenario; so it provides information about
     /// distributions of running time (e.g. mean, 95% confidence intervals, etc.) as opposed
     /// to just point estimates.
@@ -63,27 +62,29 @@ impl Hasher {
     ///       [`hash_raw_non_blocking`](struct.Hasher.html#method.hash_raw_non_blocking))
     /// * `hash_length`: `32` bytes
     /// * `iterations`: `128`
-    /// * `lanes`: The number of physical cores on your machine
+    /// * `lanes`: The number of logical cores on your machine
     /// * `memory_size`: `4096` kibibytes
     /// * `opt_out_of_random_salt`: `false`
     /// * `opt_out_of_secret_key`: `false`
-    /// * `password_clearing`: `true`
+    /// * `password_clearing`: `false`
     /// * `salt`: random [`Salt`](data/struct.Salt.html) of length 32 bytes that renews with every hash
     /// * `secret_key_clearing`: `false`
-    /// * `threads`: The number of physical cores on your machine
+    /// * `threads`: The number of logical cores on your machine
     /// * `variant`: [`Variant::Argon2id`](config/enum.Variant.html#variant.Argon2id)
     /// * `version`: [`Version::_0x13`](config/enum.Verion.html#variant._0x13)
     pub fn new() -> Hasher {
         Hasher::default()
     }
-    /// Creates a new [`Hasher`](struct.Hasher.html) that is fast <b><u>but highly insecure</u></b>.
+    /// Creates a new [`Hasher`](struct.Hasher.html) that is <b>fast but <u>highly</u> insecure</b>.
     /// If for some reason you'd like to use Argon2 for hashing where security is not an issue,
     /// you can use this configuration. It sets hash length to 32 bytes (256 bits), uses only
     /// 1 iteration, sets memory size to the minimum of 8 * the number of lanes, uses a
-    /// deterministic salt of the minimum length of 8 bytes, opts out of a secret key, and
-    /// sets password clearing to false. All other configuration options are the same as the
-    /// defaults. On the developer's early-2014 Macbook Air, this configuration hashes
-    /// "some document" in approximately 250 microseconds (on average)
+    /// deterministic salt of the minimum length of 8 bytes, and opts out of a secret key.
+    /// All other configuration options are the same as the defaults. On the developer's
+    /// early-2014 Macbook Air, this configuration hashes the full text of Shakespear's Hamlet
+    /// in approximately 1 millisecond (on average). [MD5](https://github.com/stainless-steel/md5)
+    /// does it in about half the time and [sha2](https://github.com/RustCrypto/hashes) with the
+    /// SHA-256 algorithm performs about the same as `jasonus`
     pub fn fast_but_insecure() -> Hasher {
         fn memory_size(lanes: u32) -> u32 {
             let mut counter = 1;
@@ -116,7 +117,9 @@ impl Hasher {
     /// default backend is [`Backend::C`](config/enum.Backend.html#variant.C), <i>which is
     /// currently the only backend supported. A Rust backend is planned, but is not currently
     /// available. If you configure a [`Hasher`](struct.Hasher.html) with
-    /// [`Backend::Rust`](config/enum.Backend.html#variant.Rust) it will error</i>
+    /// [`Backend::Rust`](config/enum.Backend.html#variant.Rust) it will error when you
+    /// call [`hash`](struct.Hasher.html#method.hash),
+    /// [`hash_raw`](struct.Hasher.html#method.hash_raw) or their non-blocking equivalents</i>
     pub fn configure_backend(&mut self, backend: Backend) -> &mut Hasher {
         self.config.set_backend(backend);
         self
@@ -146,8 +149,7 @@ impl Hasher {
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom number of
     /// iterations. The default is `128`.
     ///
-    /// See [configuration example](index.html#configuration) for a more detailed discussion
-    /// of this parameter
+    /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_iterations(&mut self, iterations: u32) -> &mut Hasher {
         self.config.set_iterations(iterations);
         self
@@ -155,8 +157,7 @@ impl Hasher {
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom number of
     /// lanes. The default is the number of physical cores on your machine.
     ///
-    /// See [configuration example](index.html#configuration) for a more detailed discussion
-    /// of this parameter
+    /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_lanes(&mut self, lanes: u32) -> &mut Hasher {
         self.config.set_lanes(lanes);
         self
@@ -164,8 +165,7 @@ impl Hasher {
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom memory size
     /// (in kibibytes). The default is `4096`.
     ///
-    /// See [configuration example](index.html#configuration) for a more detailed discussion
-    /// of this parameter
+    /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_memory_size(&mut self, memory_size: u32) -> &mut Hasher {
         self.config.set_memory_size(memory_size);
         self
@@ -175,8 +175,7 @@ impl Hasher {
     /// or [`hash_raw`](struct.Hasher.html#method.hash_raw) (or their non-blocking versions).
     /// The default is to clear out the password bytes (i.e. `true`).
     ///
-    /// See [configuration example](index.html#configuration) for a more detailed discussion
-    /// of this parameter
+    /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_password_clearing(&mut self, boolean: bool) -> &mut Hasher {
         self.config.set_password_clearing(boolean);
         self
@@ -188,8 +187,7 @@ impl Hasher {
     /// This default was chosen to make it easier to keep using the same
     /// [`Hasher`](struct.Hasher.html) for multiple passwords.
     ///
-    /// See [configuration example](index.html#configuration) for a more detailed discussion
-    /// of this parameter
+    /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_secret_key_clearing(&mut self, boolean: bool) -> &mut Hasher {
         self.config.set_secret_key_clearing(boolean);
         self
@@ -199,8 +197,7 @@ impl Hasher {
     /// a number of threads that is greater than the lanes configuration,
     /// [`Hasher`](struct.Hasher.html) will use the minimum of the two.
     ///
-    /// See [configuration example](index.html#configuration) for a more detailed discussion
-    /// of this parameter
+    /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_threads(&mut self, threads: u32) -> &mut Hasher {
         self.config.set_threads(threads);
         self
@@ -209,8 +206,7 @@ impl Hasher {
     /// variant. The default is [`Variant::Argon2id`](config/enum.Variant.html#variant.Argon2id).
     /// Do <b>not</b> use a different variant unless you have a specific reason to do so.
     ///
-    /// See [configuration example](index.html#configuration) for a more detailed discussion
-    /// of this parameter
+    /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_variant(&mut self, variant: Variant) -> &mut Hasher {
         self.config.set_variant(variant);
         self
@@ -220,8 +216,7 @@ impl Hasher {
     /// [`Version::_0x13`](config/enum.Version.html#variant._0x13).
     /// Do <b>not</b> use a different version unless you have a specific reason to do so.
     ///
-    /// See [configuration example](index.html#configuration) for a more detailed discussion
-    /// of this parameter
+    /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_version(&mut self, version: Version) -> &mut Hasher {
         self.config.set_version(version);
         self
@@ -272,10 +267,7 @@ impl Hasher {
             }
         });
         // reset salt if it is random
-        if hasher.salt().is_random() {
-            let len = hasher.salt().len();
-            hasher.set_salt(Salt::random(len as u32)?);
-        }
+        hasher.salt.update()?;
         // validate inputs
         hasher.validate()?;
         // calculate hash_raw
@@ -293,15 +285,27 @@ impl Hasher {
     /// [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html)
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
     pub fn hash_raw_non_blocking(&mut self) -> impl Future<Item = HashRaw, Error = Error> {
-        let mut hasher = self.clone();
-        match self.config.cpu_pool() {
+        // ensure password and/or secret_key clearing code will run
+        let hasher = scopeguard::guard(self, |hasher| {
+            if hasher.config().password_clearing() {
+                hasher.set_password(None);
+            }
+            if hasher.config().secret_key_clearing() {
+                hasher.set_secret_key(None);
+            }
+        });
+        // TODO: Random salt?
+
+        // spawn thread
+        let mut hasher = hasher.clone();
+        match hasher.config.cpu_pool() {
             Some(cpu_pool) => cpu_pool.spawn_fn(move || {
                 let hash_raw = hasher.hash_raw()?;
                 Ok::<_, Error>(hash_raw)
             }),
             None => {
                 let cpu_pool = default_cpu_pool();
-                self.config.set_cpu_pool(cpu_pool.clone());
+                hasher.config.set_cpu_pool(cpu_pool.clone());
                 cpu_pool.spawn_fn(move || {
                     let hash_raw = hasher.hash_raw()?;
                     Ok::<_, Error>(hash_raw)
@@ -412,23 +416,14 @@ impl Hasher {
 }
 
 impl Hasher {
-    pub(crate) fn additional_data_mut(&mut self) -> Option<&mut AdditionalData> {
-        self.additional_data.as_mut()
-    }
     pub(crate) fn password_mut(&mut self) -> Option<&mut Password> {
         self.password.as_mut()
-    }
-    pub(crate) fn salt_mut(&mut self) -> &mut Salt {
-        &mut self.salt
     }
     pub(crate) fn secret_key_mut(&mut self) -> Option<&mut SecretKey> {
         self.secret_key.as_mut()
     }
     pub(crate) fn set_password(&mut self, password: Option<Password>) {
         self.password = password;
-    }
-    pub(crate) fn set_salt(&mut self, salt: Salt) {
-        self.salt = salt;
     }
     pub(crate) fn set_secret_key(&mut self, secret_key: Option<SecretKey>) {
         self.secret_key = secret_key;
@@ -441,7 +436,7 @@ impl Hasher {
         match self.password {
             Some(ref password) => {
                 password.validate()?;
-                if self.config.password_clearing() && password.constructed_from_borrow() {
+                if self.config.password_clearing() && !password.is_owned() {
                     return Err(Error::new(ErrorKind::DataError(
                         DataError::PasswordUnownedError,
                     )));
@@ -462,7 +457,7 @@ impl Hasher {
         match self.secret_key {
             Some(ref secret_key) => {
                 secret_key.validate()?;
-                if self.config.secret_key_clearing() && secret_key.constructed_from_borrow() {
+                if self.config.secret_key_clearing() && !secret_key.is_owned() {
                     return Err(Error::new(ErrorKind::DataError(
                         DataError::SecretKeyUnownedError,
                     )));

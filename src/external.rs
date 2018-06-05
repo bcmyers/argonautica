@@ -10,18 +10,18 @@ use config::{Backend, Variant, Version};
 use {Hasher, Verifier};
 
 /// Frees memory associated with a pointer that was previously returned from
-/// [`a2_hash`](function.a2_hash.html)
+/// [`jasonus_hash`](function.jasonus_hash.html)
 #[no_mangle]
-pub unsafe extern "C" fn a2_free(cstring_ptr: *mut libc::c_char) {
+pub unsafe extern "C" fn jasonus_free(cstring_ptr: *mut libc::c_char) {
     CString::from_raw(cstring_ptr);
 }
 
 /// Hash function that can be called from C. This function allocates memory and hands ownership
-/// of that memory over to C; so in your C code you must call [`a2_free`](function.a2_free.html)
+/// of that memory over to C; so in your C code you must call [`jasonus_free`](function.jasonus_free.html)
 /// at some point after using the pointer returned from this function in order to avoid leaking
 /// memory
 #[no_mangle]
-pub unsafe extern "C" fn a2_hash(
+pub unsafe extern "C" fn jasonus_hash(
     password_ptr: *const libc::uint8_t,
     password_len: libc::size_t,
     backend: libc::uint32_t,
@@ -90,11 +90,11 @@ pub unsafe extern "C" fn a2_hash(
     hash_cstring.into_raw() as *const libc::c_char
 }
 
-/// Verify function that can be called from C. Unlike [`a2_hash`](function.a2_hash.html), this
+/// Verify function that can be called from C. Unlike [`jasonus_hash`](function.jasonus_hash.html), this
 /// function does <b>not</b> allocate memory that needs to be freed from C; so there is no need
-/// to call [`a2_free`](function.a2_free.html) after using this function
+/// to call [`jasonus_free`](function.jasonus_free.html) after using this function
 #[no_mangle]
-pub unsafe extern "C" fn a2_verify(
+pub unsafe extern "C" fn jasonus_verify(
     hash_ptr: *const libc::c_char,
     password_ptr: *const libc::uint8_t,
     password_len: libc::size_t,
@@ -165,7 +165,7 @@ mod tests {
         let backend = Backend::C as u32;
 
         let hash_ptr = unsafe {
-            a2_hash(
+            jasonus_hash(
                 /* password_ptr */ password_ptr,
                 /* password_len */ password_len,
                 /* backend */ backend,
@@ -183,14 +183,14 @@ mod tests {
             panic!("Error code: {}", unsafe { *error_code_ptr });
         }
         let result = unsafe {
-            a2_verify(
+            jasonus_verify(
                 hash_ptr as *const libc::c_char,
                 password_ptr as *const libc::uint8_t,
                 password_len,
                 backend,
             )
         };
-        unsafe { a2_free(hash_ptr as *mut libc::c_char) };
+        unsafe { jasonus_free(hash_ptr as *mut libc::c_char) };
         let is_valid = if result == 1 { true } else { false };
         assert!(is_valid);
     }

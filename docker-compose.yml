@@ -7,9 +7,9 @@ services:
       - LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu/
       - RUST_BACKTRACE=1
     volumes:
-      - .:/home/dev/a2
-      - target:/home/dev/a2/target
-    working_dir: /home/dev/a2
+      - .:/home/dev/jasonus
+      - target:/home/dev/jasonus/target
+    working_dir: /home/dev/jasonus
 
 volumes:
   target:

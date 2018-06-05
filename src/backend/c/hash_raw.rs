@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use data::{Data, DataPrivate};
+use input::{Data, DataMut};
 use output::HashRaw;
 use {ffi, Error, ErrorKind, Hasher};
 
@@ -9,14 +9,14 @@ pub(crate) fn hash_raw_c(hasher: &mut Hasher) -> Result<HashRaw, Error> {
     let mut context = ffi::Argon2_Context {
         out: buffer.as_mut_ptr(),
         outlen: buffer.len() as u32,
-        pwd: hasher.password_mut().as_mut_ptr(),
-        pwdlen: hasher.password().len() as u32,
-        salt: hasher.salt_mut().as_mut_ptr(),
-        saltlen: hasher.salt().len() as u32,
-        secret: hasher.secret_key_mut().as_mut_ptr(),
-        secretlen: hasher.secret_key().len() as u32,
-        ad: hasher.additional_data_mut().as_mut_ptr(),
-        adlen: hasher.additional_data().len() as u32,
+        pwd: hasher.password_mut().c_mut_ptr(),
+        pwdlen: hasher.password().c_len(),
+        salt: hasher.salt().c_ptr() as *mut u8,
+        saltlen: hasher.salt().c_len(),
+        secret: hasher.secret_key_mut().c_mut_ptr(),
+        secretlen: hasher.secret_key().c_len(),
+        ad: hasher.additional_data().c_ptr() as *mut u8,
+        adlen: hasher.additional_data().c_len(),
         t_cost: hasher.config().iterations(),
         m_cost: hasher.config().memory_size(),
         lanes: hasher.config().lanes(),

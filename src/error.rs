@@ -4,20 +4,11 @@ use ErrorKind;
 
 impl fmt::Debug for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if f.alternate() {
-            write!(
-                f,
-                "a2::error::Error {{\n    kind: a2::error::ErrorKind::{:?},\n    display: {:?},\n}}",
-                self.kind,
-                self.display,
-            )
-        } else {
-            write!(
-                f,
-                "a2::error::Error {{ kind: a2::error::ErrorKind::{:?}, display: {:?} }}",
-                self.kind, self.display,
-            )
-        }
+        write!(
+            f,
+            "jasonus::Error {{ kind: jasonus::ErrorKind::{:?}, display: {:?} }}",
+            self.kind, self.display,
+        )
     }
 }
 

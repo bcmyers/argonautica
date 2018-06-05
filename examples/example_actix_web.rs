@@ -1,5 +1,4 @@
 /// Toy example of an actix-web server that has endpoints for hashing and verifying passwords
-extern crate a2;
 extern crate actix_web;
 extern crate dotenv;
 extern crate env_logger;
@@ -8,6 +7,7 @@ extern crate failure;
 extern crate futures;
 extern crate futures_cpupool;
 extern crate futures_timer;
+extern crate jasonus;
 #[macro_use]
 extern crate serde;
 extern crate serde_json;
@@ -17,14 +17,14 @@ use std::env;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use a2::data::SecretKey;
-use a2::{Hasher, Verifier};
 use actix_web::http::Method;
 use actix_web::middleware::Logger;
 use actix_web::{server, App, AsyncResponder, Error, HttpMessage, HttpRequest, HttpResponse};
 use futures::Future;
 use futures_cpupool::CpuPool;
 use futures_timer::Delay;
+use jasonus::data::SecretKey;
+use jasonus::{Hasher, Verifier};
 
 // This will be used for the register and verify routes. We want these routes to take a
 // at least a minimum amount of time to load since we don't want to give potential attackers
@@ -111,7 +111,7 @@ struct RegisterRequest {
 }
 
 // Handler for the "/register" route. First we parse the client-provided json.
-// Then we hash the password they provided using a2.  Next we add the email they
+// Then we hash the password they provided using jasonus.  Next we add the email they
 // provided and the hash to our "database". Finally, if all worked correctly, we
 // return an empty 201 Created response. Note that we would like to
 // ensure that calling this route always takes at least a minimum amount of time

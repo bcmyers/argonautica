@@ -7,8 +7,8 @@ use serde;
 use serde::ser::SerializeStruct;
 
 use config::{default_cpu_pool, Backend, VerifierConfig};
-use data::{AdditionalData, Password, SecretKey};
 use errors::DataError;
+use input::{AdditionalData, Password, SecretKey};
 use output::HashRaw;
 use {Error, ErrorKind, Hasher};
 
@@ -40,7 +40,7 @@ impl serde::ser::Serialize for Verifier {
             Latest::Hash => state.serialize_field("hash", &self.hash)?,
             Latest::HashRaw => match self.hash_raw {
                 Some(ref hash_raw) => {
-                    let thing_to_serialize = Some(hash_raw.to_hash());
+                    let thing_to_serialize = Some(hash_raw.to_string());
                     state.serialize_field("hash", &thing_to_serialize)?;
                 }
                 None => {
@@ -411,7 +411,7 @@ mod tests {
                 "\nverifier1:\n{:#?}\nAdditional Data: {:?}\nHash: {}\nPasswod: {:?}\nSecret key: {:?}",
                 verifier1,
                 "additional data".as_bytes(),
-                hash_raw.to_hash(),
+                hash_raw.to_string(),
                 password.as_bytes(),
                 "secret".as_bytes()
             );

@@ -1,14 +1,13 @@
-extern crate a2;
+extern crate jasonus;
 #[macro_use]
 extern crate criterion;
 extern crate num_cpus;
 
-use a2::config::{
-    Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_SALT_LENGTH, DEFAULT_VARIANT, DEFAULT_VERSION,
-};
-use a2::data::{Salt, SecretKey};
-use a2::Hasher;
 use criterion::Criterion;
+use jasonus::config::{Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_SALT_LENGTH, DEFAULT_VARIANT,
+                      DEFAULT_VERSION};
+use jasonus::data::{Salt, SecretKey};
+use jasonus::Hasher;
 
 const SAMPLE_SIZE: usize = 5;
 
@@ -147,7 +146,7 @@ struct Bench {
 
 impl Bench {
     fn setup(mut self) -> Bench {
-        let mut hasher = a2::Hasher::default();
+        let mut hasher = jasonus::Hasher::default();
         hasher
             .configure_hash_length(HASH_LENGTH)
             .configure_lanes(self.threads)
@@ -158,7 +157,7 @@ impl Bench {
             .configure_threads(self.threads)
             .configure_variant(VARIANT)
             .configure_version(VERSION)
-            .with_salt(Salt::random(SALT_LENGTH).unwrap())
+            .with_salt(Salt::random(SALT_LENGTH))
             .with_secret_key(
                 SecretKey::from_base64_encoded_str(BASE64_ENCODED_SECRET_KEY).unwrap(),
             );

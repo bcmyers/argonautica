@@ -15,16 +15,16 @@ pub(crate) fn default_cpu_pool_serde() -> Option<CpuPool> {
     None
 }
 
-/// Returns the number of physical cores on your machine
+/// Returns the number of logical cores on your machine
 #[inline(always)]
 pub fn default_lanes() -> u32 {
-    num_cpus::get_physical() as u32
+    num_cpus::get() as u32
 }
 
-/// Returns the number of physical cores on your machine
+/// Returns the number of logical cores on your machine
 #[inline(always)]
 pub fn default_threads() -> u32 {
-    num_cpus::get_physical() as u32
+    num_cpus::get() as u32
 }
 
 /// [`Backend::C`](enum.Backend.html#variant.C)
@@ -48,8 +48,8 @@ pub const DEFAULT_OPT_OUT_OF_RANDOM_SALT: bool = false;
 /// `false`
 pub const DEFAULT_OPT_OUT_OF_SECRET_KEY: bool = false;
 
-/// `true`
-pub const DEFAULT_PASSWORD_CLEARING: bool = true;
+/// `false`
+pub const DEFAULT_PASSWORD_CLEARING: bool = false;
 
 /// `false`
 pub const DEFAULT_SECRET_KEY_CLEARING: bool = false;

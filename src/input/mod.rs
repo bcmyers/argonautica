@@ -14,14 +14,9 @@
 //! constructors as well, e.g. [`Salt::random(...)`](struct.Salt.html#method.random), which
 //! produces a [`Salt`](struct.Salt.html) that will create new crytographically-secure,
 //! random bytes after each hash.
-//!
-//! Finally, each struct below implements the [`Data`](trait.Data.html) trait, which
-//! provides read-only access to the otherwise opaque structs' underlying bytes.
 mod additional_data;
-#[cfg_attr(feature = "cargo-clippy", allow(module_inception))]
 mod data;
 mod password;
-mod salt_new;
 mod salt;
 mod secret_key;
 
@@ -30,7 +25,4 @@ pub use self::password::Password;
 pub use self::salt::Salt;
 pub use self::secret_key::SecretKey;
 
-pub use self::data::Data;
-pub(crate) use self::data::DataPrivate;
-
-pub use self::salt_new::SaltNew;
+pub(crate) use self::data::{Data, DataMut};

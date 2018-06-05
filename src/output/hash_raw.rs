@@ -15,14 +15,19 @@ impl FromStr for HashRaw {
     }
 }
 
-/// Struct representing raw hash output. If you use the regular
-/// [`hash`](../struct.Hasher.html#method.hash) or
-/// [`hash_non_blocking`](../struct.Hasher.html#method.hash_non_blocking) methods on
-/// [`Hasher`](../struct.Hasher.html), you won't have to use this. If, however, you prefer
-/// to see the raw bytes behind the hash, you can obtain an instance of this struct with the
-/// [`hash_raw`](../struct.Hasher.html#method.hash_raw) or
-/// [`hash_raw_non_blocking`](../struct.Hasher.html#method.hash_raw_non_blocking) methods on
-/// [`Hasher`](../struct.Hasher.html)
+/// Struct representing raw hash output.
+///
+/// You typically won't need this struct if all you'd like to produce is a string-encoded hash,
+/// which is what is returned from the regular [`hash`](../struct.Hasher.html#method.hash)
+/// method on [`Hasher`](../struct.Hasher.html) (or it's non-blocking equivalent).
+///
+/// That said, if you want to inspect each component of a hash more directly (e.g. pull out the
+/// raw hash bytes or the raw salt bytes individually), you can obtain an instance of this
+/// [`HashRaw`](struct.HashRaw.html) struct, which will allows you do to those things, by either:
+/// * Parsing a string-encoded hash into a [`HashRaw`](struct.HashRaw.html) via
+///   `let hash_raw = hash_str.parse::<HashRaw>()?;`, or
+/// * Obtaining a `HashRaw` directly by calling [`hash_raw`](../struct.Hasher.html#method.hash_raw)
+///   on a [`Hasher`](../struct.Hasher.html) (or its non-blocking equivalent)
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
@@ -38,18 +43,18 @@ pub struct HashRaw {
 
 impl HashRaw {
     /// Converts the [`HashRaw`](struct.HashRaw.html) to a string-encoded hash
-    pub fn to_hash(&self) -> String {
+    pub fn to_string(&self) -> String {
         encode_rust(self)
     }
-    /// Iterations configuration used to create this hash
+    /// Obtain the iterations configuration that was used to produce this hash
     pub fn iterations(&self) -> u32 {
         self.iterations
     }
-    /// Lanes configuration used to create this hash
+    /// Obtain the lanes configuration that was used to produce this hash
     pub fn lanes(&self) -> u32 {
         self.lanes
     }
-    /// Memory size configuration used to create this hash
+    /// Obtain the memory size configuration that was used to produce this hash
     pub fn memory_size(&self) -> u32 {
         self.memory_size
     }
@@ -61,11 +66,11 @@ impl HashRaw {
     pub fn raw_salt_bytes(&self) -> &[u8] {
         &self.raw_salt_bytes
     }
-    /// Variant configuration used to create this hash
+    /// Obtain the variant configuration that was used to produce this hash
     pub fn variant(&self) -> Variant {
         self.variant
     }
-    /// Version configuration used to create this hash
+    /// Obtian the version configuration that was used to produce this hash
     pub fn version(&self) -> Version {
         self.version
     }

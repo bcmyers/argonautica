@@ -1,17 +1,17 @@
 [package]
-name = "a2"
+name = "jasonus"
 version = "0.1.0" # remember to update html_root_url
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
 categories = ["Algorithms", "API bindings", "Authentication", "Cryptography"]
 description = "Idiomatic Argon2 password hashing for Rust"
-documentation = "https://docs.rs/a2"
-homepage = "https://github.com/bcmyers/a2"
+documentation = "https://docs.rs/jasonus"
+homepage = "https://en.wikipedia.org/wiki/Jason"
 keywords = ["argon2", "argon2d", "argon2i", "argon2id", "crypto", "cryptography", "hash", "hashing", "password", "security"]
 license = "MIT/Apache-2.0"
 publish = false # TODO
 readme = "README.md"
-repository = "https://github.com/bcmyers/a2"
+repository = "https://github.com/bcmyers/jasonus"
 
 build = "build.rs"
 links = "argon2"
@@ -31,7 +31,7 @@ scopeguard = "0.3"
 serde = { version = "1.0", optional = true, features = ["derive"] }
 
 # benches
-argon2rs = { version = "0.2.5", optional = true }
+argon2rs = { version = "0.2.5", features = ["simd"], optional = true }
 criterion = { version = "0.2", optional = true }
 md5 = { version = "0.3.7", optional = true }
 rust-argon2 = { version = "0.3.0", optional = true }
@@ -141,4 +141,4 @@ codegen-units = 1
 opt-level = 3
 
 [badges]
-travis-ci = { repository = "bcmyers/a2", branch = "master" }
+travis-ci = { repository = "bcmyers/jasonus", branch = "master" }

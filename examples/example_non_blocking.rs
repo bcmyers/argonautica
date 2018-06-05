@@ -1,13 +1,13 @@
-extern crate a2;
 extern crate dotenv;
+extern crate jasonus;
 #[macro_use]
 extern crate failure;
 extern crate futures;
 
 use std::env;
 
-use a2::data::SecretKey;
 use futures::Future;
+use jasonus::data::SecretKey;
 
 // Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey, failure::Error> {
@@ -22,8 +22,8 @@ fn load_secret_key() -> Result<SecretKey, failure::Error> {
 fn main() -> Result<(), failure::Error> {
     let secret_key = load_secret_key()?;
 
-    let mut hasher = a2::Hasher::default();
-    let mut verifier = a2::Verifier::default();
+    let mut hasher = jasonus::Hasher::default();
+    let mut verifier = jasonus::Verifier::default();
 
     let future = hasher
         .with_password("P@ssw0rd")

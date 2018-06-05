@@ -8,7 +8,7 @@ use std::path::Path;
 
 fn main() -> Result<(), failure::Error> {
     // Create temp dir
-    let temp = tempdir::TempDir::new("a2")?;
+    let temp = tempdir::TempDir::new("jasonus")?;
     let temp_dir = temp.path();
     let temp_dir_str = temp_dir.to_str().unwrap();
 

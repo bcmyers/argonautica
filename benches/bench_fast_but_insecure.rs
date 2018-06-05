@@ -1,4 +1,4 @@
-extern crate a2;
+extern crate jasonus;
 #[macro_use]
 extern crate criterion;
 extern crate md5;
@@ -11,10 +11,10 @@ const DOCUMENT: &str = include_str!("hamlet.txt");
 const SAMPLE_SIZE: usize = 100;
 
 fn bench_crates(c: &mut Criterion) {
-    // a2
-    let mut hasher = a2::Hasher::fast_but_insecure();
+    // jasonus
+    let mut hasher = jasonus::Hasher::fast_but_insecure();
     hasher.with_password(DOCUMENT);
-    let a2 = Fun::new("a2", move |b, _| {
+    let jasonus = Fun::new("jasonus", move |b, _| {
         b.iter(|| {
             let _ = hasher.hash().unwrap();
         })
@@ -36,7 +36,7 @@ fn bench_crates(c: &mut Criterion) {
         });
     });
 
-    let functions = vec![a2, md5, sha256];
+    let functions = vec![jasonus, md5, sha256];
     c.bench_functions("bench_fast_but_insecure", functions, 0);
 }
 

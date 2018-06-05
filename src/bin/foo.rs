@@ -1,4 +1,4 @@
-extern crate a2;
+extern crate jasonus;
 
 // fn main() {
 //     let password = "P@ssw0rd".to_string();
@@ -7,7 +7,7 @@ extern crate a2;
 //         an environment variable instead of in code, \
 //         but this is just an example".to_string();
 
-//     let mut hasher = a2::Hasher::default();
+//     let mut hasher = jasonus::Hasher::default();
 //     let hash = hasher
 //         .with_password(password)
 //         .with_secret_key(secret_key)
@@ -25,7 +25,7 @@ fn main() {
                       but this is just an example"
         .to_string();
 
-    let mut verifier = a2::Verifier::default();
+    let mut verifier = jasonus::Verifier::default();
     let is_valid = verifier
         .with_hash(
             "
