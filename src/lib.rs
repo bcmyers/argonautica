@@ -110,7 +110,6 @@
 //!       [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently
 //!       available on nightly Rust only</i>
 //!
-//! ```
 //! ## Configuration
 //!
 //! The default configurations for [`Hasher`](struct.Hasher.html) and

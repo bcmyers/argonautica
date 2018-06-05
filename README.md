@@ -112,8 +112,7 @@ Rust crates currently do not:
       [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently
       available on nightly Rust only</i>
 
-```rust
-## Configuration
+### Configuration
 
 The default configurations for [`Hasher`](struct.Hasher.html) and
 [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for the general
@@ -123,7 +122,7 @@ use-case of hashing passwords for storage in a website database, but if you want
 
 Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom
 configuration options. It provides color on each of the options.
-```
+```rust
 extern crate jasonus;
 extern crate futures_cpupool;
 
@@ -257,8 +256,8 @@ fn main() {
     println!("{}", &hash);
     // 👆 prints $argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q
 }
-```rust
-## Installation
+```
+### Installation
 
 <b>jasonus</b> should be relatively straightforward to include in your Rust project:
 * Place `extern crate jasonus;` in your code (typically in either `lib.rs` or `main.rs`)
@@ -281,7 +280,7 @@ machine in order to build <b>jasonus</b>. More specifically, you need:
 
 <b>jasonus</b> runs on stable Rust version 1.26.0 or greater.
 
-## License
+### License
 
 <b>jasonus</b> is licensed under either of:
 * [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
