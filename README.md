@@ -16,14 +16,17 @@ and [scrypt](https://en.wikipedia.org/wiki/Scrypt).
 
 <b>jasonus</b> was designed:
 * to be easy to use,
-* to have robust, beginner-friendly documentation,
-* to use sensible defaults, and
+* to have robust, beginner-friendly documentation, and
 * to (as much as possible) follow the [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 
 The library was built with a simple use-case in mind: hashing passwords for storage in a
-website's database. That said, <b>jasonus</b> is also feature-complete, meaning you should be able to
-to anything with <b>jasonus</b> that you can do with the cannonical
-[C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2.
+website's database. That said, <b>jasonus</b> is "feature-complete," meaning anything you can
+do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of
+Argon2 you should able to do with <b>jasonus</b>*.
+
+<i>\*Indeed, jasonus even has a feature that even the cannonical C implementation currently lacks,
+namely hashing with secret keys (the C implementation implements this under the hood, but
+doesn't expose it publicly)</i>
 
 ### Hashing
 
@@ -254,19 +257,17 @@ machine in order to build <b>jasonus</b>. More specifically, you need:
 
 If <b>jasonus</b> isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
 include [argon2rs](https://github.com/bryant/argon2rs) and
-[rust-argon2](https://github.com/sru-systems/rust-argon2). As already mentioned, there's
-also a cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2), which <b>jasonus</b>
-actually uses under the hood if you're using the C backend. Finally, if you're interesting
+[rust-argon2](https://github.com/sru-systems/rust-argon2). If you're interesting
 in password hashing with a different algorithm,
 [rust-bcrypt](https://github.com/Keats/rust-bcrypt) might be worth checking out.
 
-For what it's worth, besides API differences, <b>jasonus</b> has three features that other
+For what it's worth, besides API differences, <b>jasonus</b> has three key features that other
 Rust crates currently do not:
 * <b>jasonus</b> has the ability to create hashes with a secret key, which not even the
   [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
+* <b>jasonus</b> is the only Rust crate that implements the newest Argon2 variant: Argon2id
 * <b>jasonus</b> uses [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions by default if your
-  processor has access to them, which can lead to significantly faster hashing times than
-  implementations that do not take advantage of [SIMD](https://en.wikipedia.org/wiki/SIMD)
+  processor has access to them, which can lead to significantly faster hashing times
     * For example, on default settings, <b>jasonus</b> runs ~30% faster than other Rust crates on the
       developer's early-2014 Macbook, which has access to
       [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
@@ -276,11 +277,8 @@ Rust crates currently do not:
       </i>`without_simd`<i> feature enabled, which will be necessary if you're compiling
       for machines other than your own</i>
     * <i>Further note: [argon2rs](https://github.com/bryant/argon2rs) has a
-      [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently only
-      available on nightly Rust; if you run [argon2rs](https://github.com/bryant/argon2rs)
-      on nightly Rust with the [SIMD](https://en.wikipedia.org/wiki/SIMD) feature enabled,
-      it performs roughly in line with <b>jasonus</b></i>
-* <b>jasonus</b> is the only Rust crate that implements the newest Argon2 variant: Argon2id
+      [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently
+      available on nightly Rust only</i>
 
 ### License
 
