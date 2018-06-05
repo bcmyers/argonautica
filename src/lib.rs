@@ -4,7 +4,7 @@
 //! [![Github.com](https://img.shields.io/badge/github-bcmyers%2Fjasonus-blue.svg)](http://www.github.com/bcmyers/jasonus)
 //! ![License](https://img.shields.io/crates/l/jasonus.svg)
 //!
-//! ## Overview
+//! # Overview
 //!
 //! <b>jasonus</b> is a Rust crate for hashing passwords using the cryptographically-secure
 //! [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03),
@@ -26,7 +26,7 @@
 //! namely hashing with secret keys (the C implementation implements this, but doesn't expose it
 //! publicly)</i>
 //!
-//! ## Hashing
+//! # Hashing
 //!
 //! Hashing passwords with <b>jasonus</b> is simple.  Just instantiate a default
 //! [`Hasher`](struct.Hasher.html), provide it with a password and a secret key, and then
@@ -52,7 +52,7 @@
 //!     // 👆 prints a hash, which will be random since the default Hasher uses a random salt
 //! }
 //! ```
-//! ## Verifying
+//! # Verifying
 //!
 //! Verifying passwords against a hash is equally as simple. Just instantiate a default
 //! [`Verifier`](struct.Verifier.html), provide it with the password and the hash you would
@@ -83,7 +83,7 @@
 //!     assert!(is_valid);
 //! }
 //! ```
-//! ## Alternatives
+//! # Alternatives
 //!
 //! If <b>jasonus</b> isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
 //! include [argon2rs](https://github.com/bryant/argon2rs) and
@@ -110,7 +110,7 @@
 //!       [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently
 //!       available on nightly Rust only</i>
 //!
-//! ## Configuration
+//! # Configuration
 //!
 //! The default configurations for [`Hasher`](struct.Hasher.html) and
 //! [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for the general
@@ -255,7 +255,7 @@
 //!     // 👆 prints $argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q
 //! }
 //! ```
-//! ## Installation
+//! # Installation
 //!
 //! <b>jasonus</b> should be relatively straightforward to include in your Rust project:
 //! * Place `extern crate jasonus;` in your code (typically in either `lib.rs` or `main.rs`)
@@ -278,7 +278,7 @@
 //!
 //! <b>jasonus</b> runs on stable Rust version 1.26.0 or greater.
 //!
-//! ## License
+//! # License
 //!
 //! <b>jasonus</b> is licensed under either of:
 //! * [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
