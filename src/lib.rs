@@ -6,7 +6,7 @@
 //!
 //! ## Overview
 //!
-//! <b>[jasonus](https://en.wikipedia.org/wiki/Jason)</b> is a Rust crate for hashing passwords using the cryptographically-secure
+//! <b>jasonus</b> is a Rust crate for hashing passwords using the cryptographically-secure
 //! [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03),
 //! which won the [Password Hashing Competition](https://password-hashing.net/) in 2015 and is
 //! comparable to other secure hashing algorithms such as [bcrypt](https://en.wikipedia.org/wiki/Bcrypt)
@@ -20,9 +20,9 @@
 //! <b>jasonus</b> was built with a simple use-case in mind: hashing passwords for storage in a
 //! website's database. That said, <b>jasonus</b> is <u>"feature-complete"</u>, meaning anything you can
 //! do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of
-//! Argon2 you should able to do with <b>jasonus</b>\*.
+//! Argon2 you should able to do with <b>jasonus</b>.
 //!
-//! <i>\*Indeed, jasonus even has a feature that even the cannonical C implementation currently lacks,
+//! <i>\* Indeed, jasonus even has a feature that even the cannonical C implementation currently lacks,
 //! namely hashing with secret keys (the C implementation implements this, but doesn't expose it
 //! publicly)</i>
 //!
@@ -82,7 +82,7 @@
 //!
 //!     assert!(is_valid);
 //! }
-//!
+//! ```
 //! ## Alternatives
 //!
 //! If <b>jasonus</b> isn't your cup of tea, other Rust crates that will do Argon2 hashing for you

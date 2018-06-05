@@ -8,7 +8,7 @@
 
 ### Overview
 
-<b>[jasonus](https://en.wikipedia.org/wiki/Jason)</b> is a Rust crate for hashing passwords using the cryptographically-secure
+<b>jasonus</b> is a Rust crate for hashing passwords using the cryptographically-secure
 [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03),
 which won the [Password Hashing Competition](https://password-hashing.net/) in 2015 and is
 comparable to other secure hashing algorithms such as [bcrypt](https://en.wikipedia.org/wiki/Bcrypt)
@@ -22,9 +22,9 @@ and [scrypt](https://en.wikipedia.org/wiki/Scrypt).
 <b>jasonus</b> was built with a simple use-case in mind: hashing passwords for storage in a
 website's database. That said, <b>jasonus</b> is <u>"feature-complete"</u>, meaning anything you can
 do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of
-Argon2 you should able to do with <b>jasonus</b>\*.
+Argon2 you should able to do with <b>jasonus</b>.
 
-<i>\*Indeed, jasonus even has a feature that even the cannonical C implementation currently lacks,
+<i>\* Indeed, jasonus even has a feature that even the cannonical C implementation currently lacks,
 namely hashing with secret keys (the C implementation implements this, but doesn't expose it
 publicly)</i>
 
@@ -84,8 +84,8 @@ fn main() {
 
     assert!(is_valid);
 }
-
-## Alternatives
+```
+### Alternatives
 
 If <b>jasonus</b> isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
 include [argon2rs](https://github.com/bryant/argon2rs) and
@@ -112,8 +112,8 @@ Rust crates currently do not:
       [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently
       available on nightly Rust only</i>
 
-```
-### Configuration
+```rust
+## Configuration
 
 The default configurations for [`Hasher`](struct.Hasher.html) and
 [`Verifier`](struct.Verifier.html) were chosen to be reasonably secure for the general
@@ -123,7 +123,7 @@ use-case of hashing passwords for storage in a website database, but if you want
 
 Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom
 configuration options. It provides color on each of the options.
-```rust
+```
 extern crate jasonus;
 extern crate futures_cpupool;
 
@@ -257,8 +257,8 @@ fn main() {
     println!("{}", &hash);
     // 👆 prints $argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q
 }
-```
-### Installation
+```rust
+## Installation
 
 <b>jasonus</b> should be relatively straightforward to include in your Rust project:
 * Place `extern crate jasonus;` in your code (typically in either `lib.rs` or `main.rs`)
@@ -281,7 +281,7 @@ machine in order to build <b>jasonus</b>. More specifically, you need:
 
 <b>jasonus</b> runs on stable Rust version 1.26.0 or greater.
 
-### License
+## License
 
 <b>jasonus</b> is licensed under either of:
 * [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
