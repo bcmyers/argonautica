@@ -6,7 +6,7 @@
 //!
 //! ## Overview
 //!
-//! <b>jasonus</b> is a Rust crate for hashing passwords using the cryptographically-secure
+//! <b>[jasonus](https://en.wikipedia.org/wiki/Jason)</b> is a Rust crate for hashing passwords using the cryptographically-secure
 //! [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03),
 //! which won the [Password Hashing Competition](https://password-hashing.net/) in 2015 and is
 //! comparable to other secure hashing algorithms such as [bcrypt](https://en.wikipedia.org/wiki/Bcrypt)
