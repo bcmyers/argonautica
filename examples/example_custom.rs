@@ -1,13 +1,14 @@
+extern crate argonautica;
 extern crate dotenv;
 #[macro_use]
 extern crate failure;
-extern crate jasonus;
 
 use std::collections::HashMap;
 use std::env;
 
-use jasonus::config::{Variant, Version};
-use jasonus::input::{Salt, SecretKey};
+use argonautica::config::{Variant, Version};
+use argonautica::input::{Salt, SecretKey};
+use argonautica::{Hasher, Verifier};
 
 // Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey, failure::Error> {
@@ -21,10 +22,10 @@ fn load_secret_key() -> Result<SecretKey, failure::Error> {
 
 fn main() -> Result<(), failure::Error> {
     let secret_key = load_secret_key()?;
-    let mut hasher = jasonus::Hasher::default();
+    let mut hasher = Hasher::default();
     hasher
         .configure_hash_length(32)
-        .configure_iterations(128)
+        .configure_iterations(192)
         .configure_lanes(1)
         .configure_memory_size(2u32.pow(12))
         .configure_password_clearing(true)
@@ -43,7 +44,7 @@ fn main() -> Result<(), failure::Error> {
         dictionary.insert(password.to_string(), hash);
     }
 
-    let mut verifier = jasonus::Verifier::new();
+    let mut verifier = Verifier::new();
     verifier.with_secret_key(&secret_key);
 
     for (password, hash) in dictionary.iter() {

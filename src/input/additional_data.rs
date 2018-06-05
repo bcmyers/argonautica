@@ -40,6 +40,18 @@ impl<'a> From<&'a CStr> for AdditionalData {
     }
 }
 
+impl<'a> From<&'a Vec<u8>> for AdditionalData {
+    fn from(bytes: &Vec<u8>) -> AdditionalData {
+        AdditionalData(bytes.clone())
+    }
+}
+
+impl<'a> From<&'a String> for AdditionalData {
+    fn from(s: &String) -> AdditionalData {
+        AdditionalData(s.clone().into_bytes())
+    }
+}
+
 impl<'a> From<&'a AdditionalData> for AdditionalData {
     fn from(additional_data: &AdditionalData) -> AdditionalData {
         additional_data.clone()

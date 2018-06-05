@@ -58,6 +58,24 @@ impl<'a> From<&'a CStr> for Password {
     }
 }
 
+impl<'a> From<&'a Vec<u8>> for Password {
+    fn from(bytes: &Vec<u8>) -> Password {
+        Password {
+            bytes: bytes.clone(),
+            is_owned: false,
+        }
+    }
+}
+
+impl<'a> From<&'a String> for Password {
+    fn from(s: &String) -> Password {
+        Password {
+            bytes: s.clone().into_bytes(),
+            is_owned: false,
+        }
+    }
+}
+
 impl<'a> From<&'a Password> for Password {
     fn from(password: &Password) -> Password {
         Password {
@@ -78,7 +96,7 @@ impl<'a> From<&'a Password> for Password {
 /// [here](../index.html#configuration) for more details on the "password clearing"
 /// configuration). This limitation (again, only when "password clearing" is set to `true`)
 /// is required because when you construct a [`Password`](struct.Password.html) from a borrowed
-/// value, `jasonus` cannot guarantee that all the underlying bytes of the
+/// value, `argonautica` cannot guarantee that all the underlying bytes of the
 /// [`Password`](struct.Password.html) will indeed be erased after hashing and/or verifying,
 /// which is the whole point of the "password clearing" feature.</i>
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]

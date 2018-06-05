@@ -1,13 +1,14 @@
+extern crate argonautica;
 extern crate dotenv;
 #[macro_use]
 extern crate failure;
 extern crate futures;
-extern crate jasonus;
 
 use std::env;
 
+use argonautica::input::SecretKey;
+use argonautica::{Hasher, Verifier};
 use futures::Future;
-use jasonus::input::SecretKey;
 
 // Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey, failure::Error> {
@@ -22,8 +23,8 @@ fn load_secret_key() -> Result<SecretKey, failure::Error> {
 fn main() -> Result<(), failure::Error> {
     let secret_key = load_secret_key()?;
 
-    let mut hasher = jasonus::Hasher::default();
-    let mut verifier = jasonus::Verifier::default();
+    let mut hasher = Hasher::default();
+    let mut verifier = Verifier::default();
 
     let future = hasher
         .with_password("P@ssw0rd")

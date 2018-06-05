@@ -55,6 +55,18 @@ impl<'a> From<&'a CStr> for Salt {
     }
 }
 
+impl<'a> From<&'a Vec<u8>> for Salt {
+    fn from(bytes: &Vec<u8>) -> Salt {
+        Salt(Kind::Deterministic(bytes.clone()))
+    }
+}
+
+impl<'a> From<&'a String> for Salt {
+    fn from(s: &String) -> Salt {
+        Salt(Kind::Deterministic(s.clone().into_bytes()))
+    }
+}
+
 impl<'a> From<&'a Salt> for Salt {
     fn from(salt: &Salt) -> Salt {
         salt.clone()

@@ -1,13 +1,13 @@
+extern crate argonautica;
 #[macro_use]
 extern crate criterion;
-extern crate jasonus;
 extern crate num_cpus;
 
+use argonautica::config::{Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_SALT_LENGTH,
+                          DEFAULT_VARIANT, DEFAULT_VERSION};
+use argonautica::data::{Salt, SecretKey};
+use argonautica::Hasher;
 use criterion::Criterion;
-use jasonus::config::{Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_SALT_LENGTH, DEFAULT_VARIANT,
-                      DEFAULT_VERSION};
-use jasonus::data::{Salt, SecretKey};
-use jasonus::Hasher;
 
 const SAMPLE_SIZE: usize = 5;
 
@@ -146,7 +146,7 @@ struct Bench {
 
 impl Bench {
     fn setup(mut self) -> Bench {
-        let mut hasher = jasonus::Hasher::default();
+        let mut hasher = argonautica::Hasher::default();
         hasher
             .configure_hash_length(HASH_LENGTH)
             .configure_lanes(self.threads)

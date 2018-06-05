@@ -1,7 +1,8 @@
+import multiprocessing
 from typing import AnyStr
 
-from a2py import a2, ffi
-from a2py.other import Backend, Variant, Version
+from argonautica.ffi import ffi, rust
+from argonautica.other import Backend, Variant, Version
 
 
 class Hasher:
@@ -43,10 +44,10 @@ def hash(
     *,
     backend: Backend = Backend.C,
     hash_length: int = 32,
-    iterations: int = 128,
-    lanes: int = 2,
+    iterations: int = 192,
+    lanes: int = multiprocessing.cpu_count(),
     memory_size: int = 4096,
-    threads: int = 2,
+    threads: int = multiprocessing.cpu_count(),
     variant: Variant = Variant.Argon2id,
     version: Version = Version._0x13
 ) -> str:
@@ -59,14 +60,22 @@ def hash(
     else:
         raise Exception("TODO")
 
-    hash_ptr = a2.a2_hash(
+    hash_ptr = rust.argonautica_hash(
+        b'',
+        0,
         password_bytes,
         len(password_bytes),
+        b'',
+        0,
+        b'',
+        0,
         backend.value,
         hash_length,
         iterations,
         lanes,
         memory_size,
+        0,
+        0,
         threads,
         variant.value.encode("utf-8"),
         version.value,
@@ -77,6 +86,8 @@ def hash(
         raise Exception("failed with error code {}".format(error_code_ptr[0]))
 
     encoded = ffi.string(hash_ptr).decode("utf-8")
-    a2.a2_free(hash_ptr)
+    err = rust.argonautica_free(hash_ptr)
+    if err < 0:
+        raise Exception("Error")
 
     return encoded

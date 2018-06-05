@@ -34,15 +34,15 @@ def long_description() -> str:
 
 
 setup(
-    name="a2py",
+    name="argonautica-py",
     version="0.1.0",
 
     author="Brian Myers",
     author_email="brian.carl.myers@gmail.com",
-    description="Idiomatic Argon2 password hashing for Python based on the Rust a2 crate",
+    description="Idiomatic Argon2 password hashing for Python but written in Rust",
     license="MIT/Apache-2.0",
     long_description=long_description(),
-    url="https://github.com/bcmyers/a2",
+    url="https://github.com/bcmyers/argonautica",
 
     classifiers=[
         "Intended Audience :: Developers",
@@ -71,11 +71,11 @@ setup(
 
     project_urls={
         "Documentation": "TODO",
-        "Source Code": "https://github.com/bcmyers/a2",
+        "Source Code": "https://github.com/bcmyers/argonautica",
     },
 
     rust_extensions=[RustExtension(
-        'a2py.a2',
+        'argonautica.rust',
         'Cargo.toml',
         binding=Binding.NoBinding,
         debug=False,

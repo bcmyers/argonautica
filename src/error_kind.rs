@@ -7,9 +7,9 @@ use errors::{ConfigurationError, DataError, EncodingError};
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum ErrorKind {
-    /// This is a bug in the jasonus crate and should not occur. Please file an issue
+    /// This is a bug in the argonautica crate and should not occur. Please file an issue
     #[fail(
-        display = "This is a bug in the jasonus crate and should not occur. Please file an issue"
+        display = "This is a bug in the argonautica crate and should not occur. Please file an issue"
     )]
     Bug,
 

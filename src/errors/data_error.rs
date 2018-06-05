@@ -27,9 +27,9 @@ pub enum DataError {
     #[fail(display = "Password too long. Length in bytes must be less than 2^32")]
     PasswordTooLongError,
 
-    /// Password unowned error. You attempted to hash or verify with a borrowed password and 'password clearing' set to true, which is not possible because with a borrowed value jasonus cannot zero out the password bytes. To prevent this error, either pass Hasher or Verifier an owned password or set 'password clearing' to false
+    /// Password unowned error. You attempted to hash or verify with a borrowed password and 'password clearing' set to true, which is not possible because with a borrowed value argonautica cannot zero out the password bytes. To prevent this error, either pass Hasher or Verifier an owned password or set 'password clearing' to false
     #[fail(
-        display = "Password unowned error. You attempted to hash or verify with a borrowed password and 'password clearing' set to true, which is not possible because with a borrowed value jasonus cannot zero out the password bytes. To prevent this error, either pass Hasher or Verifier an owned password or set 'password clearing' to false"
+        display = "Password unowned error. You attempted to hash or verify with a borrowed password and 'password clearing' set to true, which is not possible because with a borrowed value argonautica cannot zero out the password bytes. To prevent this error, either pass Hasher or Verifier an owned password or set 'password clearing' to false"
     )]
     PasswordUnownedError,
 
@@ -57,9 +57,9 @@ pub enum DataError {
     #[fail(display = "Secret key too long. Length in bytes must be less than 2^32")]
     SecretKeyTooLongError,
 
-    /// Secret key unowned error. You attempted to hash or verify with a borrowed secret key and 'secret key clearing' set to true, which is not possible because with a borrowed value jasonus cannot zero out the secret key bytes. To prevent this error, either pass Hasher or Verifier an owned secret key or set 'secret key clearing' to false
+    /// Secret key unowned error. You attempted to hash or verify with a borrowed secret key and 'secret key clearing' set to true, which is not possible because with a borrowed value argonautica cannot zero out the secret key bytes. To prevent this error, either pass Hasher or Verifier an owned secret key or set 'secret key clearing' to false
     #[fail(
-        display = "Secret key unowned error. You attempted to hash or verify with a borrowed secret key and 'secret key clearing' set to true, which is not possible because with a borrowed value jasonus cannot zero out the secret key bytes. To prevent this error, either pass Hasher or Verifier an owned secret key or set 'secret key clearing' to false"
+        display = "Secret key unowned error. You attempted to hash or verify with a borrowed secret key and 'secret key clearing' set to true, which is not possible because with a borrowed value argonautica cannot zero out the secret key bytes. To prevent this error, either pass Hasher or Verifier an owned secret key or set 'secret key clearing' to false"
     )]
     SecretKeyUnownedError,
 

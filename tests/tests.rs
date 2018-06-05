@@ -1,5 +1,5 @@
+extern crate argonautica;
 extern crate failure;
-extern crate jasonus;
 #[macro_use]
 extern crate lazy_static;
 extern crate rand;
@@ -8,8 +8,8 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::Mutex;
 
-use jasonus::config::{Variant, Version};
-use jasonus::{Hasher, Verifier};
+use argonautica::config::{Variant, Version};
+use argonautica::{Hasher, Verifier};
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 

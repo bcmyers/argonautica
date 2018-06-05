@@ -1,7 +1,7 @@
 from typing import AnyStr
 
-from a2py import a2
-from a2py.other import Backend
+from argonautica.ffi import ffi, rust
+from argonautica.other import Backend
 
 
 class Verifier:
@@ -30,7 +30,7 @@ def verify(
     else:
         raise Exception("Error")
 
-    result = a2.a2_verify(
+    result = rust.argonautica_verify(
         hash.encode('utf-8'),
         password_bytes,
         len(password_bytes),

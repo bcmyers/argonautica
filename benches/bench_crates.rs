@@ -1,13 +1,13 @@
 extern crate argon2;
 extern crate argon2rs;
+extern crate argonautica;
 #[macro_use]
 extern crate criterion;
-extern crate jasonus;
 extern crate rand;
 
+use argonautica::config::{default_lanes, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS,
+                          DEFAULT_MEMORY_SIZE, DEFAULT_SALT_LENGTH};
 use criterion::{Criterion, Fun};
-use jasonus::config::{default_lanes, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
-                      DEFAULT_SALT_LENGTH};
 use rand::rngs::OsRng;
 use rand::RngCore;
 
@@ -42,13 +42,13 @@ fn bench_crates(c: &mut Criterion) {
         });
     });
 
-    // jasonus
-    let mut hasher = jasonus::Hasher::default();
+    // argonautica
+    let mut hasher = argonautica::Hasher::default();
     hasher
-        .configure_variant(jasonus::config::Variant::Argon2i)
+        .configure_variant(argonautica::config::Variant::Argon2i)
         .configure_password_clearing(false)
         .opt_out_of_secret_key(true);
-    let jasonus = Fun::new("jasonus", move |b, _| {
+    let argonautica = Fun::new("argonautica", move |b, _| {
         b.iter(|| {
             let _ = hasher.with_password(PASSWORD).hash_raw().unwrap();
         })
@@ -78,7 +78,7 @@ fn bench_crates(c: &mut Criterion) {
         });
     });
 
-    let functions = vec![argon2rs, jasonus, rust_argon2];
+    let functions = vec![argon2rs, argonautica, rust_argon2];
     c.bench_functions("bench_crates", functions, 0);
 }
 

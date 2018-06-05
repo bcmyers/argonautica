@@ -1,6 +1,6 @@
+extern crate argonautica;
 #[macro_use]
 extern crate criterion;
-extern crate jasonus;
 extern crate md5;
 extern crate sha2;
 
@@ -11,10 +11,10 @@ const DOCUMENT: &str = include_str!("hamlet.txt");
 const SAMPLE_SIZE: usize = 100;
 
 fn bench_crates(c: &mut Criterion) {
-    // jasonus
-    let mut hasher = jasonus::Hasher::fast_but_insecure();
+    // argonautica
+    let mut hasher = argonautica::Hasher::fast_but_insecure();
     hasher.with_password(DOCUMENT);
-    let jasonus = Fun::new("jasonus", move |b, _| {
+    let argonautica = Fun::new("argonautica", move |b, _| {
         b.iter(|| {
             let _ = hasher.hash().unwrap();
         })
@@ -36,7 +36,7 @@ fn bench_crates(c: &mut Criterion) {
         });
     });
 
-    let functions = vec![jasonus, md5, sha256];
+    let functions = vec![argonautica, md5, sha256];
     c.bench_functions("bench_fast_but_insecure", functions, 0);
 }
 

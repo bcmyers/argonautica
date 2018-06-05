@@ -1,5 +1,4 @@
-from a2py import Hasher, Verifier
-
+from argonautica import Hasher, Verifier
 
 if __name__ == "__main__":
     password = "P@ssw0rd"

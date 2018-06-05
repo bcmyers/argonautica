@@ -60,6 +60,24 @@ impl<'a> From<&'a CStr> for SecretKey {
     }
 }
 
+impl<'a> From<&'a Vec<u8>> for SecretKey {
+    fn from(bytes: &Vec<u8>) -> SecretKey {
+        SecretKey {
+            bytes: bytes.clone(),
+            is_owned: false,
+        }
+    }
+}
+
+impl<'a> From<&'a String> for SecretKey {
+    fn from(s: &String) -> SecretKey {
+        SecretKey {
+            bytes: s.clone().into_bytes(),
+            is_owned: false,
+        }
+    }
+}
+
 impl<'a> From<&'a SecretKey> for SecretKey {
     fn from(secret_key: &SecretKey) -> SecretKey {
         SecretKey {
@@ -80,7 +98,7 @@ impl<'a> From<&'a SecretKey> for SecretKey {
 /// [here](../index.html#configuration) for more details on the "secret key clearing"
 /// configuration). This limitation (again, only when "secret key clearing" is set to `true`)
 /// is required because when you construct a [`SecretKey`](struct.SecretKey.html) from a borrowed
-/// value, `jasonus` cannot guarantee that all the underlying bytes of the
+/// value, `argonautica` cannot guarantee that all the underlying bytes of the
 /// [`SecretKey`](struct.SecretKey.html) will indeed be erased after hashing and/or verifying,
 /// which is the whole point of the "secret key clearing" feature.</i>
 

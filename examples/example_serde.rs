@@ -1,12 +1,14 @@
+extern crate argonautica;
 extern crate failure;
-extern crate jasonus;
 extern crate serde;
 extern crate serde_json;
+
+use argonautica::{Hasher, Verifier};
 
 fn serialize_hasher() -> Result<String, failure::Error> {
     let additional_data = [1u8, 2, 3, 4];
     let salt = [1u8, 2, 3, 4, 5, 6, 7, 8];
-    let mut hasher = jasonus::Hasher::default();
+    let mut hasher = Hasher::default();
     hasher
         .with_additional_data(&additional_data[..])
         .with_password("P@ssw0rd") // note: for security reasons, password is never serialized
@@ -15,72 +17,67 @@ fn serialize_hasher() -> Result<String, failure::Error> {
     let j = serde_json::to_string_pretty(&hasher)?;
     println!("*** Serialized Hasher ***");
     println!("{}\n", &j);
-    // *** Serialized hasher ***
+    // *** Serialized Hasher ***
     // {
     //   "additionalData": [1, 2, 3, 4],
     //   "config": {
     //     "backend": "c",
     //     "hashLength": 32,
-    //     "iterations": 128,
-    //     "lanes": 2,
+    //     "iterations": 256,
+    //     "lanes": 4,
     //     "memorySize": 4096,
     //     "optOutOfRandomSalt": false,
     //     "optOutOfSecretKey": false,
-    //     "passwordClearing": true,
+    //     "passwordClearing": false,
     //     "secretKeyClearing": false,
-    //     "threads": 2,
+    //     "threads": 4,
     //     "variant": "argon2id",
     //     "version": "_0x13"
     //   },
     //   "salt": {
-    //     "bytes": [1, 2, 3, 4, 5, 6, 7, 8],
-    //     "isRandom": false
+    //     "deterministic": [1, 2, 3, 4, 5, 6, 7, 8]
     //   }
     // }
     Ok(j)
 }
 
-fn deserialize_hasher(j: &str) -> Result<jasonus::Hasher, failure::Error> {
-    let hasher: jasonus::Hasher = serde_json::from_str(&j)?;
+fn deserialize_hasher(j: &str) -> Result<argonautica::Hasher, failure::Error> {
+    let hasher: Hasher = serde_json::from_str(&j)?;
     println!("*** Deserialized Hasher ***");
     println!("{:#?}\n", &hasher);
-    // *** Deserialized hasher ***
+    // *** Deserialized Hasher ***
     // Hasher {
-    //     additional_data: AdditionalData { bytes: [1, 2, 3, 4] },
+    //     additional_data: Some(AdditionalData([1, 2, 3, 4])),
     //     config: HasherConfig {
     //         backend: C,
+    //         cpu_pool: None,
     //         hash_length: 32,
-    //         iterations: 128,
-    //         lanes: 2,
+    //         iterations: 256,
+    //         lanes: 4,
     //         memory_size: 4096,
     //         opt_out_of_random_salt: false,
     //         opt_out_of_secret_key: false,
-    //         password_clearing: true,
+    //         password_clearing: false,
     //         secret_key_clearing: false,
-    //         threads: 2,
+    //         threads: 4,
     //         variant: Argon2id,
     //         version: _0x13
     //     },
-    //     cpu_pool: CpuPool { size: 4 },
-    //     password: Password { bytes: [] },
-    //     salt: Salt {
-    //         bytes: [1, 2, 3, 4, 5, 6, 7, 8],
-    //         is_random: false
-    //     },
-    //     secret_key: SecretKey { bytes: [] }
+    //     password: None,
+    //     salt: Salt(Deterministic([1, 2, 3, 4, 5, 6, 7, 8])),
+    //     secret_key: None
     // }
-
     Ok(hasher)
 }
 
 fn serialize_verifier() -> Result<String, failure::Error> {
     let additional_data = [1u8, 2, 3, 4];
-    let mut verifier = jasonus::Verifier::default();
+    let mut verifier = Verifier::default();
     verifier
         .with_additional_data(&additional_data[..])
         .with_hash("$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q")
-        .with_password("P@ssw0rd")
-        .with_secret_key("secret");
+        .with_password("P@ssw0rd") // note: for security reasons, password is never serialized
+        .with_secret_key("secret"); // note: for security reasons, secret key is never serialized
     let j = serde_json::to_string_pretty(&verifier)?;
     println!("*** Serialized Verifier ***");
     println!("{}\n", &j);
@@ -89,18 +86,35 @@ fn serialize_verifier() -> Result<String, failure::Error> {
     //   "additionalData": [1, 2, 3, 4],
     //   "config": {
     //     "backend": "c",
-    //     "passwordClearing": true,
-    //     "secretKeyClearing": false
+    //     "passwordClearing": false,
+    //     "secretKeyClearing": false,
+    //     "threads": 4
     //   },
     //   "hash": "$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q"
     // }
     Ok(j)
 }
 
-fn deserialize_verifier(j: &str) -> Result<jasonus::Verifier, failure::Error> {
-    let verifier: jasonus::Verifier = serde_json::from_str(&j)?;
+fn deserialize_verifier(j: &str) -> Result<argonautica::Verifier, failure::Error> {
+    let verifier: Verifier = serde_json::from_str(&j)?;
     println!("*** Deserialized Verifier ***");
     println!("{:#?}\n", &verifier);
+    // *** Deserialized Verifier ***
+    // Verifier {
+    //     additional_data: Some(AdditionalData([1, 2, 3, 4])),
+    //     config: VerifierConfig {
+    //         backend: C,
+    //         cpu_pool: None,
+    //         password_clearing: false,
+    //         secret_key_clearing: false,
+    //         threads: 4
+    //     },
+    //     hash: Some("$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q"),
+    //     hash_raw: None,
+    //     latest: Hash,
+    //     password: None,
+    //     secret_key: None
+    // }
     Ok(verifier)
 }
 

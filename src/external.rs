@@ -1,63 +1,136 @@
 //! "extern" functions that can be called from C
-
 use std::ffi::{CStr, CString};
 
-use libc;
-
-// TODO: Password clearing, secret key clearing, opt outs
+use libc::{c_char, c_int, size_t, uint32_t, uint8_t};
 
 use config::{Backend, Variant, Version};
 use {Hasher, Verifier};
 
-/// Frees memory associated with a pointer that was previously returned from
-/// [`jasonus_hash`](function.jasonus_hash.html)
+/// Frees memory associated with a pointer that was previously returned from `argonautica_hash`
 #[no_mangle]
-pub unsafe extern "C" fn jasonus_free(cstring_ptr: *mut libc::c_char) {
-    CString::from_raw(cstring_ptr);
+pub extern "C" fn argonautica_free(string: *mut c_char) -> c_int {
+    if string.is_null() {
+        return -1;
+    }
+    unsafe {
+        CString::from_raw(string);
+    };
+    return 0;
 }
 
+// TODO: Does the pointer actually get set to zero?
+
 /// Hash function that can be called from C. This function allocates memory and hands ownership
-/// of that memory over to C; so in your C code you must call [`jasonus_free`](function.jasonus_free.html)
-/// at some point after using the pointer returned from this function in order to avoid leaking
+/// of that memory over to C; so in your C code you must call `argonautica_free` at some point
+/// after using the pointer returned from this function in order to avoid leaking
 /// memory
+///
+/// <b><u>Arguments (from the perspective of C code):</u></b>
+/// * <b>Additional data</b>:
+///     * To hash <b>with</b> additional data:
+///         * `additional_data_ptr` = a non-null `uint32_t*` pointing to the additional data buffer
+///         * `additional_data_len` = a `size_t` indicating the number of bytes in the additional data buffer
+///         * If `additional_data_len` exceeds 2^32 -1, this function will return `NULL`
+///         * This function will <b>not</b> modify the additional data buffer
+///     * To hash <b>without</b> additional data:
+///         * `additional_data_ptr` = `NULL`
+///         * `additional_data_len` = `0`
+/// * <b>Password</b>:
+///     * `password_ptr` = a non-null `uint32_t*` pointing to the password buffer
+///     * `password_len` = a `size_t` indicating the number of bytes in the password buffer
+///     * If `password_len` exceeds 2^32 -1, this function will return `NULL`
+///     * If `password_clearing` = `1` (see below), this function will set the `password_ptr` to `NULL`, set the `password_len` to `0`, and zero out the bytes in the password buffer
+/// * <b>Salt</b>:
+///     * To hash with a <b>random</b> salt:
+///         * `salt_ptr` = `NULL`
+///         * `salt_len` = a `size_t` indicating the length of the salt (in number of bytes)
+///         * If `salt_len` is less than 8 or exceeds 2^32 -1, this function will return `NULL`
+///     * To hash with a <b>deterministic</b> salt
+///         * `salt_ptr` = a non-null `uint32_t*` pointing to the salt buffer
+///         * `salt_len` = a `size_t` indicating the number of bytes in the salt buffer
+///         * If `salt_len` is less than 8 or exceeds 2^32 -1, this function will return `NULL`
+///         * This function will <b>not</b> modify the salt buffer
+/// * <b>Secret key</b>:
+///     * To hash <b>with</b> a secret key:
+///         * `secret_key_ptr` = a non-null `uint32_t*` pointing to the secret key buffer
+///         * `secret_key_len` = a `size_t` indicating the number of bytes in the secret key buffer
+///         * If `secret_key_len` exceeds 2^32 -1, this function will return `NULL`
+///         * If `secret_key_clearing` = `1` (see below), this function will set the `secret_key_ptr` to `NULL`, set the `secret_key_len` to `0`, and zero out the bytes in the secret key buffer
+///     * To hash <b>without</b> a secret key:
+///         * `secret_key_ptr` = `NULL`
+///         * `secret_key_len` = `0`
+/// * <b>Backend</b>
+///     * `backend` = `1` for the C backend
+///     * `backend` = `2` for the Rust backend
+///     * If `backend` is anything else, this function will return `NULL`
+/// *<b>Hash length</b>: `hash_length` = a `size_t` indicating the desired length of the hash (in number of bytes)
+/// *<b>Iterations</b>: `iterations` = a `size_t` indicating the desired number of iterations
+#[warn(unused_variables)] // TODO:
 #[no_mangle]
-pub unsafe extern "C" fn jasonus_hash(
-    password_ptr: *const libc::uint8_t,
-    password_len: libc::size_t,
-    backend: libc::uint32_t,
-    hash_length: libc::uint32_t,
-    iterations: libc::uint32_t,
-    lanes: libc::uint32_t,
-    memory_size: libc::uint32_t,
-    threads: libc::uint32_t,
-    variant_ptr: *const libc::c_char,
-    version: libc::uint32_t,
-    error_code_ptr: *mut libc::c_int,
-) -> *const libc::c_char {
+pub extern "C" fn argonautica_hash(
+    additional_data: *const uint8_t,
+    additional_data_len: size_t,
+    password: *mut uint8_t,
+    password_len: size_t,
+    salt: *const uint8_t,
+    salt_len: size_t,
+    secret_key: *const uint8_t,
+    secret_key_len: size_t,
+    backend: uint32_t,
+    hash_len: uint32_t,
+    iterations: uint32_t,
+    lanes: uint32_t,
+    memory_size: uint32_t,
+    password_clearing: c_int,
+    secret_key_clearing: c_int,
+    threads: uint32_t,
+    variant: *const c_char,
+    version: uint32_t,
+    error_code: *mut c_int,
+) -> *const c_char {
+    if password.is_null() || variant.is_null() {
+        if error_code.is_null() {
+            return ::std::ptr::null();
+        } else {
+            unsafe {
+                *error_code = -1;
+            };
+            return ::std::ptr::null();
+        }
+    }
     let backend = match Backend::from_u32(backend) {
         Ok(backend) => backend,
         Err(_) => {
-            *error_code_ptr = -2;
+            unsafe {
+                *error_code = -2;
+            };
             return ::std::ptr::null();
         }
     };
-    let variant = match CStr::from_ptr(variant_ptr).to_str() {
+    let variant_cstr = unsafe { CStr::from_ptr(variant) };
+    let variant = match variant_cstr.to_str() {
         Ok(s) => match s.parse::<Variant>() {
             Ok(variant) => variant,
             Err(_) => {
-                *error_code_ptr = -3;
+                unsafe {
+                    *error_code = -3;
+                };
                 return ::std::ptr::null();
             }
         },
         Err(_) => {
-            *error_code_ptr = -4;
+            unsafe {
+                *error_code = -4;
+            };
             return ::std::ptr::null();
         }
     };
     let version = match Version::from_u32(version) {
         Ok(version) => version,
         Err(_) => {
-            *error_code_ptr = -5;
+            unsafe {
+                *error_code = -5;
+            };
             return ::std::ptr::null();
         }
     };
@@ -65,46 +138,56 @@ pub unsafe extern "C" fn jasonus_hash(
     let mut hasher = Hasher::default();
     hasher
         .configure_backend(backend)
-        .configure_hash_length(hash_length)
+        .configure_hash_length(hash_len)
         .configure_iterations(iterations)
         .configure_lanes(lanes)
         .configure_memory_size(memory_size)
-        .configure_password_clearing(false)
-        .configure_secret_key_clearing(false)
+        .configure_password_clearing(false) // TODO:
+        .configure_secret_key_clearing(false) // TODO:
         .configure_threads(threads)
         .configure_variant(variant)
         .configure_version(version)
         .opt_out_of_random_salt(true)
         .opt_out_of_secret_key(true)
-        .with_salt("somesalt"); // TODO
-    let password = ::std::slice::from_raw_parts(password_ptr, password_len);
+        .with_additional_data(&[][..]) // TODO:
+        .with_salt("somesalt") // TODO:
+        .with_secret_key(&[][..]); // TODO:
+    let password = unsafe { ::std::slice::from_raw_parts(password, password_len) };
     let hash = match hasher.with_password(password).hash() {
         Ok(hash) => hash,
         Err(_) => {
-            *error_code_ptr = -6;
+            unsafe {
+                *error_code = -6;
+            };
             return ::std::ptr::null();
         }
     };
     let hash_cstring = CString::new(hash.as_bytes()).unwrap();
-    *error_code_ptr = 0;
-    hash_cstring.into_raw() as *const libc::c_char
+    unsafe {
+        *error_code = 0;
+    };
+    hash_cstring.into_raw() as *const c_char
 }
 
-/// Verify function that can be called from C. Unlike [`jasonus_hash`](function.jasonus_hash.html), this
+/// Verify function that can be called from C. Unlike `argonautica_hash`, this
 /// function does <b>not</b> allocate memory that needs to be freed from C; so there is no need
-/// to call [`jasonus_free`](function.jasonus_free.html) after using this function
+/// to call `argonautica_free` after using this function
 #[no_mangle]
-pub unsafe extern "C" fn jasonus_verify(
-    hash_ptr: *const libc::c_char,
-    password_ptr: *const libc::uint8_t,
-    password_len: libc::size_t,
-    backend: libc::uint32_t,
-) -> libc::c_int {
-    let hash = match CStr::from_ptr(hash_ptr).to_str() {
+pub extern "C" fn argonautica_verify(
+    hash: *const c_char,
+    password: *const uint8_t,
+    password_len: size_t,
+    backend: uint32_t,
+) -> c_int {
+    if hash.is_null() || password.is_null() {
+        return -1;
+    }
+    let hash_cstr = unsafe { CStr::from_ptr(hash) };
+    let hash = match hash_cstr.to_str() {
         Ok(hash) => hash,
         Err(_) => return -1, // Utf-8 Error
     };
-    let password = ::std::slice::from_raw_parts(password_ptr, password_len);
+    let password = unsafe { ::std::slice::from_raw_parts(password, password_len) };
     let backend = match Backend::from_u32(backend) {
         Ok(backend) => backend,
         Err(_) => return -1,
@@ -112,10 +195,12 @@ pub unsafe extern "C" fn jasonus_verify(
     let mut verifier = Verifier::default();
     let is_valid = match verifier
         .configure_backend(backend)
-        .configure_password_clearing(false)
-        .configure_secret_key_clearing(false)
+        .configure_password_clearing(false) // TODO:
+        .configure_secret_key_clearing(false) // TODO:
+        .with_additional_data(&[][..]) // TODO:
         .with_hash(hash)
         .with_password(password)
+        .with_secret_key(&[][..]) // TODO:
         .verify()
     {
         Ok(is_valid) => is_valid,
@@ -127,88 +212,3 @@ pub unsafe extern "C" fn jasonus_verify(
         0
     }
 }
-
-// TODO:
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use config::Backend;
-
-//     const HASH_LENGTHS: [u32; 2] = [8, 32];
-//     const ITERATIONS: [u32; 7] = [1, 2, 4, 8, 32, 64, 128];
-//     const LANES: [u32; 6] = [1, 2, 3, 4, 5, 6];
-//     const PASSWORDS: [&str; 2] = ["P@ssw0rd", "😊"];
-//     const VARIANTS: [&str; 3] = ["argon2d", "argon2i", "argon2id"];
-
-//     #[inline(always)]
-//     fn memory_size(lanes: u32) -> u32 {
-//         let mut counter = 1;
-//         loop {
-//             if 2u32.pow(counter) < 8 * lanes {
-//                 counter += 1;
-//                 continue;
-//             }
-//             break 2u32.pow(counter);
-//         }
-//     }
-
-//     fn test(hash_length: u32, iterations: u32, lanes: u32, password: &str, variant: &str) {
-//         let mut password_bytes = password.as_bytes().to_vec();
-//         let password_ptr = (&mut password_bytes).as_mut_ptr();
-//         let password_len = password.as_bytes().len();
-
-//         let variant_cstring = CString::new(variant).unwrap();
-//         let variant_ptr = variant_cstring.as_ptr();
-
-//         let mut error_code: libc::c_int = -1;
-//         let error_code_ptr = &mut error_code as *mut libc::c_int;
-
-//         let backend = Backend::C as u32;
-
-//         let hash_ptr = unsafe {
-//             jasonus_hash(
-//                 /* password_ptr */ password_ptr,
-//                 /* password_len */ password_len,
-//                 /* backend */ backend,
-//                 /* hash_length */ hash_length,
-//                 /* iterations */ iterations,
-//                 /* lanes */ lanes,
-//                 /* memory_size */ memory_size(lanes),
-//                 /* threads */ lanes,
-//                 /* variant_ptr */ variant_ptr,
-//                 /* version */ 19,
-//                 /* error_code_ptr */ error_code_ptr,
-//             )
-//         };
-//         if hash_ptr == ::std::ptr::null_mut() {
-//             panic!("Error code: {}", unsafe { *error_code_ptr });
-//         }
-//         let result = unsafe {
-//             jasonus_verify(
-//                 hash_ptr as *const libc::c_char,
-//                 password_ptr as *const libc::uint8_t,
-//                 password_len,
-//                 backend,
-//             )
-//         };
-//         unsafe { jasonus_free(hash_ptr as *mut libc::c_char) };
-//         let is_valid = if result == 1 { true } else { false };
-//         assert!(is_valid);
-//     }
-
-//     #[test]
-//     #[ignore] // TODO:
-//     fn test_external() {
-//         for hash_length in &HASH_LENGTHS {
-//             for iterations in &ITERATIONS {
-//                 for lanes in &LANES {
-//                     for password in &PASSWORDS {
-//                         for variant in &VARIANTS {
-//                             test(*hash_length, *iterations, *lanes, *password, *variant);
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }

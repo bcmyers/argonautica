@@ -8,7 +8,7 @@ use std::path::Path;
 
 fn main() -> Result<(), failure::Error> {
     // Create temp dir
-    let temp = tempdir::TempDir::new("jasonus")?;
+    let temp = tempdir::TempDir::new("argonautica")?;
     let temp_dir = temp.path();
     let temp_dir_str = temp_dir.to_str().unwrap();
 
@@ -26,8 +26,8 @@ fn main() -> Result<(), failure::Error> {
         "phc-winner-argon2/src/core.h",
         "phc-winner-argon2/src/encoding.h",
         "phc-winner-argon2/src/thread.h",
-        "phc-winner-argon2/src/blake2/blake2-impl.h",
-        // "phc-winner-argon2/src/blake2/blamka-round-opt.h",
+        // "phc-winner-argon2/src/blake2/blake2-impl.h",
+        "phc-winner-argon2/src/blake2/blamka-round-opt.h",
         "phc-winner-argon2/src/blake2/blamka-round-ref.h",
     ] {
         let header_path = Path::new(*header_path_str);
@@ -45,8 +45,8 @@ fn main() -> Result<(), failure::Error> {
         .header(format!("{}/thread.h", temp_dir_str))
         .header(format!("{}/blake2-impl.h", temp_dir_str))
         .header(format!("{}/blake2.h", temp_dir_str))
-        // .header(format!("{}/blamka-round-opt.h", temp_dir_str))
-        .header(format!("{}/blamka-round-ref.h", temp_dir_str))
+        .header(format!("{}/blamka-round-opt.h", temp_dir_str))
+        // .header(format!("{}/blamka-round-ref.h", temp_dir_str))
         .clang_arg("-std=c89")
         .ctypes_prefix("libc")
         .layout_tests(false)

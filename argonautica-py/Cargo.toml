@@ -1,5 +1,5 @@
 [package]
-name = "a2py"
+name = "argonautica-py"
 version = "0.1.0"
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
@@ -10,4 +10,4 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-a2 = { path = "/Users/bcmyers/dev/a2" } # TODO: Hack
+argonautica = { path = "/Users/bcmyers/dev/argonautica" } # TODO: Hack

@@ -4,9 +4,8 @@ use std::mem;
 
 use blake2_rfc::blake2b::Blake2b;
 
-use data::{Data, Salt};
-use hasher::Hasher;
-use Error;
+use input::{Data, Salt};
+use {Error, Hasher};
 
 fn h0(hasher: &mut Hasher) -> Result<[u8; 72], Error> {
     if hasher.salt().is_random() {
@@ -24,13 +23,13 @@ fn h0(hasher: &mut Hasher) -> Result<[u8; 72], Error> {
         &u32_to_byte_array(hasher.config().iterations()),
         &u32_to_byte_array(hasher.config().version() as u32),
         &u32_to_byte_array(hasher.config().variant() as u32),
-        &u32_to_byte_array(password.len() as u32),
+        &u32_to_byte_array(password.c_len()),
         password.as_bytes(),
-        &u32_to_byte_array(salt.len() as u32),
+        &u32_to_byte_array(salt.c_len()),
         salt.as_bytes(),
-        &u32_to_byte_array(secret_key.len() as u32),
+        &u32_to_byte_array(secret_key.c_len()),
         secret_key.as_bytes(),
-        &u32_to_byte_array(additional_data.len() as u32),
+        &u32_to_byte_array(additional_data.c_len()),
         additional_data.as_bytes(),
     ];
     let mut blake2b = Blake2b::new(64);

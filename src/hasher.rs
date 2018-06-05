@@ -41,11 +41,11 @@ impl Hasher {
     ///
     /// <b>Note: If you are using this library to hash user passwords for storage in a database,
     /// it is recommended that you adjust these settings for your machine (primarily `iterations`,
-    /// and `memory_size`) until the time it takes to hash a password is approximately 500
+    /// and `memory_size`) until the time it takes to hash a password is approximately 300-500
     /// milliseconds</b>.
     ///
     /// There is a script in the examples directory that will show you the various configuration
-    /// options for your machine that produce hashing times between 375 and 625 milliseconds
+    /// options for your machine that produce hashing times between 300 and 500 milliseconds
     /// (Don't forget to run it with the `--release` flag). Alternatively, you can clone the
     /// repository and run the benchmark suite with
     /// `cargo bench --features benches -- inputs`, which will take longer but which runs
@@ -61,7 +61,7 @@ impl Hasher {
     ///       that need it ([`hash_non_blocking`](struct.Hasher.html#method.hash_non_blocking) or
     ///       [`hash_raw_non_blocking`](struct.Hasher.html#method.hash_raw_non_blocking))
     /// * `hash_length`: `32` bytes
-    /// * `iterations`: `128`
+    /// * `iterations`: `192`
     /// * `lanes`: The number of logical cores on your machine
     /// * `memory_size`: `4096` kibibytes
     /// * `opt_out_of_random_salt`: `false`
@@ -84,7 +84,7 @@ impl Hasher {
     /// early-2014 Macbook Air, this configuration hashes the full text of Shakespear's Hamlet
     /// in approximately 1 millisecond (on average). [MD5](https://github.com/stainless-steel/md5)
     /// does it in about half the time and [sha2](https://github.com/RustCrypto/hashes) with the
-    /// SHA-256 algorithm performs about the same as `jasonus`
+    /// SHA-256 algorithm performs about the same as `argonautica`
     pub fn fast_but_insecure() -> Hasher {
         fn memory_size(lanes: u32) -> u32 {
             let mut counter = 1;
@@ -147,7 +147,7 @@ impl Hasher {
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom number of
-    /// iterations. The default is `128`.
+    /// iterations. The default is `192`.
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_iterations(&mut self, iterations: u32) -> &mut Hasher {

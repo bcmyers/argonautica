@@ -1,4 +1,5 @@
 extern crate bindgen;
+extern crate cbindgen;
 extern crate cc;
 extern crate failure;
 extern crate tempdir;
@@ -14,7 +15,7 @@ const BLAKE2_IMPLEMENTATION: &str = "phc-winner-argon2/src/ref.c";
 const BLAKE2_IMPLEMENTATION: &str = "phc-winner-argon2/src/opt.c";
 
 fn main() -> Result<(), failure::Error> {
-    let temp = tempdir::TempDir::new("jasonus")?;
+    let temp = tempdir::TempDir::new("argonautica")?;
     let temp_dir = temp.path();
     let temp_dir_str = temp_dir.to_str().unwrap();
     for header_path_str in &[
@@ -75,5 +76,14 @@ fn main() -> Result<(), failure::Error> {
         .generate()
         .map_err(|_| failure::err_msg("failed to generate bindings"))?;
     bindings.write_to_file(out_path)?;
+
+    let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    cbindgen::Builder::new()
+        .with_crate(crate_dir)
+        .with_documentation(false)
+        .with_language(cbindgen::Language::C)
+        .generate()
+        .expect("Unable to generate bindings")
+        .write_to_file("bindings.h");
     Ok(())
 }

@@ -1,17 +1,17 @@
 [package]
-name = "jasonus"
+name = "argonautica"
 version = "0.1.0" # remember to update html_root_url
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
 categories = ["Algorithms", "API bindings", "Authentication", "Cryptography"]
 description = "Idiomatic Argon2 password hashing for Rust"
-documentation = "https://docs.rs/jasonus"
-homepage = "https://en.wikipedia.org/wiki/Jason"
+documentation = "https://docs.rs/argonautica"
+homepage = "https://github.com/bcmyers/argonautica"
 keywords = ["argon2", "argon2d", "argon2i", "argon2id", "crypto", "cryptography", "hash", "hashing", "password", "security"]
 license = "MIT/Apache-2.0"
 publish = false # TODO
 readme = "README.md"
-repository = "https://github.com/bcmyers/jasonus"
+repository = "https://github.com/bcmyers/argonautica"
 
 build = "build.rs"
 links = "argon2"
@@ -48,13 +48,15 @@ env_logger = { version = "0.5", optional = true }
 futures-timer = { version = "0.1", optional = true }
 
 [features]
+actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
 benches = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2"]
 development = ["bindgen", "blake2-rfc", "tempdir"]
-example_actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
+nightly = []
 without_simd = []
 
 [build-dependencies]
 bindgen = "0.37"
+cbindgen = "0.6"
 cc = { version = "1.0.15", features = ["parallel"] }
 failure = "0.1"
 tempdir = "0.3"
@@ -71,7 +73,7 @@ path = "examples/calibrate_timing.rs"
 [[example]]
 name = "example_actix_web"
 path = "examples/example_actix_web.rs"
-required-features = ["example_actix_web"]
+required-features = ["actix_web"]
 
 [[example]]
 name = "example_configuration"
@@ -114,7 +116,7 @@ required-features = ["development"]
 [[bench]]
 name = "bench_crates"
 harness = false
-required-features = ["benches"]
+required-features = ["benches", "nightly"]
 
 [[bench]]
 name = "bench_fast_but_insecure"
@@ -141,4 +143,4 @@ codegen-units = 1
 opt-level = 3
 
 [badges]
-travis-ci = { repository = "bcmyers/jasonus", branch = "master" }
+travis-ci = { repository = "bcmyers/argonautica", branch = "master" }

@@ -6,7 +6,7 @@ impl fmt::Debug for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "jasonus::Error {{ kind: jasonus::ErrorKind::{:?}, display: {:?} }}",
+            "argonautica::Error {{ kind: argonautica::ErrorKind::{:?}, display: {:?} }}",
             self.kind, self.display,
         )
     }
