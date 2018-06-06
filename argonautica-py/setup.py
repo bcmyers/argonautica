@@ -3,6 +3,8 @@ from setuptools import setup, find_packages
 import subprocess
 import sys
 
+# TODO: https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 try:
@@ -17,21 +19,8 @@ except ImportError:
         print("Please install the setuptools-rust package")
         raise SystemExit(e.returncode)
 
-
-def long_description() -> str:
-    try:
-        import pypandoc
-        return pypandoc.convert('README.md', 'rst').replace("\r", "")
-    except ImportError:
-        try:
-            subprocess.check_call([
-                sys.executable, "-m", "pip", "install", "pypandoc",
-            ])
-            os.execvp(sys.executable, [sys.executable] + sys.argv)
-            return pypandoc.convert('README.md', 'rst').replace("\r", "")
-        except:
-            return ""
-
+with open("README.md", "r") as f:
+    long_description = f.read()
 
 setup(
     name="argonautica-py",
@@ -41,7 +30,8 @@ setup(
     author_email="brian.carl.myers@gmail.com",
     description="Idiomatic Argon2 password hashing for Python but written in Rust",
     license="MIT/Apache-2.0",
-    long_description=long_description(),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/bcmyers/argonautica",
 
     classifiers=[
@@ -52,14 +42,18 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.0",
+        "Programming Language :: Python :: 3.1",
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: Rust",
         "Topic :: Security :: Cryptography",
     ],
 
@@ -71,9 +65,10 @@ setup(
     packages=find_packages(exclude=["docs.*", "tests.*"]),
 
     project_urls={
-        "Documentation": "TODO",
-        "Source Code": "https://github.com/bcmyers/argonautica",
+        "Docs": "TODO",
+        "Github": "https://github.com/bcmyers/argonautica",
     },
+    python_requires='>=3',
 
     rust_extensions=[RustExtension(
         'argonautica.rust',

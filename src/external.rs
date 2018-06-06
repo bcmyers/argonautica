@@ -28,7 +28,7 @@ pub extern "C" fn argonautica_free(string: *mut c_char) -> c_int {
 /// <b><u>Arguments (from the perspective of C code):</u></b>
 /// * <b>Additional data</b>:
 ///     * To hash <b>with</b> additional data:
-///         * `additional_data_ptr` = a non-null `uint32_t*` pointing to the additional data buffer
+///         * `additional_data_ptr` = a `uint32_t*` pointing to the additional data buffer
 ///         * `additional_data_len` = a `size_t` indicating the number of bytes in the additional data buffer
 ///         * If `additional_data_len` exceeds 2^32 -1, this function will return `NULL`
 ///         * This function will <b>not</b> modify the additional data buffer
@@ -36,7 +36,7 @@ pub extern "C" fn argonautica_free(string: *mut c_char) -> c_int {
 ///         * `additional_data_ptr` = `NULL`
 ///         * `additional_data_len` = `0`
 /// * <b>Password</b>:
-///     * `password_ptr` = a non-null `uint32_t*` pointing to the password buffer
+///     * `password_ptr` = a `uint32_t*` pointing to the password buffer
 ///     * `password_len` = a `size_t` indicating the number of bytes in the password buffer
 ///     * If `password_len` exceeds 2^32 -1, this function will return `NULL`
 ///     * If `password_clearing` = `1` (see below), this function will set the `password_ptr` to `NULL`, set the `password_len` to `0`, and zero out the bytes in the password buffer
@@ -46,13 +46,13 @@ pub extern "C" fn argonautica_free(string: *mut c_char) -> c_int {
 ///         * `salt_len` = a `size_t` indicating the length of the salt (in number of bytes)
 ///         * If `salt_len` is less than 8 or exceeds 2^32 -1, this function will return `NULL`
 ///     * To hash with a <b>deterministic</b> salt
-///         * `salt_ptr` = a non-null `uint32_t*` pointing to the salt buffer
+///         * `salt_ptr` = a `uint32_t*` pointing to the salt buffer
 ///         * `salt_len` = a `size_t` indicating the number of bytes in the salt buffer
 ///         * If `salt_len` is less than 8 or exceeds 2^32 -1, this function will return `NULL`
 ///         * This function will <b>not</b> modify the salt buffer
 /// * <b>Secret key</b>:
 ///     * To hash <b>with</b> a secret key:
-///         * `secret_key_ptr` = a non-null `uint32_t*` pointing to the secret key buffer
+///         * `secret_key_ptr` = a `uint32_t*` pointing to the secret key buffer
 ///         * `secret_key_len` = a `size_t` indicating the number of bytes in the secret key buffer
 ///         * If `secret_key_len` exceeds 2^32 -1, this function will return `NULL`
 ///         * If `secret_key_clearing` = `1` (see below), this function will set the `secret_key_ptr` to `NULL`, set the `secret_key_len` to `0`, and zero out the bytes in the secret key buffer

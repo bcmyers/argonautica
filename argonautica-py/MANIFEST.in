@@ -1,4 +1,7 @@
 include argonautica/argonautica.h
 include Cargo.toml
-include README.md
 recursive-include src *
+
+include README.md
+include LICENSE-APACHE
+include LICENSE-MIT

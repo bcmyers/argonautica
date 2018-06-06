@@ -277,7 +277,7 @@ static archive during the build process. This means you need a C compiler on you
 machine in order to build <b>argonautica</b>. More specifically, you need:
 * [LLVM/Clang](https://llvm.org/) (version 3.9 or higher)
     * Mac OS: `brew install llvm`, which requires [Homebrew](https://brew.sh/)
-    * Debian-based linux: `apt-get install llvm-[version]-dev libclang-[version]-dev clang-[version]`
+    * Debian-based linux: `apt-get install clang llvm-dev libclang-dev`
     * Arch linux: `pacman -S clang`
     * Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
 
