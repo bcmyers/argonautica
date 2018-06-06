@@ -21,13 +21,13 @@
 int argonautica_free(char *string);
 
 const char *argonautica_hash(const uint8_t *additional_data,
-                             size_t additional_data_len,
+                             uint32_t additional_data_len,
                              uint8_t *password,
-                             size_t password_len,
+                             uint32_t password_len,
                              const uint8_t *salt,
-                             size_t salt_len,
-                             const uint8_t *secret_key,
-                             size_t secret_key_len,
+                             uint32_t salt_len,
+                             uint8_t *secret_key,
+                             uint32_t secret_key_len,
                              uint32_t backend,
                              uint32_t hash_len,
                              uint32_t iterations,
@@ -41,6 +41,13 @@ const char *argonautica_hash(const uint8_t *additional_data,
                              int *error_code);
 
 int argonautica_verify(const char *hash,
-                       const uint8_t *password,
-                       size_t password_len,
-                       uint32_t backend);
+                       const uint8_t *additional_data,
+                       uint32_t additional_data_len,
+                       uint8_t *password,
+                       uint32_t password_len,
+                       uint8_t *secret_key,
+                       uint32_t secret_key_len,
+                       uint32_t backend,
+                       int password_clearing,
+                       int secret_key_clearing,
+                       uint32_t threads);

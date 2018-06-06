@@ -1,5 +1,4 @@
 extern crate bindgen;
-extern crate cbindgen;
 extern crate cc;
 extern crate failure;
 extern crate tempdir;
@@ -77,17 +76,6 @@ fn main() -> Result<(), failure::Error> {
         .generate()
         .map_err(|_| failure::err_msg("failed to generate bindings"))?;
     bindings.write_to_file(file_path)?;
-
-    let crate_dir_string = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let crate_dir = Path::new(&crate_dir_string);
-    let path = crate_dir.join("argonautica.h");
-    cbindgen::Builder::new()
-        .with_crate(crate_dir)
-        .with_documentation(false)
-        .with_language(cbindgen::Language::C)
-        .generate()
-        .expect("failed to generate argonautica.h")
-        .write_to_file(path);
 
     Ok(())
 }

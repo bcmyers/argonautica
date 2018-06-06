@@ -1,8 +1,0 @@
-autopep8
-flake8
-mypy
-setuptools
-sphinx
-sphinx_rtd_theme
-twine
-wheel

@@ -40,6 +40,7 @@ sha2 = { version = "0.7.1", optional = true }
 # development
 bindgen = { version = "0.37", optional = true }
 blake2-rfc = { version = "0.2", optional = true }
+cbindgen = { version = "0.6", optional=true }
 tempdir = { version = "0.3", optional = true }
 
 # example_actix_web
@@ -50,12 +51,11 @@ futures-timer = { version = "0.1", optional = true }
 [features]
 actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
 bench = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2"]
-development = ["bindgen", "blake2-rfc", "tempdir"]
+development = ["bindgen", "blake2-rfc", "cbindgen", "tempdir"]
 without_simd = []
 
 [build-dependencies]
 bindgen = "0.37"
-cbindgen = "0.6"
 cc = { version = "1.0.15", features = ["parallel"] }
 failure = "0.1"
 tempdir = "0.3"
@@ -100,13 +100,18 @@ name = "generate_secret_key"
 path = "examples/generate_secret_key.rs"
 
 [[bin]]
-name = "foo"
-path = "src/bin/foo.rs"
-
-[[bin]]
 name = "generate_bindings"
 path = "src/bin/generate_bindings.rs"
 required-features = ["development"]
+
+[[bin]]
+name = "generate_header"
+path = "src/bin/generate_header.rs"
+required-features = ["development"]
+
+[[bin]]
+name = "foo"
+path = "src/bin/foo.rs"
 
 [[bench]]
 name = "bench_crates"

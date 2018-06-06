@@ -1,9 +1,10 @@
 //! "extern" functions that can be called from C
 use std::ffi::{CStr, CString};
 
-use libc::{c_char, c_int, size_t, uint32_t, uint8_t};
+use libc::{c_char, c_int, uint32_t, uint8_t};
 
 use config::{Backend, Variant, Version};
+use input::Salt;
 use {Hasher, Verifier};
 
 /// Frees memory associated with a pointer that was previously returned from `argonautica_hash`
@@ -65,17 +66,16 @@ pub extern "C" fn argonautica_free(string: *mut c_char) -> c_int {
 ///     * If `backend` is anything else, this function will return `NULL`
 /// *<b>Hash length</b>: `hash_length` = a `size_t` indicating the desired length of the hash (in number of bytes)
 /// *<b>Iterations</b>: `iterations` = a `size_t` indicating the desired number of iterations
-#[warn(unused_variables)] // TODO:
 #[no_mangle]
 pub extern "C" fn argonautica_hash(
     additional_data: *const uint8_t,
-    additional_data_len: size_t,
+    additional_data_len: uint32_t,
     password: *mut uint8_t,
-    password_len: size_t,
+    password_len: uint32_t,
     salt: *const uint8_t,
-    salt_len: size_t,
-    secret_key: *const uint8_t,
-    secret_key_len: size_t,
+    salt_len: uint32_t,
+    secret_key: *mut uint8_t,
+    secret_key_len: uint32_t,
     backend: uint32_t,
     hash_len: uint32_t,
     iterations: uint32_t,
@@ -98,6 +98,8 @@ pub extern "C" fn argonautica_hash(
             return ::std::ptr::null();
         }
     }
+
+    // Backend
     let backend = match Backend::from_u32(backend) {
         Ok(backend) => backend,
         Err(_) => {
@@ -107,6 +109,8 @@ pub extern "C" fn argonautica_hash(
             return ::std::ptr::null();
         }
     };
+
+    // Variant
     let variant_cstr = unsafe { CStr::from_ptr(variant) };
     let variant = match variant_cstr.to_str() {
         Ok(s) => match s.parse::<Variant>() {
@@ -125,6 +129,8 @@ pub extern "C" fn argonautica_hash(
             return ::std::ptr::null();
         }
     };
+
+    // Version
     let version = match Version::from_u32(version) {
         Ok(version) => version,
         Err(_) => {
@@ -148,12 +154,38 @@ pub extern "C" fn argonautica_hash(
         .configure_variant(variant)
         .configure_version(version)
         .opt_out_of_random_salt(true)
-        .opt_out_of_secret_key(true)
-        .with_additional_data(&[][..]) // TODO:
-        .with_salt("somesalt") // TODO:
-        .with_secret_key(&[][..]); // TODO:
-    let password = unsafe { ::std::slice::from_raw_parts(password, password_len) };
-    let hash = match hasher.with_password(password).hash() {
+        .opt_out_of_secret_key(true);
+
+    // Additional data
+    if !additional_data.is_null() {
+        let additional_data = unsafe {
+            ::std::slice::from_raw_parts(additional_data, additional_data_len as usize)
+        };
+        hasher.with_additional_data(additional_data);
+    }
+
+    // Password
+    let password = unsafe { ::std::slice::from_raw_parts(password, password_len as usize) };
+    hasher.with_password(password);
+
+    // Salt
+    if salt.is_null() {
+        let salt = Salt::random(salt_len);
+        hasher.with_salt(salt);
+    } else {
+        let salt = unsafe { ::std::slice::from_raw_parts(salt, salt_len as usize) };
+        hasher.with_salt(salt);
+    };
+
+    // Secret key
+    if !secret_key.is_null() {
+        let secret_key = unsafe {
+            ::std::slice::from_raw_parts(secret_key, secret_key_len as usize)
+        };
+        hasher.with_secret_key(secret_key);
+    };
+
+    let hash = match hasher.hash() {
         Ok(hash) => hash,
         Err(_) => {
             unsafe {
@@ -162,10 +194,12 @@ pub extern "C" fn argonautica_hash(
             return ::std::ptr::null();
         }
     };
+
     let hash_cstring = CString::new(hash.as_bytes()).unwrap();
     unsafe {
         *error_code = 0;
     };
+
     hash_cstring.into_raw() as *const c_char
 }
 
@@ -175,37 +209,67 @@ pub extern "C" fn argonautica_hash(
 #[no_mangle]
 pub extern "C" fn argonautica_verify(
     hash: *const c_char,
-    password: *const uint8_t,
-    password_len: size_t,
+    additional_data: *const uint8_t,
+    additional_data_len: uint32_t,
+    password: *mut uint8_t,
+    password_len: uint32_t,
+    secret_key: *mut uint8_t,
+    secret_key_len: uint32_t,
     backend: uint32_t,
+    password_clearing: c_int,
+    secret_key_clearing: c_int,
+    threads: uint32_t,
 ) -> c_int {
     if hash.is_null() || password.is_null() {
         return -1;
     }
+
+    // Backend
+    let backend = match Backend::from_u32(backend) {
+        Ok(backend) => backend,
+        Err(_) => return -1,
+    };
+
+    let mut verifier = Verifier::default();
+    verifier
+        .configure_backend(backend)
+        .configure_password_clearing(false) // TODO:
+        .configure_secret_key_clearing(false) // TODO:
+        .configure_threads(threads);
+
+    // Hash
     let hash_cstr = unsafe { CStr::from_ptr(hash) };
     let hash = match hash_cstr.to_str() {
         Ok(hash) => hash,
         Err(_) => return -1, // Utf-8 Error
     };
-    let password = unsafe { ::std::slice::from_raw_parts(password, password_len) };
-    let backend = match Backend::from_u32(backend) {
-        Ok(backend) => backend,
-        Err(_) => return -1,
-    };
-    let mut verifier = Verifier::default();
-    let is_valid = match verifier
-        .configure_backend(backend)
-        .configure_password_clearing(false) // TODO:
-        .configure_secret_key_clearing(false) // TODO:
-        .with_additional_data(&[][..]) // TODO:
-        .with_hash(hash)
-        .with_password(password)
-        .with_secret_key(&[][..]) // TODO:
-        .verify()
-    {
+    verifier.with_hash(hash);
+
+    // Additional data
+    if !additional_data.is_null() {
+        let additional_data = unsafe {
+            ::std::slice::from_raw_parts(additional_data, additional_data_len as usize)
+        };
+        verifier.with_additional_data(additional_data);
+    }
+
+    // Password
+    let password = unsafe { ::std::slice::from_raw_parts(password, password_len as usize) };
+    verifier.with_password(password);
+
+    // Secret key
+    if !secret_key.is_null() {
+        let secret_key = unsafe {
+            ::std::slice::from_raw_parts(secret_key, secret_key_len as usize)
+        };
+        verifier.with_additional_data(secret_key);
+    }
+
+    let is_valid = match verifier.verify() {
         Ok(is_valid) => is_valid,
         Err(_) => return -1,
     };
+
     if is_valid {
         1
     } else {
