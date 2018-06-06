@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = jasonus-py
+SPHINXPROJ    = argonautica-py
 SOURCEDIR     = source
 BUILDDIR      = build
 

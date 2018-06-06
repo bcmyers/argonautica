@@ -33,8 +33,8 @@ pub const DEFAULT_BACKEND: Backend = Backend::C;
 /// `32_u32`
 pub const DEFAULT_HASH_LENGTH: u32 = 32;
 
-/// `256_u32`
-pub const DEFAULT_ITERATIONS: u32 = 256;
+/// `192_u32`
+pub const DEFAULT_ITERATIONS: u32 = 192;
 
 /// `4096_u32`
 pub const DEFAULT_MEMORY_SIZE: u32 = 4_096;

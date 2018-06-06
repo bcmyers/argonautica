@@ -5,7 +5,7 @@ extern crate num_cpus;
 
 use argonautica::config::{Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_SALT_LENGTH,
                           DEFAULT_VARIANT, DEFAULT_VERSION};
-use argonautica::data::{Salt, SecretKey};
+use argonautica::input::{Salt, SecretKey};
 use argonautica::Hasher;
 use criterion::Criterion;
 

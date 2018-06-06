@@ -63,6 +63,7 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
 
+    include_package_data=True,
     install_requires=['cffi>=1.11.5'],
 
     keywords="argon2 argon2d argon2i argon2id crypto cryptography hash hashing password security",

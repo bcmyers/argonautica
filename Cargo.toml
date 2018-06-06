@@ -31,7 +31,7 @@ scopeguard = "0.3"
 serde = { version = "1.0", optional = true, features = ["derive"] }
 
 # benches
-argon2rs = { version = "0.2.5", features = ["simd"], optional = true }
+argon2rs = { version = "0.2.5", optional = true }
 criterion = { version = "0.2", optional = true }
 md5 = { version = "0.3.7", optional = true }
 rust-argon2 = { version = "0.3.0", optional = true }
@@ -49,9 +49,8 @@ futures-timer = { version = "0.1", optional = true }
 
 [features]
 actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
-benches = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2"]
+bench = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2"]
 development = ["bindgen", "blake2-rfc", "tempdir"]
-nightly = []
 without_simd = []
 
 [build-dependencies]
@@ -112,22 +111,22 @@ required-features = ["development"]
 [[bench]]
 name = "bench_crates"
 harness = false
-required-features = ["benches", "nightly"]
+required-features = ["bench"]
 
 [[bench]]
 name = "bench_fast_but_insecure"
 harness = false
-required-features = ["benches"]
+required-features = ["bench"]
 
 [[bench]]
 name = "bench_inputs"
 harness = false
-required-features = ["benches"]
+required-features = ["bench"]
 
 [[bench]]
 name = "bench_threads"
 harness = false
-required-features = ["benches"]
+required-features = ["bench"]
 
 [profile.bench]
 codegen-units = 1

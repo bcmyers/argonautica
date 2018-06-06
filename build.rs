@@ -56,8 +56,9 @@ fn main() -> Result<(), failure::Error> {
     }
     builder.compile("argon2");
 
-    let out_dir_str = env::var("OUT_DIR")?;
-    let out_path = Path::new(&out_dir_str).join("bindings.rs");
+    let out_dir_string = env::var("OUT_DIR")?;
+    let out_dir = Path::new(&out_dir_string);
+    let file_path = out_dir.join("bindings.rs");
     let bindings = bindgen::Builder::default()
         .header(format!("{}/argon2.h", temp_dir_str))
         .header(format!("{}/encoding.h", temp_dir_str))
@@ -75,15 +76,18 @@ fn main() -> Result<(), failure::Error> {
         .rustfmt_bindings(false)
         .generate()
         .map_err(|_| failure::err_msg("failed to generate bindings"))?;
-    bindings.write_to_file(out_path)?;
+    bindings.write_to_file(file_path)?;
 
-    let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let crate_dir_string = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let crate_dir = Path::new(&crate_dir_string);
+    let path = crate_dir.join("argonautica.h");
     cbindgen::Builder::new()
         .with_crate(crate_dir)
         .with_documentation(false)
         .with_language(cbindgen::Language::C)
         .generate()
-        .expect("Unable to generate bindings")
-        .write_to_file("bindings.h");
+        .expect("failed to generate argonautica.h")
+        .write_to_file(path);
+
     Ok(())
 }
