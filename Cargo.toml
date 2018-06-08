@@ -16,6 +16,17 @@ repository = "https://github.com/bcmyers/argonautica"
 build = "build.rs"
 links = "argon2"
 
+[lib]
+name = "argonautica"
+crate_type = ["lib", "cdylib"]
+
+[features]
+actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
+bench = ["argon2rs", "criterion", "md5", "native", "rust-argon2", "sha2", "simd"]
+development = ["bindgen", "blake2-rfc", "cbindgen", "tempdir"]
+native = []
+simd = []
+
 [dependencies]
 base64 = "0.9"
 bitflags = "1.0"
@@ -48,14 +59,10 @@ actix-web = { version = "0.6", optional = true }
 env_logger = { version = "0.5", optional = true }
 futures-timer = { version = "0.1", optional = true }
 
-[features]
-actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
-bench = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2"]
-development = ["bindgen", "blake2-rfc", "cbindgen", "tempdir"]
-without_simd = []
-
 [build-dependencies]
 bindgen = "0.37"
+cbindgen = "0.6"
+cfg-if = "0.1"
 cc = { version = "1.0.15", features = ["parallel"] }
 failure = "0.1"
 tempdir = "0.3"
@@ -64,6 +71,40 @@ tempdir = "0.3"
 dotenv = "0.13"
 lazy_static = "1.0"
 serde_json = "1.0"
+
+[[bench]]
+name = "bench_crates"
+harness = false
+required-features = ["bench"]
+
+[[bench]]
+name = "bench_fast_but_insecure"
+harness = false
+required-features = ["bench"]
+
+[[bench]]
+name = "bench_inputs"
+harness = false
+required-features = ["bench"]
+
+[[bench]]
+name = "bench_threads"
+harness = false
+required-features = ["bench"]
+
+[[bin]]
+name = "generate_bindings"
+path = "src/bin/generate_bindings.rs"
+required-features = ["development"]
+
+[[bin]]
+name = "generate_header"
+path = "src/bin/generate_header.rs"
+required-features = ["development"]
+
+[[bin]]
+name = "foo"
+path = "src/bin/foo.rs"
 
 [[example]]
 name = "calibrate_timing"
@@ -98,40 +139,6 @@ path = "examples/example_very_simple.rs"
 [[example]]
 name = "generate_secret_key"
 path = "examples/generate_secret_key.rs"
-
-[[bin]]
-name = "generate_bindings"
-path = "src/bin/generate_bindings.rs"
-required-features = ["development"]
-
-[[bin]]
-name = "generate_header"
-path = "src/bin/generate_header.rs"
-required-features = ["development"]
-
-[[bin]]
-name = "foo"
-path = "src/bin/foo.rs"
-
-[[bench]]
-name = "bench_crates"
-harness = false
-required-features = ["bench"]
-
-[[bench]]
-name = "bench_fast_but_insecure"
-harness = false
-required-features = ["bench"]
-
-[[bench]]
-name = "bench_inputs"
-harness = false
-required-features = ["bench"]
-
-[[bench]]
-name = "bench_threads"
-harness = false
-required-features = ["bench"]
 
 [profile.bench]
 codegen-units = 1

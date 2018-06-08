@@ -3,11 +3,12 @@ extern crate argonautica;
 extern crate criterion;
 extern crate num_cpus;
 
-use argonautica::Hasher;
-use argonautica::config::{Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS,
-                          DEFAULT_MEMORY_SIZE, DEFAULT_SALT_LENGTH, DEFAULT_VARIANT,
-                          DEFAULT_VERSION};
+use argonautica::config::{
+    Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
+    DEFAULT_SALT_LENGTH, DEFAULT_VARIANT, DEFAULT_VERSION,
+};
 use argonautica::input::{Salt, SecretKey};
+use argonautica::Hasher;
 use criterion::Criterion;
 
 const SAMPLE_SIZE: usize = 25;

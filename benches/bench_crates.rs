@@ -5,8 +5,10 @@ extern crate argonautica;
 extern crate criterion;
 extern crate rand;
 
-use argonautica::config::{default_lanes, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS,
-                          DEFAULT_MEMORY_SIZE, DEFAULT_SALT_LENGTH};
+use argonautica::config::{
+    default_lanes, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
+    DEFAULT_SALT_LENGTH,
+};
 use criterion::{Criterion, Fun};
 use rand::rngs::OsRng;
 use rand::RngCore;

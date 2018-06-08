@@ -262,11 +262,13 @@
 //!
 //! <b>argonautica</b> should be relatively straightforward to include in your Rust project:
 //! * Place `extern crate argonautica;` in your code (typically in either `lib.rs` or `main.rs`)
-//! * In the `[dependencies]` section of your `Cargo.toml`, place:
-//!     * `argonautica = "0.1.0"`, or
-//!     * `argonautica = { version = "0.1.0", features = ["serde"] }`</br>
-//!     (The optional serde feature allows you to serialize / deserialize structs and
-//!     enums from <b>argonautica</b> using the [serde](https://github.com/serde-rs/serde) ecosystem).
+//! * In the `[dependencies]` section of your `Cargo.toml`, place ...
+//!     * ... if you're building for your own machine ...
+//!         * `argonautica = { version = "0.1.0", features = ["native", "simd"] }`, or
+//!         * `argonautica = { version = "0.1.0", features = ["native", "serde", "simd"] }`
+//!     * ... if you're building for a different machine ...
+//!         * `argonautica = "0.1.0"`, or
+//!         * `argonautica = { version = "0.1.0", features = ["serde"] }`
 //!
 //! That said, <b>argonautica</b> uses [cc](https://github.com/alexcrichton/cc-rs) and
 //! [bindgen](https://github.com/rust-lang-nursery/rust-bindgen) to compile the cannonical

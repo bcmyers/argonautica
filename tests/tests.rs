@@ -81,10 +81,12 @@ fn generate_args(input: &Input) -> Vec<String> {
             .take(input.secret_key_len)
             .collect::<String>()
     };
-    let password = rng.sample_iter(&Alphanumeric)
+    let password = rng
+        .sample_iter(&Alphanumeric)
         .take(input.password_len)
         .collect::<String>();
-    let salt = rng.sample_iter(&Alphanumeric)
+    let salt = rng
+        .sample_iter(&Alphanumeric)
         .take(input.salt_len)
         .collect::<String>();
 
@@ -142,7 +144,8 @@ fn parse_stderr(stderr: &[u8]) -> (String, Vec<u8>) {
         panic!("invalid stderr from C: {}", stderr);
     }
     let encoded = v[0].to_string();
-    let hash = v[1].replace("[", "")
+    let hash = v[1]
+        .replace("[", "")
         .replace("]", "")
         .split(",")
         .into_iter()
@@ -249,7 +252,9 @@ fn test(input: &Input) {
     println!();
 
     // Compare results
-    if (&encoded1 != &encoded2) || (&encoded2 != &encoded3) || (&hash1 != &hash2)
+    if (&encoded1 != &encoded2)
+        || (&encoded2 != &encoded3)
+        || (&hash1 != &hash2)
         || (&hash2 != &hash3)
     {
         panic!(
@@ -322,14 +327,16 @@ fn parse_stderr_c(stderr: &[u8]) -> (String, String, Vec<u8>, Vec<u8>) {
     }
     let encoded1 = v[0].to_string();
     let encoded2 = v[1].to_string();
-    let hash1 = v[2].replace("[", "")
+    let hash1 = v[2]
+        .replace("[", "")
         .replace("]", "")
         .split(",")
         .into_iter()
         .map(|s| Ok::<_, failure::Error>(s.parse::<u8>()?))
         .collect::<Result<Vec<u8>, failure::Error>>()
         .expect("unable to parse hash from C stderr");
-    let hash2 = v[3].replace("[", "")
+    let hash2 = v[3]
+        .replace("[", "")
         .replace("]", "")
         .split(",")
         .into_iter()
@@ -363,8 +370,12 @@ fn test_c(input: &Input) {
     println!();
 
     // Compare results
-    if (&encoded1 != &encoded2) || (&encoded2 != &encoded3) || (&encoded3 != &encoded4)
-        || (&hash1 != &hash2) || (&hash2 != &hash3) || (&hash3 != &hash4)
+    if (&encoded1 != &encoded2)
+        || (&encoded2 != &encoded3)
+        || (&encoded3 != &encoded4)
+        || (&hash1 != &hash2)
+        || (&hash2 != &hash3)
+        || (&hash3 != &hash4)
     {
         panic!(
             "\nCompare failed:\n{:#?}\n{}\n{}\n{}\n{}\n{:?}\n{:?}\n{:?}\n{:?}\n",

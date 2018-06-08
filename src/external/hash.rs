@@ -1,30 +1,18 @@
-//! "extern" functions that can be called from C
-use std::ffi::{CStr, CString};
+#![allow(non_camel_case_types)]
+
+use std::ffi::CString;
 
 use libc::{c_char, c_int, uint32_t, uint8_t};
 
 use config::{Backend, Variant, Version};
 use input::Salt;
-use {Hasher, Verifier};
+use external::{argonautica_backend_t, argonautica_error_t, argonautica_variant_t, argonautica_version_t};
+use Hasher;
 
-/// Frees memory associated with a pointer that was previously returned from `argonautica_hash`
-#[no_mangle]
-pub extern "C" fn argonautica_free(string: *mut c_char) -> c_int {
-    if string.is_null() {
-        return -1;
-    }
-    unsafe {
-        CString::from_raw(string);
-    };
-    return 0;
-}
-
-// TODO: Does the pointer actually get set to zero?
-
-/// Hash function that can be called from C. This function allocates memory and hands ownership
-/// of that memory over to C; so in your C code you must call `argonautica_free` at some point
-/// after using the pointer returned from this function in order to avoid leaking
-/// memory
+/// Hash function that can be called from C that returns a string-encoded hash. This function
+/// allocates memory and hands ownership of that memory over to C; so in your C code you must
+/// call `argonautica_free` at some point after using the pointer returned from this function
+/// in order to avoid leaking memory
 ///
 /// <b><u>Arguments (from the perspective of C code):</u></b>
 /// * <b>Additional data</b>:
@@ -76,7 +64,7 @@ pub extern "C" fn argonautica_hash(
     salt_len: uint32_t,
     secret_key: *mut uint8_t,
     secret_key_len: uint32_t,
-    backend: uint32_t,
+    backend: argonautica_backend_t,
     hash_len: uint32_t,
     iterations: uint32_t,
     lanes: uint32_t,
@@ -84,62 +72,24 @@ pub extern "C" fn argonautica_hash(
     password_clearing: c_int,
     secret_key_clearing: c_int,
     threads: uint32_t,
-    variant: *const c_char,
-    version: uint32_t,
-    error_code: *mut c_int,
+    variant: argonautica_variant_t,
+    version: argonautica_version_t,
+    error_code: *mut argonautica_error_t,
 ) -> *const c_char {
-    if password.is_null() || variant.is_null() {
+    if password.is_null() {
         if error_code.is_null() {
             return ::std::ptr::null();
         } else {
             unsafe {
-                *error_code = -1;
+                *error_code = argonautica_error_t::ARGONAUTICA_ERROR1;
             };
             return ::std::ptr::null();
         }
     }
 
-    // Backend
-    let backend = match Backend::from_u32(backend) {
-        Ok(backend) => backend,
-        Err(_) => {
-            unsafe {
-                *error_code = -2;
-            };
-            return ::std::ptr::null();
-        }
-    };
-
-    // Variant
-    let variant_cstr = unsafe { CStr::from_ptr(variant) };
-    let variant = match variant_cstr.to_str() {
-        Ok(s) => match s.parse::<Variant>() {
-            Ok(variant) => variant,
-            Err(_) => {
-                unsafe {
-                    *error_code = -3;
-                };
-                return ::std::ptr::null();
-            }
-        },
-        Err(_) => {
-            unsafe {
-                *error_code = -4;
-            };
-            return ::std::ptr::null();
-        }
-    };
-
-    // Version
-    let version = match Version::from_u32(version) {
-        Ok(version) => version,
-        Err(_) => {
-            unsafe {
-                *error_code = -5;
-            };
-            return ::std::ptr::null();
-        }
-    };
+    let backend: Backend = backend.into();
+    let variant: Variant = variant.into();
+    let version: Version = version.into();
 
     let mut hasher = Hasher::default();
     hasher
@@ -158,9 +108,8 @@ pub extern "C" fn argonautica_hash(
 
     // Additional data
     if !additional_data.is_null() {
-        let additional_data = unsafe {
-            ::std::slice::from_raw_parts(additional_data, additional_data_len as usize)
-        };
+        let additional_data =
+            unsafe { ::std::slice::from_raw_parts(additional_data, additional_data_len as usize) };
         hasher.with_additional_data(additional_data);
     }
 
@@ -179,9 +128,8 @@ pub extern "C" fn argonautica_hash(
 
     // Secret key
     if !secret_key.is_null() {
-        let secret_key = unsafe {
-            ::std::slice::from_raw_parts(secret_key, secret_key_len as usize)
-        };
+        let secret_key =
+            unsafe { ::std::slice::from_raw_parts(secret_key, secret_key_len as usize) };
         hasher.with_secret_key(secret_key);
     };
 
@@ -189,7 +137,7 @@ pub extern "C" fn argonautica_hash(
         Ok(hash) => hash,
         Err(_) => {
             unsafe {
-                *error_code = -6;
+                *error_code = argonautica_error_t::ARGONAUTICA_ERROR1;
             };
             return ::std::ptr::null();
         }
@@ -197,82 +145,8 @@ pub extern "C" fn argonautica_hash(
 
     let hash_cstring = CString::new(hash.as_bytes()).unwrap();
     unsafe {
-        *error_code = 0;
+        *error_code = argonautica_error_t::ARGONAUTICA_OK;
     };
 
     hash_cstring.into_raw() as *const c_char
-}
-
-/// Verify function that can be called from C. Unlike `argonautica_hash`, this
-/// function does <b>not</b> allocate memory that needs to be freed from C; so there is no need
-/// to call `argonautica_free` after using this function
-#[no_mangle]
-pub extern "C" fn argonautica_verify(
-    hash: *const c_char,
-    additional_data: *const uint8_t,
-    additional_data_len: uint32_t,
-    password: *mut uint8_t,
-    password_len: uint32_t,
-    secret_key: *mut uint8_t,
-    secret_key_len: uint32_t,
-    backend: uint32_t,
-    password_clearing: c_int,
-    secret_key_clearing: c_int,
-    threads: uint32_t,
-) -> c_int {
-    if hash.is_null() || password.is_null() {
-        return -1;
-    }
-
-    // Backend
-    let backend = match Backend::from_u32(backend) {
-        Ok(backend) => backend,
-        Err(_) => return -1,
-    };
-
-    let mut verifier = Verifier::default();
-    verifier
-        .configure_backend(backend)
-        .configure_password_clearing(false) // TODO:
-        .configure_secret_key_clearing(false) // TODO:
-        .configure_threads(threads);
-
-    // Hash
-    let hash_cstr = unsafe { CStr::from_ptr(hash) };
-    let hash = match hash_cstr.to_str() {
-        Ok(hash) => hash,
-        Err(_) => return -1, // Utf-8 Error
-    };
-    verifier.with_hash(hash);
-
-    // Additional data
-    if !additional_data.is_null() {
-        let additional_data = unsafe {
-            ::std::slice::from_raw_parts(additional_data, additional_data_len as usize)
-        };
-        verifier.with_additional_data(additional_data);
-    }
-
-    // Password
-    let password = unsafe { ::std::slice::from_raw_parts(password, password_len as usize) };
-    verifier.with_password(password);
-
-    // Secret key
-    if !secret_key.is_null() {
-        let secret_key = unsafe {
-            ::std::slice::from_raw_parts(secret_key, secret_key_len as usize)
-        };
-        verifier.with_additional_data(secret_key);
-    }
-
-    let is_valid = match verifier.verify() {
-        Ok(is_valid) => is_valid,
-        Err(_) => return -1,
-    };
-
-    if is_valid {
-        1
-    } else {
-        0
-    }
 }

@@ -2,10 +2,12 @@ use futures_cpupool::CpuPool;
 
 #[cfg(feature = "serde")]
 use config::default_cpu_pool_serde;
-use config::{default_lanes, default_threads, Backend, Flags, Variant, Version,
-             DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
-             DEFAULT_OPT_OUT_OF_RANDOM_SALT, DEFAULT_OPT_OUT_OF_SECRET_KEY,
-             DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION};
+use config::{
+    default_lanes, default_threads, Backend, Flags, Variant, Version, DEFAULT_HASH_LENGTH,
+    DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_RANDOM_SALT,
+    DEFAULT_OPT_OUT_OF_SECRET_KEY, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING,
+    DEFAULT_VERSION,
+};
 use errors::ConfigurationError;
 use {Error, ErrorKind};
 

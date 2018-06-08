@@ -1,5 +1,8 @@
 extern crate bindgen;
+extern crate cbindgen;
 extern crate cc;
+#[macro_use]
+extern crate cfg_if;
 extern crate failure;
 extern crate tempdir;
 
@@ -7,16 +10,32 @@ use std::env;
 use std::fs;
 use std::path::Path;
 
-#[cfg(feature = "without_simd")]
-const BLAKE2_IMPLEMENTATION: &str = "phc-winner-argon2/src/ref.c";
+cfg_if! {
+    if #[cfg(feature = "native")] {
+        const IS_NATIVE: bool = true;
+    } else {
+        const IS_NATIVE: bool = false;
+    }
+}
 
-#[cfg(not(feature = "without_simd"))]
-const BLAKE2_IMPLEMENTATION: &str = "phc-winner-argon2/src/opt.c";
+cfg_if! {
+    if #[cfg(feature = "simd")] {
+        const IS_SIMD: bool = true;
+    } else {
+        const IS_SIMD: bool = false;
+    }
+}
 
 fn main() -> Result<(), failure::Error> {
     let temp = tempdir::TempDir::new("argonautica")?;
     let temp_dir = temp.path();
     let temp_dir_str = temp_dir.to_str().unwrap();
+
+    let blamka_header = if IS_SIMD {
+        "phc-winner-argon2/src/blake2/blamka-round-opt.h"
+    } else {
+        "phc-winner-argon2/src/blake2/blamka-round-ref.h"
+    };
     for header_path_str in &[
         "phc-winner-argon2/include/argon2.h",
         "phc-winner-argon2/src/core.h",
@@ -24,8 +43,7 @@ fn main() -> Result<(), failure::Error> {
         "phc-winner-argon2/src/thread.h",
         "phc-winner-argon2/src/blake2/blake2-impl.h",
         "phc-winner-argon2/src/blake2/blake2.h",
-        "phc-winner-argon2/src/blake2/blamka-round-opt.h",
-        "phc-winner-argon2/src/blake2/blamka-round-ref.h",
+        blamka_header,
     ] {
         let header_path = Path::new(*header_path_str);
         let header_filename = header_path.file_name().unwrap();
@@ -34,6 +52,11 @@ fn main() -> Result<(), failure::Error> {
         fs::copy(from, to)?;
     }
 
+    let blamka_code = if IS_SIMD {
+        "phc-winner-argon2/src/opt.c"
+    } else {
+        "phc-winner-argon2/src/ref.c"
+    };
     let mut builder = cc::Build::new();
     builder
         .files(&[
@@ -42,13 +65,16 @@ fn main() -> Result<(), failure::Error> {
             "phc-winner-argon2/src/blake2/blake2b.c",
             "phc-winner-argon2/src/encoding.c",
             "phc-winner-argon2/src/thread.c",
-            BLAKE2_IMPLEMENTATION,
+            blamka_code,
         ])
         .include(temp_dir)
         .flag_if_supported("-pthread")
         .flag_if_supported("-std=c89")
         .warnings(false)
         .extra_warnings(false);
+    if IS_NATIVE {
+        builder.flag_if_supported("-march=native");
+    }
     let opt_level = env::var("OPT_LEVEL")?.parse::<usize>()?;
     if opt_level < 3 {
         builder.flag_if_supported("-g");
@@ -76,6 +102,13 @@ fn main() -> Result<(), failure::Error> {
         .generate()
         .map_err(|_| failure::err_msg("failed to generate bindings"))?;
     bindings.write_to_file(file_path)?;
+
+    let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let mut config: cbindgen::Config = Default::default();
+    config.language = cbindgen::Language::C;
+    cbindgen::generate_with_config(&crate_dir, config)
+      .unwrap()
+      .write_to_file("target/argonautica.h");
 
     Ok(())
 }
