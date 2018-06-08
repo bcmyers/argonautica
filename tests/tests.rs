@@ -181,8 +181,6 @@ fn test(input: &Input) {
         .configure_threads(input.threads)
         .configure_variant(input.variant)
         .configure_version(input.version)
-        .opt_out_of_random_salt(true)
-        .opt_out_of_secret_key(false)
         .with_additional_data(args[0])
         .with_salt(args[2]);
     if password_clearing {

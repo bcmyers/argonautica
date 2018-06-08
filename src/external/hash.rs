@@ -102,9 +102,7 @@ pub extern "C" fn argonautica_hash(
         .configure_secret_key_clearing(false) // TODO:
         .configure_threads(threads)
         .configure_variant(variant)
-        .configure_version(version)
-        .opt_out_of_random_salt(true)
-        .opt_out_of_secret_key(true);
+        .configure_version(version);
 
     // Additional data
     if !additional_data.is_null() {

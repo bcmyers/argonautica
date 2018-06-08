@@ -20,7 +20,7 @@ class Verifier:
 
     def verify(self, *, hash: str, password: Union[bytes, str]) -> bool:
         return verify(
-            encoded=hash,
+            hash=hash,
             password=password,
             additional_data=self.additional_data,
             secret_key=self.secret_key,
@@ -31,7 +31,7 @@ class Verifier:
 
 def verify(
     *,
-    encoded: str,
+    hash: str,
     password: Union[bytes, str],
     additional_data:  Union[bytes, str, None] = None,
     secret_key: Union[bytes, str, None] = None,
@@ -74,7 +74,7 @@ def verify(
     result = rust.argonautica_verify(
         additional_data,
         additional_data_len,
-        encoded.encode('utf-8'),
+        hash.encode('utf-8'),
         password,
         password_len,
         secret_key,

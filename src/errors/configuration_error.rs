@@ -57,8 +57,6 @@ mod tests {
         hasher
             .configure_password_clearing(false)
             .configure_secret_key_clearing(false)
-            .opt_out_of_secret_key(true)
-            .opt_out_of_random_salt(true)
             .with_password("P@ssw0rd");
         hasher
     }

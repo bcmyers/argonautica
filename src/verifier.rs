@@ -171,8 +171,6 @@ impl Verifier {
             .configure_threads(verifier.config.threads())
             .configure_variant(hash_raw.variant())
             .configure_version(hash_raw.version())
-            .opt_out_of_random_salt(true)
-            .opt_out_of_secret_key(true)
             .with_salt(hash_raw.raw_salt_bytes());
 
         if verifier.additional_data.is_some() {
@@ -191,15 +189,11 @@ impl Verifier {
             if verifier.config.secret_key_clearing() {
                 // Safe unwrap because of is_some above
                 let secret_key: SecretKey = verifier.secret_key().unwrap().clone();
-                hasher
-                    .with_secret_key(secret_key)
-                    .opt_out_of_secret_key(false);
+                hasher.with_secret_key(secret_key);
             } else {
                 // Safe unwrap because of is_some above
                 let secret_key: &SecretKey = verifier.secret_key().unwrap();
-                hasher
-                    .with_secret_key(secret_key)
-                    .opt_out_of_secret_key(false);
+                hasher.with_secret_key(secret_key);
             }
         }
 
@@ -390,7 +384,6 @@ mod tests {
         hasher
             .configure_password_clearing(false)
             .configure_secret_key_clearing(false)
-            .opt_out_of_random_salt(true)
             .with_additional_data("additional data")
             .with_password(password)
             .with_secret_key(secret_key)

@@ -7,11 +7,10 @@
 //! # Overview
 //!
 //! <b>argonautica</b> is a Rust crate for hashing passwords using the cryptographically-secure
-//! [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03),
-//! which won the [Password Hashing Competition](https://password-hashing.net/) in 2015 and is
-//! comparable to other secure hashing algorithms such as
-//! [bcrypt](https://en.wikipedia.org/wiki/Bcrypt) and
-//! [scrypt](https://en.wikipedia.org/wiki/Scrypt).
+//! [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03), which in
+//! 2015 won the [Password Hashing Competition](https://password-hashing.net/), a several year
+//! project to identify a successor to [bcrypt](https://en.wikipedia.org/wiki/Bcrypt),
+//! [scrypt](https://en.wikipedia.org/wiki/Scrypt), and other common hashing algorithms
 //!
 //! <b>argonautica</b> was designed:
 //! * to be easy to use,
@@ -235,23 +234,11 @@
 //!         // 👆 Argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
 //!         // Unless you have a very specific reason not to, you should use the latest
 //!         // version (0x13), which is also the default
-//!         .opt_out_of_random_salt(true) // Default is `false`
-//!         // 👆 As a built-in security mechanism, if you wish to use a non-random salt,
-//!         // which is generally not a good idea, you must explicity call this method
-//!         // with `true` in order to allow it
-//!         .opt_out_of_secret_key(true); // Default is `false`
-//!         // 👆 As a built-in security mechanism, if you wish to hash without a secret key,
-//!         // which is generally not a good idea, you must explicity call this method
-//!         // with `true` in order to allow it
 //!
 //!     let hash = hasher
 //!         .with_password("P@ssw0rd")
 //!         .with_salt("somesalt")
-//!         // 👆 A non-random salt, which is a bad idea, but possible because we configured
-//!         // `Hasher` with `opt_out_of_random_salt(true)`
 //!         .hash()
-//!         // 👆 Notice we did not include a secret key, which is also a bad idea, but possible
-//!         // because we configured `Hasher` with `opt_out_of_secret_key(true)`
 //!         .unwrap();
 //!
 //!     println!("{}", &hash);

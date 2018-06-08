@@ -2,10 +2,11 @@ import base64
 from typing import Union
 
 from argonautica.config import (
-    Backend, DEFAULT_BACKEND, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES,
-    DEFAULT_MEMORY_SIZE, DEFAULT_THREADS, DEFAULT_VARIANT, DEFAULT_VERSION, Variant, Version,
+    Backend, Variant, Version,
+    DEFAULT_BACKEND, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES,
+    DEFAULT_MEMORY_SIZE, DEFAULT_THREADS, DEFAULT_VARIANT, DEFAULT_VERSION,
 )
-from argonautica.data import DEFAULT_SALT, RandomSalt
+from argonautica.data import RandomSalt, DEFAULT_SALT
 from argonautica.ffi import ffi, rust
 
 
@@ -14,7 +15,7 @@ class Hasher:
         self,
         *,
         additional_data: Union[bytes, str, None] = None,
-        salt: Union[bytes, str, RandomSalt] = DEFAULT_SALT,
+        salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
         secret_key: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
         hash_length: int = DEFAULT_HASH_LENGTH,
@@ -59,7 +60,7 @@ def hash(
     secret_key: Union[bytes, str, None] = None,
     *,
     additional_data: Union[bytes, str, None] = None,
-    salt: Union[bytes, str, RandomSalt] = DEFAULT_SALT,
+    salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
     backend: Backend = DEFAULT_BACKEND,
     hash_length: int = DEFAULT_HASH_LENGTH,
     iterations: int = DEFAULT_ITERATIONS,
@@ -102,23 +103,23 @@ def hash(
     if hash_ptr == ffi.NULL:
         raise Exception("failed with error code {}".format(error_code_ptr[0]))
 
-    encoded = ffi.string(hash_ptr).decode("utf-8")
+    hash = ffi.string(hash_ptr).decode("utf-8")
 
     rust.argonautica_free(hash_ptr)
 
-    return encoded
+    return hash
 
 
-def raw_bytes(encoded: str) -> bytes:
+def raw_bytes(hash: str) -> bytes:
     # $argon2d$v=16$m=32,t=3,p=4$AgICAgICAgICAgICAgICAg$lqnU5aFzQJLIXin0EKRZFKXdH1y/CLJnDaaKAoWr8ys
-    split = encoded.split("$")
+    split = hash.split("$")
     if len(split) != 6:
         raise Exception("Error")
     encoded = split[5]
     missing_padding = len(encoded) % 4
     if missing_padding != 0:
         encoded += '=' * (4 - missing_padding)
-    decoded: bytes = base64.standard_b64decode(encoded)
+    decoded = base64.standard_b64decode(encoded)
     return decoded
 
 
@@ -128,7 +129,7 @@ class _Data:
         *,
         additional_data: Union[bytes, str, None],
         password: Union[bytes, str],
-        salt: Union[bytes, str, RandomSalt],
+        salt: Union[bytes, RandomSalt, str],
         secret_key: Union[bytes, str, None]
     ) -> None:
         if additional_data is None:

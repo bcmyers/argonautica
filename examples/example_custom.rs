@@ -34,8 +34,7 @@ fn main() -> Result<(), failure::Error> {
         .configure_variant(Variant::Argon2id)
         .configure_version(Version::_0x13)
         .with_salt(Salt::random(16))
-        .with_secret_key(&secret_key)
-        .opt_out_of_random_salt(true);
+        .with_secret_key(&secret_key);
 
     let mut dictionary = HashMap::new();
     for password in &["P@ssw0rd", "Hello world!", "123456", "😊"] {

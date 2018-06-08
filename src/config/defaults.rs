@@ -43,12 +43,6 @@ pub const DEFAULT_MEMORY_SIZE: u32 = 4_096;
 pub const DEFAULT_SALT_LENGTH: u32 = 32;
 
 /// `false`
-pub const DEFAULT_OPT_OUT_OF_RANDOM_SALT: bool = false;
-
-/// `false`
-pub const DEFAULT_OPT_OUT_OF_SECRET_KEY: bool = false;
-
-/// `false`
 pub const DEFAULT_PASSWORD_CLEARING: bool = false;
 
 /// `false`
