@@ -1,21 +1,23 @@
 from enum import Enum
 import multiprocessing
 
+from argonautica.ffi import rust
+
 
 class Backend(Enum):
-    C = 1
-    Rust = 2
+    C = rust.ARGONAUTICA_C
+    Rust = rust.ARGONAUTICA_RUST
 
 
 class Variant(Enum):
-    Argon2d = "argon2d"
-    Argon2i = "argon2i"
-    Argon2id = "argon2id"
+    Argon2d = rust.ARGONAUTICA_ARGON2D
+    Argon2i = rust.ARGONAUTICA_ARGON2I
+    Argon2id = rust.ARGONAUTICA_ARGON2ID
 
 
 class Version(Enum):
-    _0x10 = 16
-    _0x13 = 19
+    _0x10 = rust.ARGONAUTICA_0x10
+    _0x13 = rust.ARGONAUTICA_0x13
 
 
 cpu_count = multiprocessing.cpu_count()

@@ -1,4 +1,5 @@
-from typing import AnyStr, Optional, Union
+import base64
+from typing import Union
 
 from argonautica.config import (
     Backend, DEFAULT_BACKEND, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES,
@@ -12,9 +13,9 @@ class Hasher:
     def __init__(
         self,
         *,
-        additional_data: Optional[AnyStr] = None,
-        salt: Union[AnyStr, RandomSalt] = DEFAULT_SALT,
-        secret_key: Optional[AnyStr] = None,
+        additional_data: Union[bytes, str, None] = None,
+        salt: Union[bytes, str, RandomSalt] = DEFAULT_SALT,
+        secret_key: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
         hash_length: int = DEFAULT_HASH_LENGTH,
         iterations: int = DEFAULT_ITERATIONS,
@@ -36,24 +37,8 @@ class Hasher:
         self.variant = variant
         self.version = version
 
-    def hash(self, password: AnyStr) -> str:
+    def hash(self, password: Union[bytes, str]) -> str:
         return hash(
-            password,
-            additional_data=self.additional_data,
-            salt=self.salt,
-            secret_key=self.secret_key,
-            backend=self.backend,
-            hash_length=self.hash_length,
-            iterations=self.iterations,
-            lanes=self.lanes,
-            memory_size=self.memory_size,
-            threads=self.threads,
-            variant=self.variant,
-            version=self.version,
-        )
-
-    def hash_raw(self, password: AnyStr) -> bytes:
-        return hash_raw(
             password,
             additional_data=self.additional_data,
             salt=self.salt,
@@ -70,11 +55,11 @@ class Hasher:
 
 
 def hash(
-    password: AnyStr,
-    secret_key: Optional[AnyStr] = None,
+    password: Union[bytes, str],
+    secret_key: Union[bytes, str, None] = None,
     *,
-    additional_data: Optional[AnyStr] = None,
-    salt: Union[AnyStr, RandomSalt] = DEFAULT_SALT,
+    additional_data: Union[bytes, str, None] = None,
+    salt: Union[bytes, str, RandomSalt] = DEFAULT_SALT,
     backend: Backend = DEFAULT_BACKEND,
     hash_length: int = DEFAULT_HASH_LENGTH,
     iterations: int = DEFAULT_ITERATIONS,
@@ -84,7 +69,7 @@ def hash(
     variant: Variant = DEFAULT_VARIANT,
     version: Version = DEFAULT_VERSION,
 ) -> str:
-    error_code_ptr = ffi.new("int*", init=-1)
+    error_code_ptr = ffi.new("argonautica_error_t*", init=1)
 
     data = Data(
         additional_data=additional_data,
@@ -110,7 +95,7 @@ def hash(
         0,
         0,
         threads,
-        variant.value.encode("utf-8"),
+        variant.value,
         version.value,
         error_code_ptr
     )
@@ -119,40 +104,32 @@ def hash(
 
     encoded = ffi.string(hash_ptr).decode("utf-8")
 
-    err = rust.argonautica_free(hash_ptr)
-    if err < 0:
-        raise Exception("Error")
+    rust.argonautica_free(hash_ptr)
 
     return encoded
 
 
-def hash_raw(
-    password: AnyStr,
-    secret_key: Optional[AnyStr] = None,
-    *,
-    additional_data: Optional[AnyStr] = None,
-    salt: Union[AnyStr, RandomSalt] = DEFAULT_SALT,
-    backend: Backend = DEFAULT_BACKEND,
-    hash_length: int = DEFAULT_HASH_LENGTH,
-    iterations: int = DEFAULT_ITERATIONS,
-    lanes: int = DEFAULT_LANES,
-    memory_size: int = DEFAULT_MEMORY_SIZE,
-    threads: int = DEFAULT_THREADS,
-    variant: Variant = DEFAULT_VARIANT,
-    version: Version = DEFAULT_VERSION,
-) -> bytes:
-    # TODO:
-    return bytes([0])
+def raw_bytes(encoded: str) -> bytes:
+    # $argon2d$v=16$m=32,t=3,p=4$AgICAgICAgICAgICAgICAg$lqnU5aFzQJLIXin0EKRZFKXdH1y/CLJnDaaKAoWr8ys
+    split = encoded.split("$")
+    if len(split) != 6:
+        raise Exception("Error")
+    encoded = split[5]
+    missing_padding = len(encoded) % 4
+    if missing_padding != 0:
+        encoded += '=' * (4 - missing_padding)
+    decoded: bytes = base64.standard_b64decode(encoded)
+    return decoded
 
 
 class Data:
     def __init__(
         self,
         *,
-        additional_data: Optional[AnyStr],
-        password: AnyStr,
-        salt: Union[AnyStr, RandomSalt],
-        secret_key: Optional[AnyStr]
+        additional_data: Union[bytes, str, None],
+        password: Union[bytes, str],
+        salt: Union[bytes, str, RandomSalt],
+        secret_key: Union[bytes, str, None]
     ) -> None:
         if additional_data is None:
             self.additional_data = ffi.NULL

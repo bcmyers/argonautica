@@ -1,5 +1,5 @@
 class RandomSalt:
-    def __init__(self, len: int = 32):
+    def __init__(self, len: int = 32) -> None:
         self.len = len
 
 

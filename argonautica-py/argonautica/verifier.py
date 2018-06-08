@@ -1,4 +1,4 @@
-from typing import AnyStr, Optional
+from typing import Union
 
 from argonautica.config import Backend, DEFAULT_BACKEND, DEFAULT_THREADS
 from argonautica.ffi import ffi, rust
@@ -8,8 +8,8 @@ class Verifier:
     def __init__(
         self,
         *,
-        additional_data: Optional[AnyStr] = None,
-        secret_key: Optional[AnyStr] = None,
+        additional_data: Union[bytes, str, None] = None,
+        secret_key: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
         threads: int = DEFAULT_THREADS,
     ) -> None:
@@ -18,9 +18,9 @@ class Verifier:
         self.backend = backend
         self.threads = threads
 
-    def verify(self, *, hash: str, password: AnyStr) -> bool:
+    def verify(self, *, hash: str, password: Union[bytes, str]) -> bool:
         return verify(
-            hash=hash,
+            encoded=hash,
             password=password,
             additional_data=self.additional_data,
             secret_key=self.secret_key,
@@ -31,10 +31,10 @@ class Verifier:
 
 def verify(
     *,
-    hash: str,
-    password: AnyStr,
-    additional_data:  Optional[AnyStr] = None,
-    secret_key: Optional[AnyStr] = None,
+    encoded: str,
+    password: Union[bytes, str],
+    additional_data:  Union[bytes, str, None] = None,
+    secret_key: Union[bytes, str, None] = None,
     backend: Backend = DEFAULT_BACKEND,
     threads: int = DEFAULT_THREADS,
 ) -> bool:
@@ -43,7 +43,6 @@ def verify(
         additional_data = ffi.NULL
         additional_data_len = 0
     elif isinstance(additional_data, bytes):
-        additional_data = additional_data
         additional_data_len = len(additional_data)
     elif isinstance(additional_data, str):
         additional_data = additional_data.encode('utf-8')
@@ -53,10 +52,9 @@ def verify(
 
     # Password
     if isinstance(password, bytes):
-        password = password
         password_len = len(password)
     elif isinstance(password, str):
-        password = password.encode("utf-8")
+        password = password.encode('utf-8')
         password_len = len(password)
     else:
         raise Exception("Error")
@@ -66,7 +64,6 @@ def verify(
         secret_key = ffi.NULL
         secret_key_len = 0
     elif isinstance(secret_key, bytes):
-        secret_key = secret_key
         secret_key_len = len(secret_key)
     elif isinstance(secret_key, str):
         secret_key = secret_key.encode('utf-8')
@@ -75,9 +72,9 @@ def verify(
         raise Exception("Error")
 
     result = rust.argonautica_verify(
-        hash.encode('utf-8'),
         additional_data,
         additional_data_len,
+        encoded.encode('utf-8'),
         password,
         password_len,
         secret_key,
@@ -88,9 +85,8 @@ def verify(
         threads,
     )
 
-    if result < 0:
-        raise Exception("Error")
-    if result > 1:
-        raise Exception("Bug")
+    if result == rust.ARGONAUTICA_OK:
+        return True
 
-    return bool(result)
+    # TODO: Check errors
+    return False

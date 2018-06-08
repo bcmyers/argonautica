@@ -5,6 +5,8 @@ argonautica-py
    :maxdepth: 3
    :caption: Contents:
 
+Works on Pypy
+
 argonautica-py_ is a Python package for password hashing that uses the cryptographically-secure argon2_ hashing algorithm.
 
 In 2015, argon2_ won the `Password Hashing Competition <https://password-hashing.net/>`_, a several year project to identify a successor to bcrypt_, scrypt_, and other common hashing algorithms.

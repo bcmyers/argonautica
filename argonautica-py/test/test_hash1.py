@@ -17,51 +17,77 @@ class TestHash1(unittest.TestCase):
         is_valid = verifier.verify(password=self.password, hash=encoded)
         self.assertTrue(is_valid)
 
+        verifier = Verifier(additional_data="data")
+        is_valid = verifier.verify(password=self.password, hash=encoded)
+        self.assertFalse(is_valid)
+
+        verifier = Verifier(secret_key="secret")
+        is_valid = verifier.verify(password=self.password, hash=encoded)
+        self.assertFalse(is_valid)
+
+        verifier = Verifier(additional_data="data", secret_key="secret")
+        is_valid = verifier.verify(password=self.password, hash=encoded)
+        self.assertFalse(is_valid)
+
     def test_hash2(self):
-        hasher = Hasher(additional_data="additional data")
+        hasher = Hasher(additional_data="data")
         encoded = hasher.hash(self.password)
 
-        verifier = Verifier(additional_data="additional data")
+        verifier = Verifier()
+        is_valid = verifier.verify(password=self.password, hash=encoded)
+        self.assertFalse(is_valid)
+
+        verifier = Verifier(additional_data="data")
         is_valid = verifier.verify(password=self.password, hash=encoded)
         self.assertTrue(is_valid)
 
-        verifier = Verifier()
+        verifier = Verifier(secret_key="secret")
+        is_valid = verifier.verify(password=self.password, hash=encoded)
+        self.assertFalse(is_valid)
+
+        verifier = Verifier(additional_data="data", secret_key="secret")
         is_valid = verifier.verify(password=self.password, hash=encoded)
         self.assertFalse(is_valid)
 
     def test_hash3(self):
-        hasher = Hasher(secret_key="secret key")
+        hasher = Hasher(secret_key="secret")
         encoded = hasher.hash(self.password)
 
-        # TODO: Failing
-        verifier = Verifier(secret_key="secret key")
+        verifier = Verifier()
+        is_valid = verifier.verify(password=self.password, hash=encoded)
+        self.assertFalse(is_valid)
+
+        verifier = Verifier(additional_data="data")
+        is_valid = verifier.verify(password=self.password, hash=encoded)
+        self.assertFalse(is_valid)
+
+        verifier = Verifier(secret_key="secret")
         is_valid = verifier.verify(password=self.password, hash=encoded)
         self.assertTrue(is_valid)
 
-        verifier = Verifier()
+        verifier = Verifier(additional_data="data", secret_key="secret")
         is_valid = verifier.verify(password=self.password, hash=encoded)
         self.assertFalse(is_valid)
 
     def test_hash4(self):
-        hasher = Hasher(additional_data="additional data", secret_key="secret key")
+        hasher = Hasher(additional_data="data", secret_key="secret")
         encoded = hasher.hash(self.password)
-
-        # TODO: Failing
-        verifier = Verifier(additional_data="additional data", secret_key="secret key")
-        is_valid = verifier.verify(password=self.password, hash=encoded)
-        self.assertTrue(is_valid)
 
         verifier = Verifier()
         is_valid = verifier.verify(password=self.password, hash=encoded)
         self.assertFalse(is_valid)
 
-        verifier = Verifier(additional_data="additional data")
+        verifier = Verifier(additional_data="data")
         is_valid = verifier.verify(password=self.password, hash=encoded)
         self.assertFalse(is_valid)
 
-        verifier = Verifier(secret_key="secret key")
+        verifier = Verifier(secret_key="secret")
         is_valid = verifier.verify(password=self.password, hash=encoded)
         self.assertFalse(is_valid)
+
+        verifier = Verifier(additional_data="data", secret_key="secret")
+        is_valid = verifier.verify(password=self.password, hash=encoded)
+        self.assertTrue(is_valid)
 
     def test_overflow(self):
         hasher = Hasher(hash_length=0x1000000000)

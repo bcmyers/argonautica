@@ -3,8 +3,6 @@ from setuptools import setup, find_packages
 import subprocess
 import sys
 
-# TODO: https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
-
 here = os.path.abspath(os.path.dirname(__file__))
 
 try:
@@ -28,10 +26,15 @@ setup(
 
     author="Brian Myers",
     author_email="brian.carl.myers@gmail.com",
-    description="Idiomatic Argon2 password hashing for Python but written in Rust",
+    description="Idiomatic Argon2 password hashing for Python written in Rust",
+    keywords="argon2 argon2d argon2i argon2id crypto cryptography hash hashing password security",
     license="MIT/Apache-2.0",
     long_description=long_description,
     long_description_content_type="text/markdown",
+    project_urls={
+        "Docs": "TODO",
+        "Github": "https://github.com/bcmyers/argonautica",
+    },
     url="https://github.com/bcmyers/argonautica",
 
     classifiers=[
@@ -57,29 +60,18 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
 
-    include_package_data=True,
     install_requires=['cffi>=1.11.5'],
-
-    keywords="argon2 argon2d argon2i argon2id crypto cryptography hash hashing password security",
-
     packages=find_packages(exclude=["docs.*", "tests.*"]),
-
-    project_urls={
-        "Docs": "TODO",
-        "Github": "https://github.com/bcmyers/argonautica",
-    },
+    package_data={'argonautica': ['*.h']},
     python_requires='>=3',
-
     rust_extensions=[RustExtension(
         'argonautica.rust',
-        'Cargo.toml',
+        'rust/Cargo.toml',
         binding=Binding.NoBinding,
         debug=False,
         native=True,
         rust_version=">=1.26.0",
     )],
-
     setup_requires=["setuptools-rust>=0.9.2"],
-
-    zip_safe=False
+    zip_safe=False,
 )
