@@ -3,4 +3,5 @@ class RandomSalt:
         self.len = len
 
 
-DEFAULT_SALT = RandomSalt(32)
+DEFAULT_SALT_LEN = 32
+DEFAULT_SALT = RandomSalt(DEFAULT_SALT_LEN)

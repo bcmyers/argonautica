@@ -71,7 +71,7 @@ def hash(
 ) -> str:
     error_code_ptr = ffi.new("argonautica_error_t*", init=1)
 
-    data = Data(
+    data = _Data(
         additional_data=additional_data,
         password=password,
         salt=salt,
@@ -122,7 +122,7 @@ def raw_bytes(encoded: str) -> bytes:
     return decoded
 
 
-class Data:
+class _Data:
     def __init__(
         self,
         *,
