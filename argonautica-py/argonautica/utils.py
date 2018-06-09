@@ -70,7 +70,7 @@ def decode(hash: str) -> DecodedHash:
     """
     l = RE_HASH.findall(hash)
     if len(l) != 5:
-        raise exception
+        raise Exception("Invalid hash")
 
     # Variant
     variant_str = l[0]
