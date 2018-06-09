@@ -11,6 +11,44 @@ from argonautica.ffi import ffi, rust
 
 
 class Hasher:
+    """
+    A class that knows how to hash (but not how to verify)
+
+    To instantiate it, just invoke it's constructor: ``Hasher()``, which will create
+    a ``Hasher`` instance with the same default values as the ``Argon2`` class above (see above).
+
+    You can change any one of these default values by calling the constructor with
+    keyword arguments matching its properties (for a list of these properties, again,
+    see ``Argon2`` above), e.g.
+
+    .. code-block:: python
+
+        from argonautica import Hasher
+
+        hasher = Hasher(iterations=256, secret_key="somesecret")
+
+    or by first instantiating a default ``Hasher`` and then modifying it's properties, e.g.
+
+    .. code-block:: python
+
+        from argonautica import Hasher
+
+        hasher = Hasher()
+        hasher.iterations = 256
+        hasher.secret_key = "somesecret"
+
+    Once you have configured a particular ``Hasher`` instance to your liking, you can use
+    it to hash by calling the ``hash`` method, e.g.
+
+    .. code-block:: python
+
+        from argonautica import Hasher
+
+        hasher = Hasher(iterations=256, secret_key="somesecret")
+        encoded = hasher.hash("P@ssw0rd")
+        print(encoded)
+    """
+
     def __init__(
         self,
         *,
@@ -39,6 +77,14 @@ class Hasher:
         self.version = version
 
     def hash(self, password: Union[bytes, str]) -> str:
+        """
+        The ``hash`` method.
+
+        This function accepts a password of type ``bytes`` or ``str`` and returns an
+        encoded hash of type ``str``. The hash will be created based on the configuration of the
+        ``Hasher`` instance (i.e. based on its ``salt``, ``secret_key``, ``iterations``,
+        ``memory_size`` etc.).
+        """
         return hash(
             password,
             additional_data=self.additional_data,
@@ -70,6 +116,9 @@ def hash(
     variant: Variant = DEFAULT_VARIANT,
     version: Version = DEFAULT_VERSION,
 ) -> str:
+    """
+    A standalone hash function
+    """
     error_code_ptr = ffi.new("argonautica_error_t*", init=1)
 
     data = _Data(
@@ -108,19 +157,6 @@ def hash(
     rust.argonautica_free(hash_ptr)
 
     return hash
-
-
-def raw_bytes(hash: str) -> bytes:
-    # $argon2d$v=16$m=32,t=3,p=4$AgICAgICAgICAgICAgICAg$lqnU5aFzQJLIXin0EKRZFKXdH1y/CLJnDaaKAoWr8ys
-    split = hash.split("$")
-    if len(split) != 6:
-        raise Exception("Error")
-    encoded = split[5]
-    missing_padding = len(encoded) % 4
-    if missing_padding != 0:
-        encoded += '=' * (4 - missing_padding)
-    decoded = base64.standard_b64decode(encoded)
-    return decoded
 
 
 class _Data:

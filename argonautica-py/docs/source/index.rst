@@ -1,11 +1,11 @@
 argonautica-py
-========
+==============
 
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
 
-Works on Pypy
+Works on Pypy?
 
 argonautica-py_ is a Python package for password hashing that uses the cryptographically-secure argon2_ hashing algorithm.
 
@@ -83,6 +83,33 @@ Addendum
 ========
 
 For the curious, argonautica-py gets it's name from the Argonautica, a greek epic which tells the tale of `Jason <https://en.wikipedia.org/wiki/Jason>`_ and his `Argonauts <https://en.wikipedia.org/wiki/Argonauts>`_ on their quest for the `Golden Fleece <https://en.wikipedia.org/wiki/Golden_Fleece>`_.
+
+API
+===
+
+``argonautica``
+^^^^^^^^^^^^^^^
+
+.. automodule:: argonautica
+   :members: Argon2, Hasher, hash, Verifier, verify
+
+``argonautica.config``
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: argonautica.config
+   :members: Backend, Variant, Version
+
+``argonautica.data``
+^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: argonautica.data
+   :members: RandomSalt
+
+``argonautica.utils``
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: argonautica.utils
+   :members: decode, DecodedHash
 
 .. _argon2: https://en.wikipedia.org/wiki/Argon2
 .. _argonautica-rs: https://github.com/bcmyers/argonautica

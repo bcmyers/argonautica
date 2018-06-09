@@ -5,6 +5,56 @@ from argonautica.ffi import ffi, rust
 
 
 class Verifier:
+    """
+    A class that knows how to verify (but not how to hash)
+
+    To instantiate it, just invoke it's constructor: ``Verifier()``, which will create
+    an ``Verifier`` instance with the following default values, which are the same default
+    values as those on the ``Argon2`` class (see above):
+
+    * additional_data: ``None``
+    * backend: ``Backend.C``
+    * secret_key: ``None``
+    * threads: ``the number of logical cores on your machine``
+
+    You can change any one of these default values by calling the constructor with
+    keyword arguments matching its properties, e.g.
+
+    .. code-block:: python
+
+        from argonautica import Verifier
+
+        verifier = Verifier(secret_key="somesecret", threads=2)
+
+    or by first instantiating a default ``Verifier`` and then modifying it's properties, e.g.
+
+    .. code-block:: python
+
+        from argonautica import Verifier
+
+        verifier = Verifier()
+        verifier.secret_key = "somesecret"
+        verifier.threads = 2
+
+    Once you have configured a particular ``Verifier`` instance to your liking, you can use
+    it to verify a password against a hash by calling the ``verify`` method, e.g.
+
+    .. code-block:: python
+
+        from argonautica import Verifier
+
+        verifier = Verifier(secret_key="somesecret", threads=2)
+        encoded = (
+            "$argon2i$v=19$m=4096,t=192,p=4"
+            "$Sd6QXG+xvnWmNX5G0L+R2JOZ1pHf39+A5hOUGLfdKfE"
+            "$QkJUt0XB9Uyuz5ObTmodlqg0tPSz6INL+ZGdwuWN4XA"
+        )
+        is_valid = verifier.verify(
+            hash=encoded,
+            password="P@ssw0rd")
+        print(is_valid)
+    """
+
     def __init__(
         self,
         *,
@@ -38,6 +88,9 @@ def verify(
     backend: Backend = DEFAULT_BACKEND,
     threads: int = DEFAULT_THREADS,
 ) -> bool:
+    """
+    A standalone verify function
+    """
     # Additional data
     if additional_data is None:
         additional_data = ffi.NULL

@@ -5,5 +5,7 @@ mypy
 passlib
 pycodestyle==2.3.1
 setuptools
+sphinx
+sphinx_rtd_theme
 twine
 wheel

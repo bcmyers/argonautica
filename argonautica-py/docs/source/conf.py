@@ -14,8 +14,10 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../..'))
+here = os.path.dirname(os.path.abspath(__file__))
+home = os.path.dirname(os.path.dirname(here))
+sys.path.insert(0, here)
+sys.path.insert(0, home)
 
 
 # -- Project information -----------------------------------------------------
@@ -133,7 +135,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'argonautica-py.tex', 'argonautica-py Documentation',
-     'Brian Myers\\textless{}brian.carl.myers@gmail.com\\textgreater{}', 'manual'), # TODO:
+     'Brian Myers\\textless{}brian.carl.myers@gmail.com\\textgreater{}', 'manual'),  # TODO:
 ]
 
 

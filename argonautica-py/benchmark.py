@@ -1,9 +1,9 @@
 import timeit
 
-from argonautica import Hasher, Variant
+from argonautica import Hasher
 from argonautica.config import (
     DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
-    DEFAULT_THREADS, DEFAULT_HASH_LENGTH,
+    DEFAULT_THREADS, DEFAULT_HASH_LENGTH, Variant
 )
 from argonautica.data import DEFAULT_SALT_LEN
 from passlib.hash import argon2
@@ -11,7 +11,7 @@ from passlib.hash import argon2
 
 def argonautica():
     hasher = Hasher(variant=Variant.Argon2i)
-    hasher.hash("P@ssw0rd")
+    print(hasher.hash("P@ssw0rd"))
 
 
 def passlib():
