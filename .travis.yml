@@ -12,8 +12,7 @@ before_install:
 install:
   - pip install -r requirements-dev.txt
   - python setup.py bdist_wheel
-  - ls dist
-  - pip install .
+  - pip install dist/argonautica-0.1.0-cp36-cp36m-linux_x86_64.whl
 script:
   - cargo test --release --features="native simd serde"
   - cd argonautica-py && python3 -m unittest
