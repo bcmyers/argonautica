@@ -1,7 +1,7 @@
+from distutils.sysconfig import get_python_lib
 from glob import glob
 import os
 import re
-import site
 from typing import Any, Tuple
 
 from cffi import FFI
@@ -19,7 +19,7 @@ def init_ffi() -> Tuple[FFI, Any]:
     ffi.cdef(header)
 
     try:
-        site_dir = site.getsitepackages()[0]
+        site_dir = get_python_lib()
         rust_glob = os.path.join(site_dir, "argonautica", "rust.*")
         rust_path = glob(rust_glob)[0]
     except:

@@ -1,24 +1,49 @@
-language: python
-python:
-  - "3.6"
-  - "3.5"
-  - "3.4"
-env:
-  global:
-    - CARGO_HOME=$HOME/cargo
-    - PATH=$HOME/cargo/bin:$PATH
-    - RUST_BACKTRACE=1
-    - RUSTUP_HOME=$HOME/rustup
-before_install:
-  - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
-  - cd argonautica-py
-install:
-  # - pip install -r requirements-dev.txt
-  - pip install setuptools_rust
-  - python setup.py bdist_wheel
-  - pip install dist/argonautica-0.1.0-cp36-cp36m-linux_x86_64.whl
-script:
-  # - cargo test --release --features="native simd serde"
-  - python -m unittest
-sudo: false
-dist: trusty
+# language: python
+# python:
+#   - "3.6"
+#   - "3.5"
+#   - "3.4"
+# env:
+#   global:
+#     - CARGO_HOME=$HOME/cargo
+#     - PATH=$HOME/cargo/bin:$PATH
+#     - RUST_BACKTRACE=1
+#     - RUSTUP_HOME=$HOME/rustup
+# before_install:
+#   - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
+#   - cd argonautica-py
+# install:
+#   - pip install setuptools_rust
+#   - python setup.py bdist_wheel
+#   - pip install dist/argonautica-0.1.0-cp36-cp36m-linux_x86_64.whl
+# script:
+#   - python -m unittest
+# sudo: false
+# dist: trusty
+
+matrix:
+  include:
+    - language: python
+      python: "3.6"
+      env:
+        global:
+          - CARGO_HOME=$HOME/cargo
+          - PATH=$HOME/cargo/bin:$PATH
+          - RUST_BACKTRACE=1
+          - RUSTUP_HOME=$HOME/rustup
+      before_install:
+        - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
+        - cd argonautica-py
+      install:
+        - pip install setuptools_rust
+        - python setup.py bdist_wheel
+        - pip install dist/argonautica-0.1.0-cp36-cp36m-linux_x86_64.whl
+      script:
+        - python -m unittest
+      sudo: false
+      dist: trusty
+    - language: rust
+      rust: stable
+      cache: cargo
+      script:
+        - cargo test --release --features-"native simd serde"
