@@ -7,16 +7,13 @@ env:
     - RUST_BACKTRACE=1
     - RUSTUP_HOME=$HOME/rustup
 before_install:
-  - sudo export CARGO_HOME=$HOME/cargo
-  - sudo export PATH=$HOME/cargo/bin:$PATH
-  - sudo export RUSTUP_HOME=$HOME/rustup
   - curl https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
   - cd argonautica-py
 install:
   - pip install -r requirements-dev.txt
-  - sudo python setup.py bdist_wheel
+  - sudo -E bash -c 'python setup.py bdist_wheel'
   - ls dist
-  - sudo pip install .
+  - sudo -E bash -c 'pip install .'
 script:
   - cargo test --release --features="native simd serde"
   - cd argonautica-py && python3 -m unittest
