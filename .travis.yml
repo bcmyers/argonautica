@@ -1,25 +1,21 @@
-matrix:
-  include:
-    - language: python
-      python:
-        - "3.4"
-        - "3.6"
-      before_install:
-        - cd argonautica-py
-        - curl -sSf https://build.travis-ci.org/files/rustup-init.sh | sh -s -- --default-toolchain=stable -y
-      install:
-        - pip install -r requirements-dev.txt
-        - python setup.py bdist_wheel
-        - pip install .
-      before_script:
-        - cd argonautica-py
-      script:
-        - python -m unittest
-    - language: rust
-      cache: cargo
-      env:
-        global:
-          - RUST_BACKTRACE=1
-      script:
-        - cargo test --release --features="native simd serde"
-      sudo: false
+language: rust
+env:
+  global:
+    - RUST_BACKTRACE=1
+cache: cargo
+# matrix:
+  # allow_failures:
+  #   - rust: nightly
+  # fast_finish: true
+rust:
+  - stable
+before_install:
+  - cd argonautica-py
+install:
+  - pip3 install -r requirements-dev.txt
+  - python3 setup.py bdist_wheel
+  - pip3 install .
+script:
+  - cargo test --release --features="native simd serde"
+  - cd argonautica-py && python3 -m unittest
+sudo: false
