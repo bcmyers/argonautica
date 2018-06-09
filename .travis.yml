@@ -1,11 +1,20 @@
 language: python
-python: "3.6"
+python:
+  - "3.6"
+  - "3.5"
+  - "3.4"
 env:
   global:
-    # - CARGO_HOME=$HOME/cargo
+    - CARGO_HOME=$HOME/cargo
     - PATH=$HOME/cargo/bin:$PATH
     - RUST_BACKTRACE=1
-    # - RUSTUP_HOME=$HOME/rustup
+    - RUSTUP_HOME=$HOME/rustup
+matrix:
+  fast_finish: true
+  include:
+    - python: "3.6"
+    - python: "3.5"
+    - python: "3.4"
 before_install:
   - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
   - cd argonautica-py
