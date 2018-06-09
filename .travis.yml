@@ -11,10 +11,10 @@ before_install:
   - cd argonautica-py
 install:
   - pip install -r requirements-dev.txt
-  - sudo -E -H bash -c 'echo $CARGO_HOME'
-  - sudo -E -H bash -c 'python setup.py bdist_wheel'
+  - sudo -E -H echo $CARGO_HOME
+  - sudo -E -H python setup.py bdist_wheel
   - ls dist
-  - sudo -E -H bash -c 'pip install .'
+  - sudo -E -H pip install .
 script:
   - cargo test --release --features="native simd serde"
   - cd argonautica-py && python3 -m unittest
