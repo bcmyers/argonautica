@@ -4,11 +4,13 @@ matrix:
       python:
         - "3.4"
         - "3.6"
+      before_install: cd argonautica-py
       install:
-        - pip install -r argonautica-py/requirements-dev.txt
-        - pip install argonautica-py
+        - pip install -r requirements-dev.txt
+        - pip install .
+      before_script: cd argonautica-py
       script:
-        - cd argonautica-py && python -m unittest
+        - python -m unittest
     - language: rust
       cache: cargo
       env:
