@@ -18,4 +18,5 @@ install:
 script:
   - cargo test --release --features="native simd serde"
   - cd argonautica-py && python3 -m unittest
-sudo: true
+sudo: required
+dist: trusty
