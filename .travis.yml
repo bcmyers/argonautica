@@ -2,19 +2,18 @@ language: python
 python: "3.6"
 env:
   global:
-    - CARGO_HOME=$HOME/cargo
+    # - CARGO_HOME=$HOME/cargo
     - PATH=$HOME/cargo/bin:$PATH
     - RUST_BACKTRACE=1
-    - RUSTUP_HOME=$HOME/rustup
+    # - RUSTUP_HOME=$HOME/rustup
 before_install:
-  - curl https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+  - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
   - cd argonautica-py
 install:
   # - pip install -r requirements-dev.txt
+  - pip install setuptools_rust
   - python setup.py bdist_wheel
   - pip install dist/argonautica-0.1.0-cp36-cp36m-linux_x86_64.whl
-before_script:
-  - cd argonautica-py
 script:
   # - cargo test --release --features="native simd serde"
   - python -m unittest
