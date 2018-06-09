@@ -13,9 +13,9 @@ before_install:
   - sudo apt-get install python3 python3-pip -y
   - cd argonautica-py
 install:
-  - pip3 install -r requirements-dev.txt
-  - python3 setup.py bdist_wheel
-  - pip3 install .
+  - sudo pip3 install -r requirements-dev.txt
+  - sudo python3 setup.py bdist_wheel
+  - sudo pip3 install .
 script:
   - cargo test --release --features="native simd serde"
   - cd argonautica-py && python3 -m unittest
