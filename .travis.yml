@@ -1,16 +1,27 @@
-language: rust
-cache: cargo
-env:
-  global:
-    - RUST_BACKTRACE=1
 matrix:
-  allow_failures:
-    - rust: nightly
-  fast_finish: true
-rust:
-  - stable
-  - beta
-  - nightly
-script:
-  - cargo test --release --features="native simd serde"
-sudo: false
+  include:
+    - language: python
+      python:
+        - "3.4"
+        - "3.6"
+      install:
+        - pip install -r argonautica-py/requirements-dev.txt
+        - pip install argonautica-py
+      script:
+        - cd argonautica-py && python -m unittest
+    - language: rust
+      cache: cargo
+      env:
+        global:
+          - RUST_BACKTRACE=1
+      matrix:
+        allow_failures:
+          - rust: nightly
+        fast_finish: true
+      rust:
+        - stable
+        - beta
+        - nightly
+      script:
+        - cargo test --release --features="native simd serde"
+      sudo: false
