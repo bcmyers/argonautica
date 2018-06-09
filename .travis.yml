@@ -10,8 +10,6 @@ matrix:
       script:
         - cd argonautica-py && python -m unittest
     - language: rust
-      rust:
-        - stable
       cache: cargo
       env:
         global:
