@@ -6,12 +6,13 @@ matrix:
         - "3.6"
       before_install:
         - cd argonautica-py
-        - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain=stable -y
+        - curl -sSf https://build.travis-ci.org/files/rustup-init.sh | sh -s -- --default-toolchain=stable -y
       install:
         - pip install -r requirements-dev.txt
         - python setup.py bdist_wheel
         - pip install .
-      before_script: cd argonautica-py
+      before_script:
+        - cd argonautica-py
       script:
         - python -m unittest
     - language: rust
