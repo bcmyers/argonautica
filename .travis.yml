@@ -10,18 +10,12 @@ matrix:
       script:
         - cd argonautica-py && python -m unittest
     - language: rust
+      rust:
+        - stable
       cache: cargo
       env:
         global:
           - RUST_BACKTRACE=1
-      matrix:
-        allow_failures:
-          - rust: nightly
-        fast_finish: true
-      rust:
-        - stable
-        - beta
-        - nightly
       script:
         - cargo test --release --features="native simd serde"
       sudo: false
