@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "argonautica-rs",
+    "argonautica-py/rust",
 ]
 
 [profile.bench]
