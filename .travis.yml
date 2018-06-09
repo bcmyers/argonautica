@@ -11,7 +11,7 @@ before_install:
   - cd argonautica-py
 install:
   - pip install -r requirements-dev.txt
-  - sudo -E bach -c 'echo $CARGO_HOME'
+  - sudo -E bash -c 'echo $CARGO_HOME'
   - sudo -E bash -c 'python setup.py bdist_wheel'
   - ls dist
   - sudo -E bash -c 'pip install .'
