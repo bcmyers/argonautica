@@ -1,21 +1,18 @@
-language: rust
+language: python
+python: "3.6"
 env:
   global:
+    - CARGO_HOME=$HOME/cargo
+    - PATH=$HOME/cargo/bin:$PATH
     - RUST_BACKTRACE=1
-cache: cargo
-# matrix:
-  # allow_failures:
-  #   - rust: nightly
-  # fast_finish: true
-rust:
-  - stable
+    - RUSTUP_HOME=$HOME/rustup
 before_install:
-  - sudo apt-get install python3 python3-pip -y
+  - curl https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
   - cd argonautica-py
 install:
-  - sudo pip3 install -r requirements-dev.txt
-  - sudo python3 setup.py bdist_wheel
-  - sudo pip3 install .
+  - pip install -r requirements-dev.txt
+  - python setup.py bdist_wheel
+  - pip install .
 script:
   - cargo test --release --features="native simd serde"
   - cd argonautica-py && python3 -m unittest
