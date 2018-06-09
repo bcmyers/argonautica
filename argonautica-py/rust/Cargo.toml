@@ -10,4 +10,4 @@ publish = false
 crate-type = ["cdylib"]
 
 [dependencies]
-argonautica = { path = "/Users/bcmyers/dev/argonautica/argonautica-rs" } # TODO: Hack
+argonautica = { path = "../../argonautica-rs" } # TODO: Hack
