@@ -18,5 +18,5 @@ before_script:
 script:
   # - cargo test --release --features="native simd serde"
   - python -m unittest
-sudo: required
+sudo: false
 dist: trusty
