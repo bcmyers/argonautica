@@ -7,6 +7,7 @@ matrix:
       before_install: cd argonautica-py
       install:
         - pip install -r requirements-dev.txt
+        - python setup.py bdist_wheel
         - pip install .
       before_script: cd argonautica-py
       script:
