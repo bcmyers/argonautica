@@ -14,4 +14,4 @@ dist/
 *.py[cod]
 __pycache__/
 *.so
-venv/
+venv*/

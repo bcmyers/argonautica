@@ -62,7 +62,7 @@ class Hasher:
         memory_size: int = DEFAULT_MEMORY_SIZE,
         threads: int = DEFAULT_THREADS,
         variant: Variant = DEFAULT_VARIANT,
-        version: Version = DEFAULT_VERSION,
+        version: Version = DEFAULT_VERSION
     ) -> None:
         self.additional_data = additional_data
         self.salt = salt
@@ -114,7 +114,7 @@ def hash(
     memory_size: int = DEFAULT_MEMORY_SIZE,
     threads: int = DEFAULT_THREADS,
     variant: Variant = DEFAULT_VARIANT,
-    version: Version = DEFAULT_VERSION,
+    version: Version = DEFAULT_VERSION
 ) -> str:
     """
     A standalone hash function

@@ -85,7 +85,7 @@ class Argon2:
         memory_size: int = DEFAULT_MEMORY_SIZE,
         threads: int = DEFAULT_THREADS,
         variant: Variant = DEFAULT_VARIANT,
-        version: Version = DEFAULT_VERSION,
+        version: Version = DEFAULT_VERSION
     ) -> None:
         """
         The Argon2 constructor

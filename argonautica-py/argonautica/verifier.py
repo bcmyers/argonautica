@@ -61,7 +61,7 @@ class Verifier:
         additional_data: Union[bytes, str, None] = None,
         secret_key: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
-        threads: int = DEFAULT_THREADS,
+        threads: int = DEFAULT_THREADS
     ) -> None:
         self.additional_data = additional_data
         self.secret_key = secret_key
@@ -86,7 +86,7 @@ def verify(
     additional_data:  Union[bytes, str, None] = None,
     secret_key: Union[bytes, str, None] = None,
     backend: Backend = DEFAULT_BACKEND,
-    threads: int = DEFAULT_THREADS,
+    threads: int = DEFAULT_THREADS
 ) -> bool:
     """
     A standalone verify function

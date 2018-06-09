@@ -41,7 +41,7 @@ class DecodedHash:
         raw_hash_bytes: bytes,
         raw_salt_bytes: bytes,
         variant: Variant,
-        version: Version,
+        version: Version
     ) -> None:
         self.iterations = iterations
         self.lanes = lanes
