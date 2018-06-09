@@ -44,6 +44,6 @@ matrix:
       rust: stable
       cache: cargo
       script:
-        - cargo test --release --features-"native simd serde"
+        - cargo test --release --features="native simd serde"
 sudo: false
 dist: trusty
