@@ -4,9 +4,10 @@ matrix:
       python:
         - "3.4"
         - "3.6"
-      before_install: cd argonautica-py
-      install:
+      before_install:
+        - cd argonautica-py
         - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain=stable -y
+      install:
         - pip install -r requirements-dev.txt
         - python setup.py bdist_wheel
         - pip install .
