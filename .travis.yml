@@ -17,6 +17,6 @@ before_script:
   - cd argonautica-py
 script:
   # - cargo test --release --features="native simd serde"
-  - python3 -m unittest
+  - python -m unittest
 sudo: required
 dist: trusty
