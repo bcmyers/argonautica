@@ -1,14 +1,12 @@
 matrix:
   include:
-    - language:
-        - python
-        - rust
+    - language: python
       python:
         - "3.4"
         - "3.6"
       before_install: cd argonautica-py
       install:
-        - curl https://sh.rustup.rs -sSf | sh
+        - curl -sSf https://build.travis-ci.org/files/rustup-init.sh | sh -s -- --default-toolchain=stable -y
         - pip install -r requirements-dev.txt
         - python setup.py bdist_wheel
         - pip install .
