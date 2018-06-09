@@ -6,7 +6,7 @@ matrix:
         - "3.6"
       before_install: cd argonautica-py
       install:
-        - curl -sSf https://build.travis-ci.org/files/rustup-init.sh | sh -s -- --default-toolchain=stable -y
+        - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain=stable -y
         - pip install -r requirements-dev.txt
         - python setup.py bdist_wheel
         - pip install .
