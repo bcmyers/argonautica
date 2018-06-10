@@ -1,26 +1,3 @@
-# language: python
-# python:
-#   - "3.6"
-#   - "3.5"
-#   - "3.4"
-# env:
-#   global:
-#     - CARGO_HOME=$HOME/cargo
-#     - PATH=$HOME/cargo/bin:$PATH
-#     - RUST_BACKTRACE=1
-#     - RUSTUP_HOME=$HOME/rustup
-# before_install:
-#   - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
-#   - cd argonautica-py
-# install:
-#   - pip install setuptools_rust
-#   - python setup.py bdist_wheel
-#   - pip install dist/argonautica-0.1.0-cp36-cp36m-linux_x86_64.whl
-# script:
-#   - python -m unittest
-# sudo: false
-# dist: trusty
-
 env:
   global:
     - CARGO_HOME=$HOME/cargo
@@ -37,6 +14,17 @@ matrix:
         - cd setuptools-rust && pip install . && cd ..
         - python setup.py bdist_wheel
         - pip install dist/argonautica-0.1.0-cp36-cp36m-linux_x86_64.whl
+      script:
+        - cd argonautica-py
+        - python -m unittest
+    - language: python
+      python: "3.4"
+      install:
+        - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
+        - git clone https://github.com/bcmyers/setuptools-rust.git
+        - cd setuptools-rust && pip install . && cd ..
+        - python setup.py bdist_wheel
+        - pip install dist/argonautica-0.1.0-cp34-cp34m-linux_x86_64.whl
       script:
         - cd argonautica-py
         - python -m unittest

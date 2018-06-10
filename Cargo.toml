@@ -18,6 +18,7 @@ links = "argon2"
 
 [lib]
 name = "argonautica"
+path = "src/lib.rs"
 crate_type = ["lib", "cdylib"]
 
 [features]
