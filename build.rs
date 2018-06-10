@@ -104,11 +104,13 @@ fn main() -> Result<(), failure::Error> {
     bindings.write_to_file(file_path)?;
 
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let mut config: cbindgen::Config = Default::default();
-    config.language = cbindgen::Language::C;
-    cbindgen::generate_with_config(&crate_dir, config)
-      .unwrap()
-      .write_to_file("target/argonautica.h");
+    let bindings = cbindgen::Builder::new()
+      .with_crate(crate_dir)
+      .with_language(cbindgen::Language::C)
+      .generate()
+      .expect("Unable to generate bindings");
+    bindings.write_to_file("target/argonautica.h");
+    bindings.write_to_file("argonautica-py/argonautica/argonautica.h");
 
     Ok(())
 }

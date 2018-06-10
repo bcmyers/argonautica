@@ -37,7 +37,8 @@ RUN set -eux; \
 
 RUN set -eux; \
     apt-get install -y \
-    build-essential clang-3.9 cmake gcc git llvm-3.9-dev libclang-3.9-dev nano valgrind;
+    build-essential clang-3.9 cmake gcc git llvm-3.9-dev \
+    libclang-3.9-dev nano valgrind;
 
 WORKDIR /home/dev
 
