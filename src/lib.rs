@@ -230,7 +230,7 @@
 //!         // as Argon2d for the rest, thus providing both side-channel attack protection and
 //!         // brute-force cost savings due to time-memory tradeoffs." If you do not know which
 //!         // variant to use, use the default, which is Argon2id
-//!         .configure_version(Version::_0x13) // Default is `Version::_0x13`
+//!         .configure_version(Version::_0x13); // Default is `Version::_0x13`
 //!         // 👆 Argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
 //!         // Unless you have a very specific reason not to, you should use the latest
 //!         // version (0x13), which is also the default

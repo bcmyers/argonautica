@@ -1,0 +1,6 @@
+include LICENSE-APACHE
+include LICENSE-MIT
+
+include build.rs
+include Cargo.toml
+include src/*

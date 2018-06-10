@@ -17,7 +17,7 @@ except ImportError:
         print("Please install the setuptools-rust package")
         raise SystemExit(e.returncode)
 
-with open("README.md", "r") as f:
+with open(os.path.join(here, "argonautica-py", "README.md"), "r") as f:
     long_description = f.read()
 
 setup(
@@ -57,14 +57,16 @@ setup(
     ],
 
     install_requires=['cffi>=1.11.5'],
-    packages=find_packages(exclude=["docs.*", "tests.*"]),
+    packages=["argonautica"],
+    package_dir={'': 'argonautica-py'},
     package_data={'argonautica': ['*.h']},
     python_requires='>=3',
     rust_extensions=[RustExtension(
         'argonautica.rust',
-        'rust/Cargo.toml',
+        'Cargo.toml',
         binding=Binding.NoBinding,
         debug=False,
+        features=["native", "simd"],
         native=True,
         rust_version=">=1.26.0",
     )],

@@ -11,7 +11,7 @@ from passlib.hash import argon2
 
 def argonautica():
     hasher = Hasher(variant=Variant.Argon2i)
-    print(hasher.hash("P@ssw0rd"))
+    hasher.hash("P@ssw0rd")
 
 
 def passlib():
@@ -26,7 +26,7 @@ def passlib():
 
 
 if __name__ == "__main__":
-    iterations = 200
+    iterations = 100
 
     print("Running argonautica for {} iterations ...".format(iterations))
     setup = "from __main__ import argonautica"
