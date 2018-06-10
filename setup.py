@@ -63,10 +63,9 @@ setup(
     python_requires='>=3.4',
     rust_extensions=[RustExtension(
         'argonautica.rust',
-        'Cargo.toml',
+        'argonautica-c/Cargo.toml',
         binding=Binding.NoBinding,
         debug=False,
-        # TODO: Fix problem of native build, what's deal with link-arg undefined?
         features=["simd"],
         native=True,
         rust_version=">=1.26.0",

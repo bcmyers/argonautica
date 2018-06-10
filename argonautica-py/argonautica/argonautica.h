@@ -2,20 +2,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define DEFAULT_HASH_LENGTH 32
-
-#define DEFAULT_ITERATIONS 192
-
-#define DEFAULT_MEMORY_SIZE 4096
-
-#define DEFAULT_OPT_OUT_OF_SECRET_KEY false
-
-#define DEFAULT_PASSWORD_CLEARING false
-
-#define DEFAULT_SALT_LENGTH 32
-
-#define DEFAULT_SECRET_KEY_CLEARING false
-
 /*
  * Available backends
  */

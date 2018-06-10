@@ -1,4 +1,0 @@
-argon2_cffi
-passlib
-setuptools>=39.2.0
-wheel>=0.31.1

@@ -1,0 +1,23 @@
+[package]
+name = "argonautica-c"
+version = "0.1.0" # remember to update html_root_url
+
+authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
+license = "MIT/Apache-2.0"
+publish = false # TODO
+
+build = "build.rs"
+
+[lib]
+name = "argonautica"
+crate_type = ["cdylib"]
+
+[features]
+simd = ["argonautica/simd"]
+
+[dependencies]
+argonautica = { path = "../argonautica-rs" }
+libc = "0.2"
+
+[build-dependencies]
+cbindgen = "0.6"

@@ -16,3 +16,6 @@ __pycache__/
 *.so
 venv*/
 .python-version
+
+node_modules/
+yarn.lock

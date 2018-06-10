@@ -1,0 +1,13 @@
+{
+  "name": "argonautica",
+  "version": "0.1.0",
+  "description": "Argon2 password hashing",
+  "main": "index.js",
+  "repository": "https://github.com/bcmyers/argonautica",
+  "author": "Brian Myers",
+  "license": "MIT/Apache-2.0",
+  "private": true,
+  "dependencies": {
+    "node-gyp": "^3.7.0"
+  }
+}
