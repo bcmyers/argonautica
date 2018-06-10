@@ -66,9 +66,9 @@ setup(
         'Cargo.toml',
         binding=Binding.NoBinding,
         debug=False,
-        native=False,
-        # features=["native", "simd"],
-        # native=True,
+        # TODO: Fix problem of native build, what's deal with link-arg undefined?
+        features=["simd"],
+        native=True,
         rust_version=">=1.26.0",
     )],
     setup_requires=["setuptools-rust>=0.9.2"],
