@@ -90,7 +90,7 @@ class TestHash1(unittest.TestCase):
         self.assertTrue(is_valid)
 
     def test_overflow(self):
-        hasher = Hasher(hash_length=0x1000000000)
+        hasher = Hasher(None, hash_length=0x1000000000)
         try:
             encoded = hasher.hash(self.password)
         except OverflowError:

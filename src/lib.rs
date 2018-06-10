@@ -22,9 +22,9 @@
 //!   [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 //!
 //! <b>argonautica</b> was built with a simple use-case in mind: hashing passwords for storage in a
-//! website's database. That said, it's also <u>"feature-complete"</u>, meaning anything
-//! you can do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2)
-//! of Argon2 you should able to do with argonautica.
+//! website's database. That said, it's also <u>"feature-complete"</u>, meaning you can do
+//! anything with argonautica that you can do with the cannonical
+//! [C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2.
 //!
 //! <i>\* Indeed, argonautica even has a feature that even the cannonical C implementation currently
 //! lacks, i.e. hashing passwords with secret keys (the C implementation implements this, but

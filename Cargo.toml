@@ -92,20 +92,6 @@ name = "bench_threads"
 harness = false
 required-features = ["benches"]
 
-[[bin]]
-name = "generate_bindings"
-path = "src/bin/generate_bindings.rs"
-required-features = ["development"]
-
-[[bin]]
-name = "generate_header"
-path = "src/bin/generate_header.rs"
-required-features = ["development"]
-
-[[bin]]
-name = "foo"
-path = "src/bin/foo.rs"
-
 [[example]]
 name = "calibrate_timing"
 path = "examples/calibrate_timing.rs"
