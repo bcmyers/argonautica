@@ -1,6 +1,10 @@
+include argonautica-py/README.md README.md
 include LICENSE-APACHE
 include LICENSE-MIT
 
+include benches/*
 include build.rs
 include Cargo.toml
+include examples/*
+include phc-winner-argon2/*
 include src/*

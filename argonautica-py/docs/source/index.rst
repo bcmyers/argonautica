@@ -20,7 +20,7 @@ Another feature of argonautica_ is that it uses `SIMD <https://en.wikipedia.org/
 Requirements
 ============
 
-  * Python_ version 3.4.0 or higher (or PyPy_ version 3.5v6.0 or higher)
+  * Python_ version 3.5.0 or higher (or PyPy_ version 3.5v6.0 or higher)
   * Rust_ version 1.26.0 or higher
   * LLVM_ version 3.9.0 or higher
 
