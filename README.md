@@ -22,7 +22,8 @@ The libraries are:
 | Language          | Library                                                                             |
 | ----------------- | ----------------------------------------------------------------------------------- |
 | C / C++           | [argonautica-c](https://github.com/bcmyers/argonautica/tree/master/argonautica-c)   |
-| Python            | [argonautica-py](https://github.com/bcmyers/argonautica/tree/master/argonautica-py) |
+| Python3           | [argonautica-py](https://github.com/bcmyers/argonautica/tree/master/argonautica-py) |
+| PyPy3             | [argonautica-py](https://github.com/bcmyers/argonautica/tree/master/argonautica-py) |
 | Javascript (Node) | [argonautica-js](https://github.com/bcmyers/argonautica/tree/master/argonautica-js) |
 | Rust              | [argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs) |
 | Typescript (Node) | [argonautica-ts](https://github.com/bcmyers/argonautica/tree/master/argonautica-ts) |
