@@ -48,8 +48,7 @@ matrix:
         - git clone https://github.com/bcmyers/setuptools-rust.git
         - cd setuptools-rust && pip install . && cd ..
         - python setup.py bdist_wheel
-        - ls dist/
-        - pip install dist/argonautica-0.1.0-pp360-pypy3_60-linux_x86_64.whl
+        - pip install dist/argonautica-0.1.0-pp3510-pypy3_510-linux_x86_64.whl
       script:
         - cd argonautica-py
         - python -m unittest
