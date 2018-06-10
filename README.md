@@ -19,10 +19,15 @@ hashing algorithms.
 
 The libraries are:
 
-- argonautica-c,
-- argonautica-js,
-- argonautica-py,
-- argonautica-rs,
+| Language          |                                       Library                                       |
+| ----------------- | :---------------------------------------------------------------------------------: |
+| C                 |  [argonautica-c](https://github.com/bcmyers/argonautica/tree/master/argonautica-c)  |
+| Python            | [argonautica-py](https://github.com/bcmyers/argonautica/tree/master/argonautica-py) |
+| Node (Javascript) | [argonautica-js](https://github.com/bcmyers/argonautica/tree/master/argonautica-js) |
+| Node (Typescript) | [argonautica-js](https://github.com/bcmyers/argonautica/tree/master/argonautica-js) |
+| Rust              | [argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs) |
+
+All of the libraries use the [Rust implementation](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs) as their core.
 
 ## License
 
