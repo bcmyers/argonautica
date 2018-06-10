@@ -47,8 +47,9 @@ fn bench_crates(c: &mut Criterion) {
     // argonautica
     let mut hasher = argonautica::Hasher::default();
     hasher
-        .configure_variant(argonautica::config::Variant::Argon2i)
-        .configure_password_clearing(false);
+        .configure_opt_out_of_secret_key(true)
+        .configure_password_clearing(false)
+        .configure_variant(argonautica::config::Variant::Argon2i);
     let argonautica = Fun::new("argonautica", move |b, _| {
         b.iter(|| {
             let _ = hasher.with_password(PASSWORD).hash_raw().unwrap();

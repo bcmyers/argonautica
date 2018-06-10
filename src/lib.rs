@@ -7,26 +7,28 @@
 //! # Overview
 //!
 //! <b>argonautica</b> is a Rust crate for hashing passwords using the cryptographically-secure
-//! [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03), which in
-//! 2015 won the [Password Hashing Competition](https://password-hashing.net/), a several year
-//! project to identify a successor to [bcrypt](https://en.wikipedia.org/wiki/Bcrypt),
-//! [scrypt](https://en.wikipedia.org/wiki/Scrypt), and other common hashing algorithms. (For the
-//! Python version see [here](https://github.com/bcmyers/argonautica/tree/master/argonautica-py))
+//! [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03).
 //!
-//! <b>argonautica</b> was designed:
+//! [Argon2]((https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03)) won the
+//! [Password Hashing Competition](https://password-hashing.net/) in 2015, a several
+//! year project to identify a successor to [bcrypt](https://en.wikipedia.org/wiki/Bcrypt),
+//! [scrypt](https://en.wikipedia.org/wiki/Scrypt), and other common cryptographically-secure
+//! hashing algorithms.
+//!
+//! The <b>argonautica</b> crate was designed:
 //! * to be easy to use,
 //! * to have robust, beginner-friendly documentation, and
 //! * to (as much as possible) follow the
 //!   [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 //!
 //! <b>argonautica</b> was built with a simple use-case in mind: hashing passwords for storage in a
-//! website's database. That said, <b>argonautica</b> is <u>"feature-complete"</u>, meaning anything
+//! website's database. That said, it's also <u>"feature-complete"</u>, meaning anything
 //! you can do with the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2)
-//! of Argon2 you should able to do with <b>argonautica</b>.\*
+//! of Argon2 you should able to do with argonautica.
 //!
 //! <i>\* Indeed, argonautica even has a feature that even the cannonical C implementation currently
-//! lacks, i.e. hashing with secret keys (the C implementation implements this, but doesn't
-//! expose it publicly)</i>
+//! lacks, i.e. hashing passwords with secret keys (the C implementation implements this, but
+//! does not expose it publicly)</i>
 //!
 //! # Hashing
 //!
@@ -93,24 +95,20 @@
 //! in password hashing with a different algorithm,
 //! [rust-bcrypt](https://github.com/Keats/rust-bcrypt) might be worth checking out.
 //!
-//! For what it's worth, besides API differences, <b>argonautica</b> has three key features that other
-//! Rust crates currently do not:
-//! * <b>argonautica</b> has the ability to create hashes with a secret key, which not even the
-//!   [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
-//! * <b>argonautica</b> is the only Rust crate that implements the newest Argon2 variant: Argon2id
-//! * <b>argonautica</b> uses [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions by default if your
-//!   processor has access to them, which can lead to significantly faster hashing times
-//!     * For example, on default settings, <b>argonautica</b> runs ~30% faster than other Rust crates
-//!       on the developer's early-2014 Macbook, which has access to
+//! For what it's worth, besides API differences, <b>argonautica</b> has three key features that
+//! other crates currently lack:
+//! * The ability to use [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions (even on stable),
+//!   which can lead to significantly faster hashing times
+//!     * For example, on default settings, argonautica with SIMD runs <b>over twice
+//!       as fast</b> as other crates on the developer's early-2014 Macbook, which has access to
 //!       [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
 //!       through
-//!       [AVX1.0](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
-//!     * <i>Note: If for some reason you would like to turn SIMD off, compile with the
-//!       </i>`without_simd`<i> feature enabled, which will be necessary if you're compiling
-//!       for machines other than your own</i>
-//!     * <i>Further note: [argon2rs](https://github.com/bryant/argon2rs) has a
-//!       [SIMD](https://en.wikipedia.org/wiki/SIMD) feature as well, but it's currently
-//!       available on nightly Rust only</i>
+//!       [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
+//!     * <i>Note: SIMD instructions are specific to your CPU; so if you're compiling for
+//!       machines other than your own, it's unlikely you'll be able to use the SIMD feature</i>
+//! * The ability to hash passwords with a secret key, which not even the
+//!   [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
+//! * The newest Argon2 variant: Argon2id
 //!
 //! # Configuration
 //!
@@ -135,7 +133,7 @@
 //!     let mut hasher = Hasher::default();
 //!     hasher
 //!         .configure_backend(Backend::C) // Default is `Backend::C`
-//!         // 👆 jargonauticawas designed to support multiple backends (meaning multiple
+//!         // 👆 argonautica was designed to support multiple backends (meaning multiple
 //!         // implementations of the underlying Argon2 algorithm). Currently only the C backend
 //!         // is supported, which uses the cannonical Argon2 library written in C to actually
 //!         // do the work. In the future hopefully a Rust backend will also be supported, but,
@@ -156,7 +154,7 @@
 //!         // makes heavy use of futures, the code you are writing uses both a `Hasher` and
 //!         // a `Verifier`, and you would like both of them to share the same underlying
 //!         // `CpuPool`.
-//!         .configure_hash_length(32) // Default is `32`
+//!         .configure_hash_length(16) // Default is `32`
 //!         // 👆 The hash length in bytes is configurable. The default is 32. This is probably
 //!         // a good number to use. 16 is also probably fine. You probably shouldn't go below 16
 //!         .configure_iterations(192) // Default is `192`
@@ -193,6 +191,12 @@
 //!         // the time it takes to hash to the maximum you can reasonably allow for your use-case
 //!         // (e.g. to probably about 300-500 milliseconds for the use-case of hashing user
 //!         // passwords for a website)
+//!         .configure_opt_out_of_secret_key(true) // Default is `false`
+//!         // 👆 As an extra security measure, if you want to hash without a secret key, which
+//!         // is not recommended, you must explicitly declare that this is your intention
+//!         // by calling this method and setting the `opt_out_of_secret_key` configuration to
+//!         // `true` (by default, it is set to `false`); otherwise hashing will return an error
+//!         // when you fail to provide a secret key
 //!         .configure_password_clearing(false) // Default is `false`
 //!         // 👆 It is possible to have the underlying bytes of the password you provided
 //!         // to `Hasher` be erased after each call to `hash`, `hash_raw` or their non-blocking
@@ -241,9 +245,13 @@
 //!         .with_salt("somesalt")
 //!         .hash()
 //!         .unwrap();
+//!         // 👆 Note: We are able to hash witout a secret key because we explicitly
+//!         // set `opt_out_of_secret_key` to `true` above
 //!
-//!     println!("{}", &hash);
-//!     // 👆 prints $argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q
+//!     assert_eq!(
+//!         &hash,
+//!         "$argon2id$v=19$m=4096,t=192,p=2$c29tZXNhbHQ$sw41ZsxebJmOJ6vSHe6BGQ",
+//!     );
 //! }
 //! ```
 //! # Installation
@@ -252,8 +260,8 @@
 //! * Place `extern crate argonautica;` in your code (typically in either `lib.rs` or `main.rs`)
 //! * In the `[dependencies]` section of your `Cargo.toml`, place ...
 //!     * ... if you're building for your own machine ...
-//!         * `argonautica = { version = "0.1.0", features = ["native", "simd"] }`, or
-//!         * `argonautica = { version = "0.1.0", features = ["native", "serde", "simd"] }`
+//!         * `argonautica = { version = "0.1.0", features = ["simd"] }`, or
+//!         * `argonautica = { version = "0.1.0", features = ["serde", "simd"] }`
 //!     * ... if you're building for a different machine ...
 //!         * `argonautica = "0.1.0"`, or
 //!         * `argonautica = { version = "0.1.0", features = ["serde"] }`
@@ -279,7 +287,7 @@
 //!
 //! at your option.
 
-#![warn(
+#![deny(
     missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
 )]
 #![doc(html_root_url = "https://docs.rs/argonautica/0.1.0")]
@@ -325,10 +333,4 @@ pub mod output;
 pub mod utils;
 pub use verifier::Verifier;
 
-// TODO: Change password clearing default
-// TODO: Python
-// TODO: External
 // TODO: Logging
-// TODO: SQLite database for Actix-web example
-// TODO: Wasm?
-// TODO: Assert instead of pring in examples

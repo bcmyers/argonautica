@@ -14,6 +14,8 @@ class Hasher:
     """
     A class that knows how to hash (but not how to verify)
 
+    TODO: Secret key
+
     To instantiate it, just invoke it's constructor: ``Hasher()``, which will create
     a ``Hasher`` instance with the same default values as the ``Argon2`` class above (see above).
 
@@ -51,10 +53,10 @@ class Hasher:
 
     def __init__(
         self,
+        secret_key: Union[bytes, str, None],
         *,
         additional_data: Union[bytes, str, None] = None,
         salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
-        secret_key: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
         hash_length: int = DEFAULT_HASH_LENGTH,
         iterations: int = DEFAULT_ITERATIONS,

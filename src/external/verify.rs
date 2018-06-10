@@ -11,8 +11,13 @@ use external::{argonautica_backend_t, argonautica_error_t};
 use Verifier;
 
 /// Verify function that can be called from C. Unlike `argonautica_hash`, this
-/// function does <b>not</b> allocate memory that needs to be freed from C; so there is no need
+/// function does <b>not</b> allocate memory that you need to free; so there is no need
 /// to call `argonautica_free` after using this function
+///
+/// `encoded` is the string-encoded hash as a `char*`.
+///
+/// For a description of the other arguments, see documentation for
+/// [`argonautica_hash`](function.argonautica_hash.html)
 #[no_mangle]
 pub extern "C" fn argonautica_verify(
     additional_data: *const uint8_t,
@@ -32,12 +37,14 @@ pub extern "C" fn argonautica_verify(
     }
 
     let backend: Backend = backend.into();
+    let password_clearing = if password_clearing == 0 { false } else { true };
+    let secret_key_clearing = if secret_key_clearing == 0 { false } else { true };
 
     let mut verifier = Verifier::default();
     verifier
         .configure_backend(backend)
-        .configure_password_clearing(false) // TODO:
-        .configure_secret_key_clearing(false) // TODO:
+        .configure_password_clearing(password_clearing)
+        .configure_secret_key_clearing(secret_key_clearing)
         .configure_threads(threads);
 
     // Hash

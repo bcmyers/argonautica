@@ -14,6 +14,8 @@ class Argon2:
     """
     A class that knows how to hash and how to verify.
 
+    TODO: Secretkey
+
     To instantiate it, just invoke it's constructor: ``Argon2()``, which will create
     an ``Argon2`` instance with the following default values:
 
@@ -74,10 +76,10 @@ class Argon2:
 
     def __init__(
         self,
+        secret_key: Union[bytes, str, None],
         *,
         additional_data: Union[bytes, str, None] = None,
         salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
-        secret_key: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
         hash_length: int = DEFAULT_HASH_LENGTH,
         iterations: int = DEFAULT_ITERATIONS,

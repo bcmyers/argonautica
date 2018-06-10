@@ -39,11 +39,14 @@ pub const DEFAULT_ITERATIONS: u32 = 192;
 /// `4096_u32`
 pub const DEFAULT_MEMORY_SIZE: u32 = 4_096;
 
-/// `32_u32`
-pub const DEFAULT_SALT_LENGTH: u32 = 32;
+/// `false`
+pub const DEFAULT_OPT_OUT_OF_SECRET_KEY: bool = false;
 
 /// `false`
 pub const DEFAULT_PASSWORD_CLEARING: bool = false;
+
+/// `32_u32`
+pub const DEFAULT_SALT_LENGTH: u32 = 32;
 
 /// `false`
 pub const DEFAULT_SECRET_KEY_CLEARING: bool = false;

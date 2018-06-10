@@ -79,7 +79,7 @@ impl Verifier {
     ///     * with threads equal to the number of logical cores on your machine
     ///     * that is lazily created, i.e. created only if / when you call the method that
     ///       needs it ([`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking))
-    /// * `password_clearing`: `true`
+    /// * `password_clearing`: `false`
     /// * `secret_key_clearing`: `false`
     pub fn new() -> Verifier {
         Verifier::default()
@@ -166,6 +166,7 @@ impl Verifier {
             .configure_iterations(hash_raw.iterations())
             .configure_lanes(hash_raw.lanes())
             .configure_memory_size(hash_raw.memory_size())
+            .configure_opt_out_of_secret_key(true)
             .configure_password_clearing(verifier.config.password_clearing())
             .configure_secret_key_clearing(verifier.config.secret_key_clearing())
             .configure_threads(verifier.config.threads())

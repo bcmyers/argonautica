@@ -8,6 +8,8 @@ class Verifier:
     """
     A class that knows how to verify (but not how to hash)
 
+    TODO: Secret key
+
     To instantiate it, just invoke it's constructor: ``Verifier()``, which will create
     an ``Verifier`` instance with the following default values, which are the same default
     values as those on the ``Argon2`` class (see above):
@@ -57,9 +59,9 @@ class Verifier:
 
     def __init__(
         self,
+        secret_key: Union[bytes, str, None],
         *,
         additional_data: Union[bytes, str, None] = None,
-        secret_key: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
         threads: int = DEFAULT_THREADS
     ) -> None:

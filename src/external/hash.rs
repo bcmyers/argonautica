@@ -14,46 +14,62 @@ use Hasher;
 /// call `argonautica_free` at some point after using the pointer returned from this function
 /// in order to avoid leaking memory
 ///
-/// <b><u>Arguments (from the perspective of C code):</u></b>
+/// <u>Arguments (from the perspective of C code):</u>
 /// * <b>Additional data</b>:
 ///     * To hash <b>with</b> additional data:
-///         * `additional_data_ptr` = a `uint32_t*` pointing to the additional data buffer
-///         * `additional_data_len` = a `size_t` indicating the number of bytes in the additional data buffer
-///         * If `additional_data_len` exceeds 2^32 -1, this function will return `NULL`
+///         * `additional_data` = a `uint8_t*` pointing to the additional data buffer
+///         * `additional_data_len` = a `uint32_t` indicating the number of bytes in the additional data buffer
 ///         * This function will <b>not</b> modify the additional data buffer
 ///     * To hash <b>without</b> additional data:
-///         * `additional_data_ptr` = `NULL`
+///         * `additional_data` = `NULL`
 ///         * `additional_data_len` = `0`
 /// * <b>Password</b>:
-///     * `password_ptr` = a `uint32_t*` pointing to the password buffer
-///     * `password_len` = a `size_t` indicating the number of bytes in the password buffer
-///     * If `password_len` exceeds 2^32 -1, this function will return `NULL`
-///     * If `password_clearing` = `1` (see below), this function will set the `password_ptr` to `NULL`, set the `password_len` to `0`, and zero out the bytes in the password buffer
+///     * `password` = a `uint8_t*` pointing to the password buffer
+///     * `password_len` = a `uint32_t` indicating the number of bytes in the password buffer
+///     * If `password_clearing` (see below) is <b>any value other than zero</b>, this function will set `password` to `NULL`, set `password_len` to `0`, and zero out the bytes in the password buffer
 /// * <b>Salt</b>:
 ///     * To hash with a <b>random</b> salt:
-///         * `salt_ptr` = `NULL`
-///         * `salt_len` = a `size_t` indicating the length of the salt (in number of bytes)
-///         * If `salt_len` is less than 8 or exceeds 2^32 -1, this function will return `NULL`
+///         * `salt` = `NULL`
+///         * `salt_len` = a `uint32_t` indicating the length of the salt (in number of bytes)
 ///     * To hash with a <b>deterministic</b> salt
-///         * `salt_ptr` = a `uint32_t*` pointing to the salt buffer
-///         * `salt_len` = a `size_t` indicating the number of bytes in the salt buffer
-///         * If `salt_len` is less than 8 or exceeds 2^32 -1, this function will return `NULL`
+///         * `salt` = a `uint8_t*` pointing to the salt buffer
+///         * `salt_len` = a `uint32_t` indicating the number of bytes in the salt buffer
 ///         * This function will <b>not</b> modify the salt buffer
 /// * <b>Secret key</b>:
 ///     * To hash <b>with</b> a secret key:
-///         * `secret_key_ptr` = a `uint32_t*` pointing to the secret key buffer
-///         * `secret_key_len` = a `size_t` indicating the number of bytes in the secret key buffer
-///         * If `secret_key_len` exceeds 2^32 -1, this function will return `NULL`
-///         * If `secret_key_clearing` = `1` (see below), this function will set the `secret_key_ptr` to `NULL`, set the `secret_key_len` to `0`, and zero out the bytes in the secret key buffer
+///         * `secret_key` = a `uint8_t*` pointing to the secret key buffer
+///         * `secret_key_len` = a `uint32_t` indicating the number of bytes in the secret key buffer
+///         * If `secret_key_clearing` (see below) is <b>any value other than zero</b>, this function will set `secret_key` to `NULL`, set `secret_key_len` to `0`, and zero out the bytes in the secret key buffer
 ///     * To hash <b>without</b> a secret key:
-///         * `secret_key_ptr` = `NULL`
+///         * `secret_key` = `NULL`
 ///         * `secret_key_len` = `0`
 /// * <b>Backend</b>
-///     * `backend` = `1` for the C backend
-///     * `backend` = `2` for the Rust backend
-///     * If `backend` is anything else, this function will return `NULL`
-/// *<b>Hash length</b>: `hash_length` = a `size_t` indicating the desired length of the hash (in number of bytes)
-/// *<b>Iterations</b>: `iterations` = a `size_t` indicating the desired number of iterations
+///     * `backend` = `ARGONAUTICA_C` for the C backend
+///     * `backend` = `ARGONAUTICA_RUST` for the Rust backend
+/// * <b>Hash length</b>
+///     * `hash_len` = a `uint32_t` indicating the desired hash length (in number of bytes)
+/// * <b>Iterations</b>
+///     * `iterations` = a `uint32_t` indicating the desired number of iterations
+/// * <b>Lanes</b>
+///     * `lanes` = a `uint32_t` indicating the desired number of lanes
+/// * <b>Memory size</b>
+///     * `memory_size` = a `uint32_t` indicating the desired memory size (in kibibytes)
+/// * <b>Password clearing</b>
+///     * If `password_clearing` is <b>any value other than zero</b>, this function will set `password` to `NULL`, set `password_len` to `0`, and zero out the bytes in the password buffer
+/// * <b>Secret key clearing</b>
+///     * If `secret_key_clearing` is <b>any value other than zero</b>, this function will set `secret_key` to `NULL`, set `secret_key_len` to `0`, and zero out the bytes in the secret key buffer
+/// * <b>Threads</b>
+///     * `threads` = a `uint32_t` indicating the desired number of threads
+/// * <b>Variant</b>
+///     * `variant` = `ARGONAUTICA_ARGON2D` for argon2d
+///     * `variant` = `ARGONAUTICA_ARGON2I` for argon2i
+///     * `variant` = `ARGONAUTICA_ARGON2ID` for argon2id
+/// * <b>Version</b>
+///     * `version` = `ARGONAUTICA_0x10` for 0x10
+///     * `version` = `ARGONAUTICA_0x13` for 0x13
+/// * <b>Error code</b>
+///     * `error_code` = an `argonautica_error_t*` that will be set to `ARGONAUTICA_OK` if there
+///       was no error and another variant of `argonautica_error_t` if an error occurred
 #[no_mangle]
 pub extern "C" fn argonautica_hash(
     additional_data: *const uint8_t,
@@ -88,6 +104,8 @@ pub extern "C" fn argonautica_hash(
     }
 
     let backend: Backend = backend.into();
+    let password_clearing = if password_clearing == 0 { false } else { true };
+    let secret_key_clearing = if secret_key_clearing == 0 { false } else { true };
     let variant: Variant = variant.into();
     let version: Version = version.into();
 
@@ -98,8 +116,9 @@ pub extern "C" fn argonautica_hash(
         .configure_iterations(iterations)
         .configure_lanes(lanes)
         .configure_memory_size(memory_size)
-        .configure_password_clearing(false) // TODO:
-        .configure_secret_key_clearing(false) // TODO:
+        .configure_opt_out_of_secret_key(true)
+        .configure_password_clearing(password_clearing)
+        .configure_secret_key_clearing(secret_key_clearing)
         .configure_threads(threads)
         .configure_variant(variant)
         .configure_version(version);

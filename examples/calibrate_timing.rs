@@ -9,8 +9,8 @@ use argonautica::input::{Salt, SecretKey};
 use argonautica::Hasher;
 
 pub const HASH_LENGTH: u32 = 32;
-pub const ITERATIONS: [u32; 5] = [64, 96, 128, 192, 256];
-pub const MEMORY_SIZES: [u32; 5] = [512, 1_024, 2_048, 4_096, 8_192];
+pub const ITERATIONS: [u32; 7] = [64, 128, 192, 256, 320, 384, 448];
+pub const MEMORY_SIZES: [u32; 7] = [256, 512, 1_024, 2_048, 4_096, 8_192, 16_384];
 pub const PASSWORD: &str = "P@ssw0rd";
 pub const SALT_LENGTH: u32 = 32;
 pub const VARIANT: Variant = Variant::Argon2id;

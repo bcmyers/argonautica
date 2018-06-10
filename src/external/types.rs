@@ -6,10 +6,10 @@ use config::{Backend, Variant, Version};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[repr(C)]
 pub enum argonautica_backend_t {
-    /// TODO:
+    /// The C backend
     ARGONAUTICA_C = 0,
 
-    /// TODO:
+    /// The Rust backend
     ARGONAUTICA_RUST = 1,
 }
 
@@ -26,7 +26,7 @@ impl From<argonautica_backend_t> for Backend {
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[repr(C)]
 pub enum argonautica_error_t {
-    /// TODO:
+    /// No error occurred
     ARGONAUTICA_OK = 0,
 
     /// TODO:
@@ -40,13 +40,13 @@ pub enum argonautica_error_t {
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[repr(C)]
 pub enum argonautica_variant_t {
-    /// TODO:
+    /// argon2d
     ARGONAUTICA_ARGON2D = 1,
 
-    /// TODO:
+    /// argond2i
     ARGONAUTICA_ARGON2I = 2,
 
-    /// TODO:
+    /// argon2id
     ARGONAUTICA_ARGON2ID = 3,
 }
 
@@ -64,10 +64,10 @@ impl From<argonautica_variant_t> for Variant {
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[repr(C)]
 pub enum argonautica_version_t {
-    /// TODO:
+    /// 0x10
     ARGONAUTICA_0x10 = 13,
 
-    /// TODO:
+    /// 0x13
     ARGONAUTICA_0x13 = 16,
 }
 

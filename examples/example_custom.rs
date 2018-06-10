@@ -38,7 +38,7 @@ fn main() -> Result<(), failure::Error> {
 
     let mut dictionary = HashMap::new();
     for password in &["P@ssw0rd", "Hello world!", "123456", "😊"] {
-        let hash = hasher.with_password(*password).hash()?;
+        let hash = hasher.with_password(password.to_string()).hash()?;
         println!("{}", &hash);
         dictionary.insert(password.to_string(), hash);
     }
@@ -46,10 +46,10 @@ fn main() -> Result<(), failure::Error> {
     let mut verifier = Verifier::new();
     verifier.with_secret_key(&secret_key);
 
-    for (password, hash) in dictionary.iter() {
+    for (password, hash) in dictionary.into_iter() {
         let is_valid = verifier
-            .with_hash(hash)
-            .with_password(password.as_str())
+            .with_hash(&hash)
+            .with_password(password)
             .verify()?;
         assert!(is_valid);
     }

@@ -46,9 +46,9 @@ impl Hasher {
     ///
     /// There is a script in the examples directory that will show you the various configuration
     /// options for your machine that produce hashing times between 300 and 500 milliseconds
-    /// (Don't forget to run it with the `--release` flag). Alternatively, you can clone the
-    /// repository and run the benchmark suite with
-    /// `cargo bench --features benches -- inputs`, which will take longer but which runs
+    /// (Don't forget to run it with the `--release` and `--features="simd"` flags). Alternatively,
+    /// you can clone the repository and run the benchmark suite with
+    /// `cargo bench --features="benches simd" -- inputs`, which will take longer but which runs
     /// many iterations for each configuration scenario; so it provides information about
     /// distributions of running time (e.g. mean, 95% confidence intervals, etc.) as opposed
     /// to just point estimates.
@@ -64,6 +64,7 @@ impl Hasher {
     /// * `iterations`: `192`
     /// * `lanes`: The number of logical cores on your machine
     /// * `memory_size`: `4096` kibibytes
+    /// * `opt_out_of_secret_key`: `false`
     /// * `password_clearing`: `false`
     /// * `salt`: random [`Salt`](data/struct.Salt.html) of length 32 bytes that renews with every hash
     /// * `secret_key_clearing`: `false`
@@ -103,6 +104,7 @@ impl Hasher {
             .configure_iterations(1)
             .configure_lanes(lanes)
             .configure_memory_size(memory_size(lanes))
+            .configure_opt_out_of_secret_key(true)
             .configure_password_clearing(false)
             .configure_secret_key_clearing(false)
             .configure_threads(lanes)
@@ -164,6 +166,11 @@ impl Hasher {
     /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_memory_size(&mut self, memory_size: u32) -> &mut Hasher {
         self.config.set_memory_size(memory_size);
+        self
+    }
+    /// TODO:
+    pub fn configure_opt_out_of_secret_key(&mut self, boolean: bool) -> &mut Hasher {
+        self.config.set_opt_out_of_secret_key(boolean);
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to erase the password bytes
@@ -424,6 +431,22 @@ impl Hasher {
             }
         }
         self.salt.validate()?;
+        match self.secret_key {
+            Some(ref secret_key) => {
+                secret_key.validate()?;
+                if self.config.secret_key_clearing() && !secret_key.is_owned() {
+                    return Err(Error::new(ErrorKind::DataError(
+                        DataError::SecretKeyUnownedError,
+                    )));
+                }
+            },
+            None => {
+                if !self.config.opt_out_of_secret_key() {
+                    return Err(Error::new(ErrorKind::DataError(DataError::SecretKeyMissingError)));
+                }
+            }
+        }
+
         if let Some(ref secret_key) = self.secret_key {
             secret_key.validate()?;
             if self.config.secret_key_clearing() && !secret_key.is_owned() {

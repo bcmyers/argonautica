@@ -4,8 +4,8 @@ use futures_cpupool::CpuPool;
 use config::default_cpu_pool_serde;
 use config::{
     default_lanes, default_threads, Backend, Flags, Variant, Version, DEFAULT_HASH_LENGTH,
-    DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE, DEFAULT_PASSWORD_CLEARING,
-    DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION,
+    DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_SECRET_KEY,
+    DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION,
 };
 use errors::ConfigurationError;
 use {Error, ErrorKind};
@@ -29,6 +29,7 @@ pub struct HasherConfig {
     iterations: u32,
     lanes: u32,
     memory_size: u32,
+    opt_out_of_secret_key: bool,
     password_clearing: bool,
     secret_key_clearing: bool,
     threads: u32,
@@ -65,6 +66,10 @@ impl HasherConfig {
         self.memory_size
     }
     #[allow(missing_docs)]
+    pub fn opt_out_of_secret_key(&self) -> bool {
+        self.opt_out_of_secret_key
+    }
+    #[allow(missing_docs)]
     pub fn password_clearing(&self) -> bool {
         self.password_clearing
     }
@@ -95,6 +100,7 @@ impl HasherConfig {
             iterations: DEFAULT_ITERATIONS,
             lanes: default_lanes(),
             memory_size: DEFAULT_MEMORY_SIZE,
+            opt_out_of_secret_key: DEFAULT_OPT_OUT_OF_SECRET_KEY,
             password_clearing: DEFAULT_PASSWORD_CLEARING,
             secret_key_clearing: DEFAULT_SECRET_KEY_CLEARING,
             threads: default_threads(),
@@ -144,6 +150,9 @@ impl HasherConfig {
             warn!("{}. {}.", e, PANIC_WARNING);
         });
         self.memory_size = memory_size;
+    }
+    pub(crate) fn set_opt_out_of_secret_key(&mut self, boolean: bool) {
+        self.opt_out_of_secret_key = boolean;
     }
     pub(crate) fn set_password_clearing(&mut self, boolean: bool) {
         self.password_clearing = boolean;

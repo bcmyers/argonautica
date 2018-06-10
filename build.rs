@@ -11,14 +11,6 @@ use std::fs;
 use std::path::Path;
 
 cfg_if! {
-    if #[cfg(feature = "native")] {
-        const IS_NATIVE: bool = true;
-    } else {
-        const IS_NATIVE: bool = false;
-    }
-}
-
-cfg_if! {
     if #[cfg(feature = "simd")] {
         const IS_SIMD: bool = true;
     } else {
@@ -72,7 +64,7 @@ fn main() -> Result<(), failure::Error> {
         .flag_if_supported("-std=c89")
         .warnings(false)
         .extra_warnings(false);
-    if IS_NATIVE {
+    if IS_SIMD {
         builder.flag_if_supported("-march=native");
     }
     let opt_level = env::var("OPT_LEVEL")?.parse::<usize>()?;
