@@ -24,8 +24,8 @@ The libraries are:
 | C / C++           | [argonautica-c](https://github.com/bcmyers/argonautica/tree/master/argonautica-c)   |
 | Python            | [argonautica-py](https://github.com/bcmyers/argonautica/tree/master/argonautica-py) |
 | Javascript (Node) | [argonautica-js](https://github.com/bcmyers/argonautica/tree/master/argonautica-js) |
-| Typescript (Node) | [argonautica-ts](https://github.com/bcmyers/argonautica/tree/master/argonautica-js) |
 | Rust              | [argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs) |
+| Typescript (Node) | [argonautica-ts](https://github.com/bcmyers/argonautica/tree/master/argonautica-ts) |
 
 All of the libraries use the <b>Rust implemenation</b> [argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs) at their core.
 
