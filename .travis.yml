@@ -43,22 +43,18 @@ matrix:
       python: "pypy3.5"
       install:
         - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
-        - git clone https://github.com/bcmyers/setuptools-rust.git
         - pip install --upgrade setuptools
         - pip install wheel
+        - git clone https://github.com/bcmyers/setuptools-rust.git
         - cd setuptools-rust && pip install . && cd ..
         - python setup.py bdist_wheel
+        - ls dist/
         - pip install dist/argonautica-0.1.0-pp360-pypy3_60-linux_x86_64.whl
       script:
         - cd argonautica-py
         - python -m unittest
     - language: rust
       rust: stable
-      cache: cargo
-      script:
-        - cargo test --release --features="native simd serde"
-    - language: rust
-      rust: beta
       cache: cargo
       script:
         - cargo test --release --features="native simd serde"

@@ -12,7 +12,8 @@
 [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03), which in
 2015 won the [Password Hashing Competition](https://password-hashing.net/), a several year
 project to identify a successor to [bcrypt](https://en.wikipedia.org/wiki/Bcrypt),
-[scrypt](https://en.wikipedia.org/wiki/Scrypt), and other common hashing algorithms
+[scrypt](https://en.wikipedia.org/wiki/Scrypt), and other common hashing algorithms. (For the
+Python version see [here](https://github.com/bcmyers/argonautica/tree/master/argonautica-py))
 
 <b>argonautica</b> was designed:
 * to be easy to use,
