@@ -27,7 +27,7 @@ The libraries are:
 | Typescript (Node) | [argonautica-ts](https://github.com/bcmyers/argonautica/tree/master/argonautica-js) |
 | Rust              | [argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs) |
 
-All of the libraries use the [Rust library](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs) at their core.
+All of the libraries use the <b>Rust implemenation</b> [argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs) at their core.
 
 ## License
 
