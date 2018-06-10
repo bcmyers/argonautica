@@ -1,12 +1,9 @@
 include README.md
+include argonautica-py/README.md
 include LICENSE-APACHE
 include LICENSE-MIT
 
 include pyproject.toml
 
-graft ../benches
-include ../build.rs
-include ../Cargo.toml
-graft ../examples
-graft ../phc-winner-argon2
-graft src
+graft argonautica-c
+graft argonautica-rs
