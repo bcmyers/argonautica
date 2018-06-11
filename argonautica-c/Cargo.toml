@@ -9,6 +9,8 @@ publish = false # TODO
 build = "build.rs"
 
 [lib]
+name = "argonautica_c"
+path = "src/lib.rs"
 crate_type = ["cdylib"]
 
 [features]

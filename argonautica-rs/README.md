@@ -1,4 +1,4 @@
-# [argonautica-rs](https://en.wikipedia.org/wiki/Argonautica)
+# argonautica-rs
 
 [![Build Status](https://travis-ci.org/bcmyers/argonautica.svg?branch=master)](https://travis-ci.org/bcmyers/argonautica)
 [![Crates.io](https://img.shields.io/crates/v/argonautica.svg)](https://crates.io/crates/argonautica)

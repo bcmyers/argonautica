@@ -1,3 +1,3 @@
-# [argonautica-rs](https://en.wikipedia.org/wiki/Argonautica)
+# argonautica-rs
 
 {{readme}}
