@@ -1,4 +1,4 @@
-# Overview
+## Overview
 
 [argonautica](https://github.com/bcmyers/argonautica/tree/master/argonautica-py/) is a Python
 package for hashing passwords that uses the cryptographically-secure
@@ -27,14 +27,14 @@ algorithm (if they are available on your CPU), which means it\'s taking full adv
 modern CPUs to run as fast as possible. The downside is that you have to compile it for
 your specific machine (this is why the pip install argonautica process takes a bit of time).
 
-# Requirements
+## Requirements
 
 - [Python](https://www.python.org/) version 3.4.0 or higher (or
   [PyPy](http://pypy.org/) version 3.5 or higher)
 - [Rust](https://www.rust-lang.org/en-US/) version 1.26.0 or higher
 - [LLVM](https://llvm.org/) version 3.9.0 or higher
 
-# Installation
+## Installation
 
 - Python:
   - macOS: brew install python3, which requires [Homebrew](<https://brew.sh/)
@@ -69,11 +69,11 @@ your specific machine (this is why the pip install argonautica process takes a b
     Rather it\'s specific to a platform/architecture/cpu combination; so 64bit macOS code on a
     Haswell processor will be different than 64bit macOS code on a Skylake processor.
 
-# Usage
+## Usage
 
 ### Hashing
 
-```{.sourceCode .python3}
+```python3
 from argonautica import Hasher             # or ... from argonautica import Argon2
 
 hasher = Hasher(secret_key='somesecret')   # or ... argon2 = Argon2(secret_key='somesecret')
@@ -83,7 +83,7 @@ print(hash)
 
 ### Verifying
 
-```{.sourceCode .python3}
+```python3
 from argonautica import Verifier              # or ... from argonautica import Argon2
 
 verifier = Verifier(secret_key='somesecret')  # or ... argon2 = Argon2(secret_key='somesecret')
