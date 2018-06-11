@@ -18,18 +18,19 @@ here = os.path.dirname(os.path.abspath(__file__))
 home = os.path.dirname(os.path.dirname(here))
 sys.path.insert(0, here)
 sys.path.insert(0, home)
+import argonautica
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'argonautica-py'
+project = 'argonautica'
 copyright = '2018, Brian Myers'
-author = 'Brian Myers'
+author = 'Brian Myers <brian.carl.myers@gmail.com>'
 
 # The short X.Y version
-version = '0.1.0'
+version = argonautica.__version__
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = argonautica.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -135,7 +136,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'argonautica-py.tex', 'argonautica-py Documentation',
-     'Brian Myers\\textless{}brian.carl.myers@gmail.com\\textgreater{}', 'manual'),  # TODO:
+     'Brian Myers', 'manual'),
 ]
 
 

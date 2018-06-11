@@ -2,22 +2,25 @@
 
 use std::ffi::CStr;
 
-use argonautica::Verifier;
 use argonautica::config::Backend;
+use argonautica::Verifier;
 use libc::{c_char, c_int, uint32_t, uint8_t};
 
 use {argonautica_backend_t, argonautica_error_t};
 
-/// Verify function that can be called from C. Unlike `argonautica_hash`, this
-/// function does <b>not</b> allocate memory that you need to free; so there is no need
-/// to call `argonautica_free` after using this function
+/// Function that verifies a password against a hash. It will modify the provided `is_valid` int
+/// and return an `argonautica_error_t` indicating whether or not the verification was successful.
 ///
-/// `encoded` is the string-encoded hash as a `char*`.
+/// On success, `is_valid` will be modified to be `1` if the hash / password combination is valid
+/// or `0` if the hash / password combination is not valid.
 ///
-/// For a description of the other arguments, see documentation for
-/// [`argonautica_hash`](function.argonautica_hash.html)
+/// `encoded` is a `char*` pointing to the string-encoded hash.
+///
+/// For a description of the other arguments, see the documentation for
+/// `argonautica_hash`
 #[no_mangle]
 pub extern "C" fn argonautica_verify(
+    is_valid: *mut c_int,
     additional_data: *const uint8_t,
     additional_data_len: uint32_t,
     encoded: *const c_char,
@@ -30,13 +33,17 @@ pub extern "C" fn argonautica_verify(
     secret_key_clearing: c_int,
     threads: uint32_t,
 ) -> argonautica_error_t {
-    if encoded.is_null() || password.is_null() {
+    if is_valid.is_null() || encoded.is_null() || password.is_null() {
         return argonautica_error_t::ARGONAUTICA_ERROR1;
     }
 
     let backend: Backend = backend.into();
     let password_clearing = if password_clearing == 0 { false } else { true };
-    let secret_key_clearing = if secret_key_clearing == 0 { false } else { true };
+    let secret_key_clearing = if secret_key_clearing == 0 {
+        false
+    } else {
+        true
+    };
 
     let mut verifier = Verifier::default();
     verifier
@@ -71,14 +78,16 @@ pub extern "C" fn argonautica_verify(
         verifier.with_secret_key(secret_key);
     }
 
-    let is_valid = match verifier.verify() {
-        Ok(is_valid) => is_valid,
+    let valid = match verifier.verify() {
+        Ok(valid) => valid,
         Err(_) => return argonautica_error_t::ARGONAUTICA_ERROR1,
     };
 
-    if is_valid {
-        argonautica_error_t::ARGONAUTICA_OK
+    if valid {
+        unsafe { *is_valid = 1; };
     } else {
-        argonautica_error_t::ARGONAUTICA_ERROR1
+        unsafe { *is_valid = 0; };
     }
+
+    argonautica_error_t::ARGONAUTICA_OK
 }

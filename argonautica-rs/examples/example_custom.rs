@@ -47,10 +47,7 @@ fn main() -> Result<(), failure::Error> {
     verifier.with_secret_key(&secret_key);
 
     for (password, hash) in dictionary.into_iter() {
-        let is_valid = verifier
-            .with_hash(&hash)
-            .with_password(password)
-            .verify()?;
+        let is_valid = verifier.with_hash(&hash).with_password(password).verify()?;
         assert!(is_valid);
     }
 

@@ -25,7 +25,7 @@ class TestHash2(unittest.TestCase):
             secret_key=bytes([
                 3, 3, 3, 3, 3, 3, 3, 3
             ]),
-            hash_length=32,
+            hash_len=32,
             iterations=3,
             lanes=4,
             memory_size=32,

@@ -3,7 +3,7 @@ import timeit
 from argonautica import Hasher
 from argonautica.config import (
     DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
-    DEFAULT_THREADS, DEFAULT_HASH_LENGTH, Variant
+    DEFAULT_THREADS, DEFAULT_HASH_LEN, Variant
 )
 from argonautica.data import DEFAULT_SALT_LEN
 from passlib.hash import argon2
@@ -17,7 +17,7 @@ def argonautica():
 def passlib():
     argon2.using(
         memory_cost=DEFAULT_MEMORY_SIZE,
-        hash_len=DEFAULT_HASH_LENGTH,
+        hash_len=DEFAULT_HASH_LEN,
         max_threads=DEFAULT_THREADS,
         parallelism=DEFAULT_THREADS,
         rounds=DEFAULT_ITERATIONS,

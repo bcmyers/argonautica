@@ -1,6 +1,7 @@
 from typing import Union
 
-from argonautica.config import Backend, DEFAULT_BACKEND, DEFAULT_THREADS
+from argonautica.config import Backend
+from argonautica.defaults import *
 from argonautica.ffi import ffi, rust
 
 
@@ -8,15 +9,13 @@ class Verifier:
     """
     A class that knows how to verify (but not how to hash)
 
-    TODO: Secret key
-
-    To instantiate it, just invoke it's constructor: ``Verifier()``, which will create
-    an ``Verifier`` instance with the following default values, which are the same default
-    values as those on the ``Argon2`` class (see above):
+    To instantiate it, just invoke it's constructor with a secret key (which can be ``None``), e.g.
+    ``Verifier(secret_key=None)``. This will create a ``Verifier`` instance with the
+    following default values, which are the same default values as those on the ``Argon2``
+    class (see above):
 
     * additional_data: ``None``
     * backend: ``Backend.C``
-    * secret_key: ``None``
     * threads: ``the number of logical cores on your machine``
 
     You can change any one of these default values by calling the constructor with
@@ -34,7 +33,7 @@ class Verifier:
 
         from argonautica import Verifier
 
-        verifier = Verifier()
+        verifier = Verifier(secret_key=None)
         verifier.secret_key = "somesecret"
         verifier.threads = 2
 
@@ -53,14 +52,15 @@ class Verifier:
         )
         is_valid = verifier.verify(
             hash=encoded,
-            password="P@ssw0rd")
+            password="P@ssw0rd",
+        )
         print(is_valid)
     """
 
     def __init__(
         self,
-        secret_key: Union[bytes, str, None],
         *,
+        secret_key: Union[bytes, str, None],
         additional_data: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
         threads: int = DEFAULT_THREADS
@@ -85,8 +85,8 @@ def verify(
     *,
     hash: str,
     password: Union[bytes, str],
+    secret_key: Union[bytes, str, None],
     additional_data:  Union[bytes, str, None] = None,
-    secret_key: Union[bytes, str, None] = None,
     backend: Backend = DEFAULT_BACKEND,
     threads: int = DEFAULT_THREADS
 ) -> bool:
@@ -126,7 +126,9 @@ def verify(
     else:
         raise Exception("Error")
 
-    result = rust.argonautica_verify(
+    is_valid = ffi.new("int*", 0)
+    err = rust.argonautica_verify(
+        is_valid,
         additional_data,
         additional_data_len,
         hash.encode('utf-8'),
@@ -139,9 +141,10 @@ def verify(
         0,
         threads,
     )
+    if err != rust.ARGONAUTICA_OK:
+        raise Exception("ERROR")
 
-    if result == rust.ARGONAUTICA_OK:
+    if is_valid[0] == 1:
         return True
 
-    # TODO: Check errors
     return False

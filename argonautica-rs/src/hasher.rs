@@ -439,10 +439,12 @@ impl Hasher {
                         DataError::SecretKeyUnownedError,
                     )));
                 }
-            },
+            }
             None => {
                 if !self.config.opt_out_of_secret_key() {
-                    return Err(Error::new(ErrorKind::DataError(DataError::SecretKeyMissingError)));
+                    return Err(Error::new(ErrorKind::DataError(
+                        DataError::SecretKeyMissingError,
+                    )));
                 }
             }
         }

@@ -1,12 +1,9 @@
 import base64
 from typing import Union
 
-from argonautica.config import (
-    Backend, Variant, Version,
-    DEFAULT_BACKEND, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES,
-    DEFAULT_MEMORY_SIZE, DEFAULT_THREADS, DEFAULT_VARIANT, DEFAULT_VERSION,
-)
-from argonautica.data import RandomSalt, DEFAULT_SALT
+from argonautica.config import Backend, Variant, Version
+from argonautica.data import RandomSalt
+from argonautica.defaults import *
 from argonautica.ffi import ffi, rust
 
 
@@ -14,10 +11,9 @@ class Hasher:
     """
     A class that knows how to hash (but not how to verify)
 
-    TODO: Secret key
-
-    To instantiate it, just invoke it's constructor: ``Hasher()``, which will create
-    a ``Hasher`` instance with the same default values as the ``Argon2`` class above (see above).
+    To instantiate it, just invoke it's constructor with a secret key (which can be ``None``), e.g.
+    ``Hasher(secret_key=None)``. This will create a ``Hasher`` instance with the same default
+    values as the ``Argon2`` class above (see above).
 
     You can change any one of these default values by calling the constructor with
     keyword arguments matching its properties (for a list of these properties, again,
@@ -35,7 +31,7 @@ class Hasher:
 
         from argonautica import Hasher
 
-        hasher = Hasher()
+        hasher = Hasher(secret_key=None)
         hasher.iterations = 256
         hasher.secret_key = "somesecret"
 
@@ -58,7 +54,7 @@ class Hasher:
         additional_data: Union[bytes, str, None] = None,
         salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
         backend: Backend = DEFAULT_BACKEND,
-        hash_length: int = DEFAULT_HASH_LENGTH,
+        hash_len: int = DEFAULT_HASH_LEN,
         iterations: int = DEFAULT_ITERATIONS,
         lanes: int = DEFAULT_LANES,
         memory_size: int = DEFAULT_MEMORY_SIZE,
@@ -70,7 +66,7 @@ class Hasher:
         self.salt = salt
         self.secret_key = secret_key
         self.backend = backend
-        self.hash_length = hash_length
+        self.hash_len = hash_len
         self.iterations = iterations
         self.lanes = lanes
         self.memory_size = memory_size
@@ -93,7 +89,7 @@ class Hasher:
             salt=self.salt,
             secret_key=self.secret_key,
             backend=self.backend,
-            hash_length=self.hash_length,
+            hash_len=self.hash_len,
             iterations=self.iterations,
             lanes=self.lanes,
             memory_size=self.memory_size,
@@ -105,12 +101,12 @@ class Hasher:
 
 def hash(
     password: Union[bytes, str],
-    secret_key: Union[bytes, str, None] = None,
     *,
+    secret_key: Union[bytes, str, None],
     additional_data: Union[bytes, str, None] = None,
     salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
     backend: Backend = DEFAULT_BACKEND,
-    hash_length: int = DEFAULT_HASH_LENGTH,
+    hash_len: int = DEFAULT_HASH_LEN,
     iterations: int = DEFAULT_ITERATIONS,
     lanes: int = DEFAULT_LANES,
     memory_size: int = DEFAULT_MEMORY_SIZE,
@@ -121,16 +117,23 @@ def hash(
     """
     A standalone hash function
     """
-    error_code_ptr = ffi.new("argonautica_error_t*", init=1)
-
     data = _Data(
         additional_data=additional_data,
         password=password,
         salt=salt,
         secret_key=secret_key,
     )
-
-    hash_ptr = rust.argonautica_hash(
+    encoded_len = rust.argonautica_encoded_len(
+        hash_len,
+        iterations,
+        lanes,
+        memory_size,
+        data.salt_len,
+        variant.value,
+    )
+    encoded = ffi.new("char[]", b'\0'*encoded_len)
+    err = rust.argonautica_hash(
+        encoded,
         data.additional_data,
         data.additional_data_len,
         data.password,
@@ -140,7 +143,7 @@ def hash(
         data.secret_key,
         data.secret_key_len,
         backend.value,
-        hash_length,
+        hash_len,
         iterations,
         lanes,
         memory_size,
@@ -149,15 +152,10 @@ def hash(
         threads,
         variant.value,
         version.value,
-        error_code_ptr
     )
-    if hash_ptr == ffi.NULL:
-        raise Exception("failed with error code {}".format(error_code_ptr[0]))
-
-    hash = ffi.string(hash_ptr).decode("utf-8")
-
-    rust.argonautica_free(hash_ptr)
-
+    if err != rust.ARGONAUTICA_OK:
+        raise Exception("failed with error code {}".format(err))
+    hash = ffi.string(encoded).decode("utf-8")
     return hash
 
 

@@ -67,104 +67,113 @@ typedef enum {
 } argonautica_version_t;
 
 /*
- * Frees memory associated with a `char *` that was returned from `argonautica_hash`
+ * Function that returns the length of a string-encoded hash (in bytes and including the NULL byte)
  */
-void argonautica_free(char *string);
+int argonautica_encoded_len(uint32_t hash_len,
+                            uint32_t iterations,
+                            uint32_t lanes,
+                            uint32_t memory_size,
+                            uint32_t salt_len,
+                            argonautica_variant_t variant);
 
 /*
- * Hash function that can be called from C that returns a string-encoded hash. This function
- * allocates memory and hands ownership of that memory over to C; so in your C code you must
- * call `argonautica_free` at some point after using the pointer returned from this function
- * in order to avoid leaking memory
+ * Function that hashes a password. It will modify the provided `encoded` buffer
+ * and return an `argonautica_error_t` indicating whether or not the hash was successful.
  *
- * <u>Arguments (from the perspective of C code):</u>
- * * <b>Additional data</b>:
- *     * To hash <b>with</b> additional data:
+ * Arguments (from the perspective of C code):
+ * * Encoded:
+ *     * `encoded` = a `char*` that points to a buffer whose length (in bytes) is sufficient
+ *       to hold the resulting string-encoded hash (including it's NULL byte)
+ *     * To determine what the length of the string-encoded hash will be
+ *       ahead of time (including the NULL byte), use the `argonautica_encoded_len` function
+ *     * This function will modify the encoded buffer (that's it's whole point :))
+ * * Additional data:
+ *     * To hash with additional data:
  *         * `additional_data` = a `uint8_t*` pointing to the additional data buffer
  *         * `additional_data_len` = a `uint32_t` indicating the number of bytes in the additional data buffer
- *         * This function will <b>not</b> modify the additional data buffer
+ *         * This function will not modify the additional data buffer
  *     * To hash <b>without</b> additional data:
  *         * `additional_data` = `NULL`
  *         * `additional_data_len` = `0`
- * * <b>Password</b>:
+ * * Password:
  *     * `password` = a `uint8_t*` pointing to the password buffer
  *     * `password_len` = a `uint32_t` indicating the number of bytes in the password buffer
- *     * If `password_clearing` (see below) is <b>any value other than zero</b>, this function will set `password` to `NULL`, set `password_len` to `0`, and zero out the bytes in the password buffer
- * * <b>Salt</b>:
- *     * To hash with a <b>random</b> salt:
+ *     * If `password_clearing` (see below) is any value other than zero, this function will set `password` to `NULL`, set `password_len` to `0`, and zero out the bytes in the password buffer
+ * * Salt:
+ *     * To hash with a random salt (which is recommended):
  *         * `salt` = `NULL`
  *         * `salt_len` = a `uint32_t` indicating the length of the salt (in number of bytes)
- *     * To hash with a <b>deterministic</b> salt
+ *     * To hash with a deterministic salt (which is not recommended)
  *         * `salt` = a `uint8_t*` pointing to the salt buffer
  *         * `salt_len` = a `uint32_t` indicating the number of bytes in the salt buffer
- *         * This function will <b>not</b> modify the salt buffer
- * * <b>Secret key</b>:
- *     * To hash <b>with</b> a secret key:
+ *         * This function will not modify the salt buffer
+ * * Secret key:
+ *     * To hash with a secret key (which is recommended):
  *         * `secret_key` = a `uint8_t*` pointing to the secret key buffer
  *         * `secret_key_len` = a `uint32_t` indicating the number of bytes in the secret key buffer
- *         * If `secret_key_clearing` (see below) is <b>any value other than zero</b>, this function will set `secret_key` to `NULL`, set `secret_key_len` to `0`, and zero out the bytes in the secret key buffer
- *     * To hash <b>without</b> a secret key:
+ *         * If `secret_key_clearing` (see below) is any value other than zero, this function will set `secret_key` to `NULL`, set `secret_key_len` to `0`, and zero out the bytes in the secret key buffer
+ *     * To hash without a secret key (which is not recommended):
  *         * `secret_key` = `NULL`
  *         * `secret_key_len` = `0`
- * * <b>Backend</b>
+ * * Backend:
  *     * `backend` = `ARGONAUTICA_C` for the C backend
  *     * `backend` = `ARGONAUTICA_RUST` for the Rust backend
- * * <b>Hash length</b>
+ * * Hash length:
  *     * `hash_len` = a `uint32_t` indicating the desired hash length (in number of bytes)
- * * <b>Iterations</b>
+ * * Iterations:
  *     * `iterations` = a `uint32_t` indicating the desired number of iterations
- * * <b>Lanes</b>
+ * * Lanes:
  *     * `lanes` = a `uint32_t` indicating the desired number of lanes
- * * <b>Memory size</b>
+ * * Memory size:
  *     * `memory_size` = a `uint32_t` indicating the desired memory size (in kibibytes)
- * * <b>Password clearing</b>
- *     * If `password_clearing` is <b>any value other than zero</b>, this function will set `password` to `NULL`, set `password_len` to `0`, and zero out the bytes in the password buffer
- * * <b>Secret key clearing</b>
- *     * If `secret_key_clearing` is <b>any value other than zero</b>, this function will set `secret_key` to `NULL`, set `secret_key_len` to `0`, and zero out the bytes in the secret key buffer
- * * <b>Threads</b>
+ * * Password clearing:
+ *     * If `password_clearing` is any value other than zero, this function will set `password` to `NULL`, set `password_len` to `0`, and zero out the bytes in the password buffer
+ * * Secret key clearing:
+ *     * If `secret_key_clearing` is any value other than zero, this function will set `secret_key` to `NULL`, set `secret_key_len` to `0`, and zero out the bytes in the secret key buffer
+ * * Threads:
  *     * `threads` = a `uint32_t` indicating the desired number of threads
- * * <b>Variant</b>
+ * * Variant:
  *     * `variant` = `ARGONAUTICA_ARGON2D` for argon2d
  *     * `variant` = `ARGONAUTICA_ARGON2I` for argon2i
  *     * `variant` = `ARGONAUTICA_ARGON2ID` for argon2id
- * * <b>Version</b>
+ * * Version:
  *     * `version` = `ARGONAUTICA_0x10` for 0x10
  *     * `version` = `ARGONAUTICA_0x13` for 0x13
- * * <b>Error code</b>
- *     * `error_code` = an `argonautica_error_t*` that will be set to `ARGONAUTICA_OK` if there
- *       was no error and another variant of `argonautica_error_t` if an error occurred
  */
-const char *argonautica_hash(const uint8_t *additional_data,
-                             uint32_t additional_data_len,
-                             uint8_t *password,
-                             uint32_t password_len,
-                             const uint8_t *salt,
-                             uint32_t salt_len,
-                             uint8_t *secret_key,
-                             uint32_t secret_key_len,
-                             argonautica_backend_t backend,
-                             uint32_t hash_len,
-                             uint32_t iterations,
-                             uint32_t lanes,
-                             uint32_t memory_size,
-                             int password_clearing,
-                             int secret_key_clearing,
-                             uint32_t threads,
-                             argonautica_variant_t variant,
-                             argonautica_version_t version,
-                             argonautica_error_t *error_code);
+argonautica_error_t argonautica_hash(char *encoded,
+                                     const uint8_t *additional_data,
+                                     uint32_t additional_data_len,
+                                     uint8_t *password,
+                                     uint32_t password_len,
+                                     const uint8_t *salt,
+                                     uint32_t salt_len,
+                                     uint8_t *secret_key,
+                                     uint32_t secret_key_len,
+                                     argonautica_backend_t backend,
+                                     uint32_t hash_len,
+                                     uint32_t iterations,
+                                     uint32_t lanes,
+                                     uint32_t memory_size,
+                                     int password_clearing,
+                                     int secret_key_clearing,
+                                     uint32_t threads,
+                                     argonautica_variant_t variant,
+                                     argonautica_version_t version);
 
 /*
- * Verify function that can be called from C. Unlike `argonautica_hash`, this
- * function does <b>not</b> allocate memory that you need to free; so there is no need
- * to call `argonautica_free` after using this function
+ * Function that verifies a password against a hash. It will modify the provided `is_valid` int
+ * and return an `argonautica_error_t` indicating whether or not the verification was successful.
  *
- * `encoded` is the string-encoded hash as a `char*`.
+ * On success, `is_valid` will be modified to be `1` if the hash / password combination is valid
+ * or `0` if the hash / password combination is not valid.
  *
- * For a description of the other arguments, see documentation for
- * [`argonautica_hash`](function.argonautica_hash.html)
+ * `encoded` is a `char*` pointing to the string-encoded hash.
+ *
+ * For a description of the other arguments, see the documentation for
+ * `argonautica_hash`
  */
-argonautica_error_t argonautica_verify(const uint8_t *additional_data,
+argonautica_error_t argonautica_verify(int *is_valid,
+                                       const uint8_t *additional_data,
                                        uint32_t additional_data_len,
                                        const char *encoded,
                                        uint8_t *password,

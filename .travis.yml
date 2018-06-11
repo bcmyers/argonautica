@@ -56,6 +56,7 @@ matrix:
       rust: stable
       cache: cargo
       script:
-        - cargo test --release --features="simd serde"
+        - cargo test --release --features="simd serde" -p argonautica
+        - cargo test --release --features="simd" -p argonautica-c -- --nocapture
 sudo: false
 dist: trusty

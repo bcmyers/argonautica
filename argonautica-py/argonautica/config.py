@@ -55,13 +55,3 @@ class Version(Enum):
     """
     _0x10 = rust.ARGONAUTICA_0x10
     _0x13 = rust.ARGONAUTICA_0x13
-
-
-DEFAULT_BACKEND = Backend.C
-DEFAULT_HASH_LENGTH = 32
-DEFAULT_ITERATIONS = 192
-DEFAULT_LANES = multiprocessing.cpu_count()
-DEFAULT_MEMORY_SIZE = 4096
-DEFAULT_THREADS = multiprocessing.cpu_count()
-DEFAULT_VARIANT = Variant.Argon2id
-DEFAULT_VERSION = Version._0x13

@@ -6,6 +6,8 @@ from typing import Any, Tuple
 
 from cffi import FFI
 
+RE = re.compile(r'^\s*#.*?$(?m)')
+
 
 def init_ffi() -> Tuple[FFI, Any]:
     ffi = FFI()
@@ -13,8 +15,7 @@ def init_ffi() -> Tuple[FFI, Any]:
     here = os.path.abspath(os.path.dirname(__file__))
     with open(os.path.join(here, "argonautica.h"), 'r') as f:
         header = f.read()
-    directive_regex = re.compile(r'^\s*#.*?$(?m)')
-    header = directive_regex.sub('', header)
+    header = RE.sub('', header)
 
     ffi.cdef(header)
 

@@ -9,7 +9,6 @@ publish = false # TODO
 build = "build.rs"
 
 [lib]
-name = "argonautica"
 crate_type = ["cdylib"]
 
 [features]
@@ -17,6 +16,7 @@ simd = ["argonautica/simd"]
 
 [dependencies]
 argonautica = { path = "../argonautica-rs" }
+itoa = "0.4"
 libc = "0.2"
 
 [build-dependencies]

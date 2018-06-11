@@ -1,11 +1,8 @@
 from typing import Union
 
-from argonautica.config import (
-    Backend, Variant, Version,
-    DEFAULT_BACKEND, DEFAULT_HASH_LENGTH, DEFAULT_ITERATIONS, DEFAULT_LANES,
-    DEFAULT_MEMORY_SIZE, DEFAULT_THREADS, DEFAULT_VARIANT, DEFAULT_VERSION,
-)
-from argonautica.data import RandomSalt, DEFAULT_SALT
+from argonautica.config import Backend, Variant, Version
+from argonautica.data import RandomSalt
+from argonautica.defaults import *
 from argonautica.hasher import Hasher
 from argonautica.verifier import Verifier
 
@@ -14,19 +11,17 @@ class Argon2:
     """
     A class that knows how to hash and how to verify.
 
-    TODO: Secretkey
-
-    To instantiate it, just invoke it's constructor: ``Argon2()``, which will create
-    an ``Argon2`` instance with the following default values:
+    To instantiate it, just invoke it's constructor with a secret key (which can be ``None``), e.g.
+    ``Argon2(secret_key=None)``. This will create an ``Argon2`` instance with the
+    following default values:
 
     * additional_data: ``None``
     * backend: ``Backend.C``
-    * hash_length: ``32``
+    * hash_len: ``32``
     * iterations: ``192``
     * lanes: ``the number of logical cores on your machine``
     * memory_size: ``4096``
     * salt: ``RandomSalt(32)``
-    * secret_key: ``None``
     * threads: ``the number of logical cores on your machine``
     * variant: ``Variant.Argon2id``
     * version: ``Version._0x13``
@@ -46,7 +41,7 @@ class Argon2:
 
         from argonautica import Argon2
 
-        argon2 = Argon2()
+        argon2 = Argon2(secret_key=None)
         argon2.iterations = 256
         argon2.secret_key = "somesecret"
 
@@ -76,12 +71,12 @@ class Argon2:
 
     def __init__(
         self,
-        secret_key: Union[bytes, str, None],
         *,
+        secret_key: Union[bytes, str, None],
         additional_data: Union[bytes, str, None] = None,
         salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
         backend: Backend = DEFAULT_BACKEND,
-        hash_length: int = DEFAULT_HASH_LENGTH,
+        hash_len: int = DEFAULT_HASH_LEN,
         iterations: int = DEFAULT_ITERATIONS,
         lanes: int = DEFAULT_LANES,
         memory_size: int = DEFAULT_MEMORY_SIZE,
@@ -97,7 +92,7 @@ class Argon2:
             salt=salt,
             secret_key=secret_key,
             backend=backend,
-            hash_length=hash_length,
+            hash_len=hash_len,
             iterations=iterations,
             lanes=lanes,
             memory_size=memory_size,
@@ -154,9 +149,9 @@ class Argon2:
         self.verifier.backend = value
 
     @property
-    def hash_length(self) -> int:
+    def hash_len(self) -> int:
         """
-        The ``hash_length`` configuration, which defaults to ``32`` and has the type ``int``.
+        The ``hash_len`` configuration, which defaults to ``32`` and has the type ``int``.
 
         The hash length in bytes is configurable. The default is ``32``. This is probably
         a good number to use. ``16`` is also probably fine. You probably shouldn't go below ``16``.
@@ -164,11 +159,11 @@ class Argon2:
         This configuration is only used for hashing (it will be read from the encoded hash
         string during verification as opposed to being provided by the user as during hashing).
         """
-        return self.hasher.hash_length
+        return self.hasher.hash_len
 
-    @hash_length.setter
-    def hash_length(self, value: int) -> None:
-        self.hasher.hash_length = value
+    @hash_len.setter
+    def hash_len(self, value: int) -> None:
+        self.hasher.hash_len = value
 
     @property
     def iterations(self) -> int:
