@@ -1,9 +1,9 @@
 //! [argonautica-c](https://github.com/bcmyers/argonautica/tree/master/argonautica-c)
 //! is wrapper for
-//! [argonautica](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs).
+//! [argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs).
 //!
 //! It allows you to write C or C++ code that uses
-//! [argonautica](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs).
+//! [argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs).
 #![deny(
     missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
 )]
