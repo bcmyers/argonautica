@@ -110,7 +110,7 @@ pub extern "C" fn argonautica_hash(
     let mut hasher = Hasher::default();
     hasher
         .configure_backend(backend)
-        .configure_hash_length(hash_len)
+        .configure_hash_len(hash_len)
         .configure_iterations(iterations)
         .configure_lanes(lanes)
         .configure_memory_size(memory_size)

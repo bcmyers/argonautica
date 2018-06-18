@@ -2,7 +2,7 @@ from typing import Union
 
 from argonautica.config import Backend
 from argonautica.defaults import *
-from argonautica._rust import ffi, lib
+from argonautica.ffi import ffi, lib
 
 
 class Verifier:

@@ -154,7 +154,7 @@
 //!         // makes heavy use of futures, the code you are writing uses both a `Hasher` and
 //!         // a `Verifier`, and you would like both of them to share the same underlying
 //!         // `CpuPool`.
-//!         .configure_hash_length(16) // Default is `32`
+//!         .configure_hash_len(16) // Default is `32`
 //!         // 👆 The hash length in bytes is configurable. The default is 32. This is probably
 //!         // a good number to use. 16 is also probably fine. You probably shouldn't go below 16
 //!         .configure_iterations(192) // Default is `192`

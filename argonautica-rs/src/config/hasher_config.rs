@@ -3,7 +3,7 @@ use futures_cpupool::CpuPool;
 #[cfg(feature = "serde")]
 use config::default_cpu_pool_serde;
 use config::{
-    default_lanes, default_threads, Backend, Flags, Variant, Version, DEFAULT_HASH_LENGTH,
+    default_lanes, default_threads, Backend, Flags, Variant, Version, DEFAULT_HASH_LEN,
     DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_SECRET_KEY,
     DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION,
 };
@@ -25,7 +25,7 @@ pub struct HasherConfig {
         serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde")
     )]
     cpu_pool: Option<CpuPool>,
-    hash_length: u32,
+    hash_len: u32,
     iterations: u32,
     lanes: u32,
     memory_size: u32,
@@ -50,8 +50,8 @@ impl HasherConfig {
         }
     }
     #[allow(missing_docs)]
-    pub fn hash_length(&self) -> u32 {
-        self.hash_length
+    pub fn hash_len(&self) -> u32 {
+        self.hash_len
     }
     #[allow(missing_docs)]
     pub fn iterations(&self) -> u32 {
@@ -96,7 +96,7 @@ impl HasherConfig {
         HasherConfig {
             backend: Backend::default(),
             cpu_pool: None,
-            hash_length: DEFAULT_HASH_LENGTH,
+            hash_len: DEFAULT_HASH_LEN,
             iterations: DEFAULT_ITERATIONS,
             lanes: default_lanes(),
             memory_size: DEFAULT_MEMORY_SIZE,
@@ -127,11 +127,11 @@ impl HasherConfig {
     pub(crate) fn set_cpu_pool(&mut self, cpu_pool: CpuPool) {
         self.cpu_pool = Some(cpu_pool);
     }
-    pub(crate) fn set_hash_length(&mut self, hash_length: u32) {
-        validate_hash_length(hash_length).unwrap_or_else(|e| {
+    pub(crate) fn set_hash_len(&mut self, hash_len: u32) {
+        validate_hash_len(hash_len).unwrap_or_else(|e| {
             warn!("{}. {}.", e, PANIC_WARNING);
         });
-        self.hash_length = hash_length;
+        self.hash_len = hash_len;
     }
     pub(crate) fn set_iterations(&mut self, iterations: u32) {
         validate_iterations(iterations).unwrap_or_else(|e| {
@@ -181,7 +181,7 @@ impl HasherConfig {
     }
     pub(crate) fn validate(&self) -> Result<(), Error> {
         validate_backend(self.backend)?;
-        validate_hash_length(self.hash_length)?;
+        validate_hash_len(self.hash_len)?;
         validate_iterations(self.iterations)?;
         validate_lanes(self.lanes)?;
         validate_memory_size(self.lanes, self.memory_size)?;
@@ -202,11 +202,11 @@ fn validate_backend(backend: Backend) -> Result<(), Error> {
     Ok(())
 }
 
-fn validate_hash_length(hash_length: u32) -> Result<(), Error> {
-    if hash_length < 4 {
+fn validate_hash_len(hash_len: u32) -> Result<(), Error> {
+    if hash_len < 4 {
         return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::HashLengthTooShortError,
-        )).add_context(format!("Hash length: {}", hash_length)));
+            ConfigurationError::HashLenTooShortError,
+        )).add_context(format!("Hash len: {}", hash_len)));
     }
     Ok(())
 }

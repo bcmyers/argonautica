@@ -19,7 +19,7 @@ fn h0(_hasher: &mut Hasher) -> Result<[u8; 72], Error> {
     //     let secret_key = hasher.secret_key();
     //     let input = &[
     //         &u32_to_byte_array(hasher.config().lanes()),
-    //         &u32_to_byte_array(hasher.config().hash_length()),
+    //         &u32_to_byte_array(hasher.config().hash_len()),
     //         &u32_to_byte_array(hasher.config().memory_size()),
     //         &u32_to_byte_array(hasher.config().iterations()),
     //         &u32_to_byte_array(hasher.config().version() as u32),

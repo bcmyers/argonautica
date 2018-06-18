@@ -8,16 +8,16 @@ use argonautica::config::{Variant, Version};
 use argonautica::input::{Salt, SecretKey};
 use argonautica::Hasher;
 
-pub const HASH_LENGTH: u32 = 32;
+pub const HASH_LEN: u32 = 32;
 pub const ITERATIONS: [u32; 7] = [64, 128, 192, 256, 320, 384, 448];
 pub const MEMORY_SIZES: [u32; 7] = [256, 512, 1_024, 2_048, 4_096, 8_192, 16_384];
 pub const PASSWORD: &str = "P@ssw0rd";
-pub const SALT_LENGTH: u32 = 32;
+pub const SALT_LEN: u32 = 32;
 pub const VARIANT: Variant = Variant::Argon2id;
 pub const VERSION: Version = Version::_0x13;
 
 fn main() -> Result<(), failure::Error> {
-    let salt = Salt::random(SALT_LENGTH);
+    let salt = Salt::random(SALT_LEN);
     let secret_key =
         SecretKey::from_base64_encoded_str("t9nGEsDxjWtJYdYeExdB6/HU0vg+rT6czv6HSjVjZng=")?;
     let threads = num_cpus::get();
@@ -25,7 +25,7 @@ fn main() -> Result<(), failure::Error> {
         for iterations in &ITERATIONS {
             let mut hasher = Hasher::default();
             hasher
-                .configure_hash_length(HASH_LENGTH)
+                .configure_hash_len(HASH_LEN)
                 .configure_iterations(*iterations)
                 .configure_lanes(threads as u32)
                 .configure_memory_size(*memory_size)

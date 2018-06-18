@@ -9,7 +9,7 @@ pub enum ConfigurationError {
 
     /// Hash length too short. Hash length must be at least 4
     #[fail(display = "Hash length too short. Hash length must be at least 4")]
-    HashLengthTooShortError,
+    HashLenTooShortError,
 
     /// Iterations too few. Iterations must be greater than 0
     #[fail(display = "Iterations must be greater than 0")]
@@ -95,14 +95,14 @@ mod tests {
     }
 
     #[test]
-    fn test_error_hash_length_too_short() {
+    fn test_error_hash_len_too_short() {
         let mut hasher = hasher();
-        let result = hasher.configure_hash_length(3).hash();
+        let result = hasher.configure_hash_len(3).hash();
         match result {
             Ok(_) => panic!(),
             Err(e) => assert_eq!(
                 e.kind(),
-                ErrorKind::ConfigurationError(ConfigurationError::HashLengthTooShortError)
+                ErrorKind::ConfigurationError(ConfigurationError::HashLenTooShortError)
             ),
         }
     }

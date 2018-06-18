@@ -22,7 +22,7 @@ struct Input {
     additional_data_len: usize,
     build_dir: PathBuf,
     flags: u32,
-    hash_length: u32,
+    hash_len: u32,
     iterations: u32,
     lanes: u32,
     memory_size: u32,
@@ -91,7 +91,7 @@ fn generate_args(input: &Input) -> Vec<String> {
         .collect::<String>();
 
     let flags_string = format!("{}", input.flags);
-    let hash_length_string = format!("{}", input.hash_length);
+    let hash_len_string = format!("{}", input.hash_len);
     let iterations_string = format!("{}", input.iterations);
     let lanes_string = format!("{}", input.lanes);
     let memory_size_string = format!("{}", input.memory_size);
@@ -111,7 +111,7 @@ fn generate_args(input: &Input) -> Vec<String> {
         salt,
         secret_key,
         flags_string,
-        hash_length_string,
+        hash_len_string,
         iterations_string,
         lanes_string,
         memory_size_string,
@@ -172,7 +172,7 @@ fn test(input: &Input) {
     let secret_key_clearing = ((input.flags >> 1) & 0b1) == 1;
     let mut hasher = Hasher::default();
     hasher
-        .configure_hash_length(input.hash_length)
+        .configure_hash_len(input.hash_len)
         .configure_iterations(input.iterations)
         .configure_lanes(input.lanes)
         .configure_memory_size(input.memory_size)
@@ -263,12 +263,13 @@ fn test(input: &Input) {
 }
 
 #[test]
+#[ignore]
 fn test_integration() {
     let build_dir = PathBuf::from("tests/c/build");
     build_c(&build_dir);
     let additional_data_lens = [0, 32];
     let flags = [0b00, 0b01, 0b10, 0b11];
-    let hash_lengths = [8, 32];
+    let hash_lens = [8, 32];
     let iterations = [8, 16];
     let lane_threads = [(1, 1), (4, 4), (4, 1)];
     let memory_sizes = [32, 64];
@@ -279,7 +280,7 @@ fn test_integration() {
     let versions = [Version::_0x10, Version::_0x13];
     for flags in &flags {
         for additional_data_len in &additional_data_lens {
-            for hash_length in &hash_lengths {
+            for hash_len in &hash_lens {
                 for iterations in &iterations {
                     for lane_thread in &lane_threads {
                         for memory_size in &memory_sizes {
@@ -292,7 +293,7 @@ fn test_integration() {
                                                     additional_data_len: *additional_data_len,
                                                     build_dir: build_dir.clone(),
                                                     flags: *flags,
-                                                    hash_length: *hash_length,
+                                                    hash_len: *hash_len,
                                                     iterations: *iterations,
                                                     lanes: (*lane_thread).0,
                                                     memory_size: *memory_size,
@@ -388,7 +389,7 @@ fn test_c_code() {
     let build_dir = PathBuf::from("tests/c/build");
     build_c(&build_dir);
     let flags = [0b00]; // Note: for high level, cannot set flags
-    let hash_lengths = [8, 32];
+    let hash_lens = [8, 32];
     let iterations = [8, 32];
     let lane_threads = [(1, 1), (4, 4)]; // Note: for high level, lanes and threads have to be the same
     let memory_sizes = [32, 128];
@@ -397,7 +398,7 @@ fn test_c_code() {
     let variants = [Variant::Argon2d, Variant::Argon2i, Variant::Argon2id];
     let versions = [Version::_0x10, Version::_0x13];
     for flags in &flags {
-        for hash_length in &hash_lengths {
+        for hash_len in &hash_lens {
             for iterations in &iterations {
                 for lane_thread in &lane_threads {
                     for memory_size in &memory_sizes {
@@ -409,7 +410,7 @@ fn test_c_code() {
                                             additional_data_len: 0, // Note: for high level, can't have additional data
                                             build_dir: build_dir.clone(),
                                             flags: *flags,
-                                            hash_length: *hash_length,
+                                            hash_len: *hash_len,
                                             iterations: *iterations,
                                             lanes: (*lane_thread).0,
                                             memory_size: *memory_size,

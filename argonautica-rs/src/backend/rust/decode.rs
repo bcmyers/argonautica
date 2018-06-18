@@ -107,10 +107,10 @@ mod tests {
         for _ in 0..100 {
             rng.fill_bytes(&mut password);
             rng.fill_bytes(&mut secret_key);
-            for hash_length in &[8, 32, 128] {
+            for hash_len in &[8, 32, 128] {
                 let mut hasher = Hasher::default();
                 let hash = hasher
-                    .configure_hash_length(*hash_length)
+                    .configure_hash_len(*hash_len)
                     .configure_iterations(1)
                     .configure_memory_size(32)
                     .configure_threads(1)

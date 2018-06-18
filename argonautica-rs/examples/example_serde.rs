@@ -22,7 +22,7 @@ fn serialize_hasher() -> Result<String, failure::Error> {
     //   "additionalData": [1, 2, 3, 4],
     //   "config": {
     //     "backend": "c",
-    //     "hashLength": 32,
+    //     "hashLen": 32,
     //     "iterations": 256,
     //     "lanes": 4,
     //     "memorySize": 4096,
@@ -49,7 +49,7 @@ fn deserialize_hasher(j: &str) -> Result<argonautica::Hasher, failure::Error> {
     //     config: HasherConfig {
     //         backend: C,
     //         cpu_pool: None,
-    //         hash_length: 32,
+    //         hash_len: 32,
     //         iterations: 256,
     //         lanes: 4,
     //         memory_size: 4096,

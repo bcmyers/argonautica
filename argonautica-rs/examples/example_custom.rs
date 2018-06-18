@@ -24,7 +24,7 @@ fn main() -> Result<(), failure::Error> {
     let secret_key = load_secret_key()?;
     let mut hasher = Hasher::default();
     hasher
-        .configure_hash_length(32)
+        .configure_hash_len(32)
         .configure_iterations(192)
         .configure_lanes(1)
         .configure_memory_size(2u32.pow(12))

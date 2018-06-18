@@ -60,7 +60,7 @@ impl Hasher {
     ///     * that is lazily created, i.e. created only if / when you call the methods
     ///       that need it ([`hash_non_blocking`](struct.Hasher.html#method.hash_non_blocking) or
     ///       [`hash_raw_non_blocking`](struct.Hasher.html#method.hash_raw_non_blocking))
-    /// * `hash_length`: `32` bytes
+    /// * `hash_len`: `32` bytes
     /// * `iterations`: `192`
     /// * `lanes`: The number of logical cores on your machine
     /// * `memory_size`: `4096` kibibytes
@@ -100,7 +100,7 @@ impl Hasher {
         let lanes = default_lanes();
         let mut hasher = Hasher::default();
         hasher
-            .configure_hash_length(32)
+            .configure_hash_len(32)
             .configure_iterations(1)
             .configure_lanes(lanes)
             .configure_memory_size(memory_size(lanes))
@@ -140,8 +140,8 @@ impl Hasher {
     ///
     /// See [configuration example](index.html#configuration) for a more detailed discussion
     /// of this parameter
-    pub fn configure_hash_length(&mut self, hash_length: u32) -> &mut Hasher {
-        self.config.set_hash_length(hash_length);
+    pub fn configure_hash_len(&mut self, hash_len: u32) -> &mut Hasher {
+        self.config.set_hash_len(hash_len);
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom number of
@@ -476,7 +476,7 @@ mod tests {
         fn run(&self) {
             let mut hasher = Hasher::default();
             let raw_hash = hasher
-                .configure_hash_length(32)
+                .configure_hash_len(32)
                 .configure_iterations(3)
                 .configure_lanes(4)
                 .configure_memory_size(32)

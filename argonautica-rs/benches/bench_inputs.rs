@@ -4,7 +4,7 @@ extern crate criterion;
 extern crate num_cpus;
 
 use argonautica::config::{
-    Variant, Version, DEFAULT_HASH_LENGTH, DEFAULT_SALT_LENGTH, DEFAULT_VARIANT, DEFAULT_VERSION,
+    Variant, Version, DEFAULT_HASH_LEN, DEFAULT_SALT_LEN, DEFAULT_VARIANT, DEFAULT_VERSION,
 };
 use argonautica::input::{Salt, SecretKey};
 use argonautica::Hasher;
@@ -131,8 +131,8 @@ const INPUTS: [Config; 25] = [
 ];
 
 const BASE64_ENCODED_SECRET_KEY: &str = "t9nGEsDxjWtJYdYeExdB6/HU0vg+rT6czv6HSjVjZng=";
-const HASH_LENGTH: u32 = DEFAULT_HASH_LENGTH;
-const SALT_LENGTH: u32 = DEFAULT_SALT_LENGTH;
+const HASH_LEN: u32 = DEFAULT_HASH_LEN;
+const SALT_LEN: u32 = DEFAULT_SALT_LEN;
 const PASSWORD: &str = "P@ssw0rd";
 const VARIANT: Variant = DEFAULT_VARIANT;
 const VERSION: Version = DEFAULT_VERSION;
@@ -149,7 +149,7 @@ impl Bench {
     fn setup(mut self) -> Bench {
         let mut hasher = argonautica::Hasher::default();
         hasher
-            .configure_hash_length(HASH_LENGTH)
+            .configure_hash_len(HASH_LEN)
             .configure_lanes(self.threads)
             .configure_iterations(self.iterations)
             .configure_memory_size(self.memory_size)
@@ -158,7 +158,7 @@ impl Bench {
             .configure_threads(self.threads)
             .configure_variant(VARIANT)
             .configure_version(VERSION)
-            .with_salt(Salt::random(SALT_LENGTH))
+            .with_salt(Salt::random(SALT_LEN))
             .with_secret_key(
                 SecretKey::from_base64_encoded_str(BASE64_ENCODED_SECRET_KEY).unwrap(),
             );

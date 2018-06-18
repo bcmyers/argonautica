@@ -5,7 +5,7 @@ use output::HashRaw;
 use {ffi, Error, ErrorKind, Hasher};
 
 pub(crate) fn hash_raw_c(hasher: &mut Hasher) -> Result<HashRaw, Error> {
-    let mut buffer = vec![0u8; hasher.config().hash_length() as usize];
+    let mut buffer = vec![0u8; hasher.config().hash_len() as usize];
     let mut context = ffi::Argon2_Context {
         out: buffer.as_mut_ptr(),
         outlen: buffer.len() as u32,

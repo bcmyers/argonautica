@@ -7,3 +7,4 @@ include pyproject.toml
 
 graft argonautica-c
 graft argonautica-rs
+include Cargo.toml

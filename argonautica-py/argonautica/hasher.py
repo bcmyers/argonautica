@@ -4,7 +4,7 @@ from typing import Union
 from argonautica.config import Backend, Variant, Version
 from argonautica.data import RandomSalt
 from argonautica.defaults import *
-from argonautica._rust import ffi, lib
+from argonautica.ffi import ffi, lib
 
 
 class Hasher:

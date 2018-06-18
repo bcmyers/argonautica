@@ -7,10 +7,10 @@ use {Error, ErrorKind};
 
 /// A utility function for generating cryptographically-secure random bytes. A quick glance at
 /// this function's source should give you a good idea of what the function is doing.
-pub fn generate_random_bytes(length: u32) -> Result<Vec<u8>, Error> {
+pub fn generate_random_bytes(len: u32) -> Result<Vec<u8>, Error> {
     let mut rng =
         OsRng::new().map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
-    let mut salt = vec![0u8; length as usize];
+    let mut salt = vec![0u8; len as usize];
     rng.fill_bytes(&mut salt);
     Ok(salt)
 }
@@ -20,10 +20,10 @@ pub fn generate_random_bytes(length: u32) -> Result<Vec<u8>, Error> {
 /// [standard base64 encoding](https://docs.rs/base64/0.9.1/base64/constant.STANDARD.html).
 /// A quick glance at this function's source should give you a good idea of what the function
 /// is doing.
-pub fn generate_random_base64_encoded_string(length: u32) -> Result<String, Error> {
+pub fn generate_random_base64_encoded_string(len: u32) -> Result<String, Error> {
     let mut rng =
         OsRng::new().map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
-    let mut bytes = vec![0u8; length as usize];
+    let mut bytes = vec![0u8; len as usize];
     rng.fill_bytes(&mut bytes);
     let output = base64::encode_config(&bytes, base64::STANDARD);
     Ok(output)
@@ -35,12 +35,12 @@ pub fn generate_random_base64_encoded_string(length: u32) -> Result<String, Erro
 /// A quick glance at this function's source should give you a good idea of what the
 /// function is doing.
 pub fn generate_random_base64_encoded_string_config(
-    length: u32,
+    len: u32,
     config: base64::Config,
 ) -> Result<String, Error> {
     let mut rng =
         OsRng::new().map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
-    let mut bytes = vec![0u8; length as usize];
+    let mut bytes = vec![0u8; len as usize];
     rng.fill_bytes(&mut bytes);
     let output = base64::encode_config(&bytes, config);
     Ok(output)

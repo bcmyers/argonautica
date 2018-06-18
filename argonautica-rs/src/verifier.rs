@@ -162,7 +162,7 @@ impl Verifier {
         let mut hasher = Hasher::default();
         hasher
             .configure_backend(verifier.config.backend())
-            .configure_hash_length(hash_raw.raw_hash_bytes().len() as u32)
+            .configure_hash_len(hash_raw.raw_hash_bytes().len() as u32)
             .configure_iterations(hash_raw.iterations())
             .configure_lanes(hash_raw.lanes())
             .configure_memory_size(hash_raw.memory_size())

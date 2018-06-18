@@ -31,7 +31,7 @@ pub fn default_threads() -> u32 {
 pub const DEFAULT_BACKEND: Backend = Backend::C;
 
 /// `32_u32`
-pub const DEFAULT_HASH_LENGTH: u32 = 32;
+pub const DEFAULT_HASH_LEN: u32 = 32;
 
 /// `192_u32`
 pub const DEFAULT_ITERATIONS: u32 = 192;
@@ -46,7 +46,7 @@ pub const DEFAULT_OPT_OUT_OF_SECRET_KEY: bool = false;
 pub const DEFAULT_PASSWORD_CLEARING: bool = false;
 
 /// `32_u32`
-pub const DEFAULT_SALT_LENGTH: u32 = 32;
+pub const DEFAULT_SALT_LEN: u32 = 32;
 
 /// `false`
 pub const DEFAULT_SECRET_KEY_CLEARING: bool = false;
