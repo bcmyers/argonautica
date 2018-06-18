@@ -104,10 +104,10 @@ impl Hasher {
             .configure_iterations(1)
             .configure_lanes(lanes)
             .configure_memory_size(memory_size(lanes))
-            .configure_opt_out_of_secret_key(true)
             .configure_password_clearing(false)
             .configure_secret_key_clearing(false)
             .configure_threads(lanes)
+            .opt_out_of_secret_key(true)
             .with_salt("somesalt");
         hasher
     }
@@ -166,11 +166,6 @@ impl Hasher {
     /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_memory_size(&mut self, memory_size: u32) -> &mut Hasher {
         self.config.set_memory_size(memory_size);
-        self
-    }
-    /// TODO:
-    pub fn configure_opt_out_of_secret_key(&mut self, boolean: bool) -> &mut Hasher {
-        self.config.set_opt_out_of_secret_key(boolean);
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to erase the password bytes
@@ -315,6 +310,15 @@ impl Hasher {
                 })
             }
         }
+    }
+    /// As an extra security measure, if you want to hash without a secret key, which
+    /// is not recommended, you must explicitly declare that this is your intention
+    /// by calling this method and setting the `opt_out_of_secret_key` configuration to
+    /// `true` (by default, it is set to `false`); otherwise hashing will return an error
+    /// when you fail to provide a secret key
+    pub fn opt_out_of_secret_key(&mut self, boolean: bool) -> &mut Hasher {
+        self.config.set_opt_out_of_secret_key(boolean);
+        self
     }
     /// Allows you to add some additional data to the [`Hasher`](struct.Hasher.html)
     /// that will be hashed alongside the [`Password`](data/struct.Password.html) and

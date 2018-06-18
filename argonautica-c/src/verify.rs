@@ -34,7 +34,7 @@ pub extern "C" fn argonautica_verify(
     threads: uint32_t,
 ) -> argonautica_error_t {
     if is_valid.is_null() || encoded.is_null() || password.is_null() {
-        return argonautica_error_t::ARGONAUTICA_ERROR1;
+        return argonautica_error_t::ARGONAUTICA_ERROR_NULL_PTR;
     }
 
     let backend: Backend = backend.into();
@@ -56,7 +56,7 @@ pub extern "C" fn argonautica_verify(
     let encoded_cstr = unsafe { CStr::from_ptr(encoded) };
     let encoded = match encoded_cstr.to_str() {
         Ok(encoded) => encoded,
-        Err(_) => return argonautica_error_t::ARGONAUTICA_ERROR1, // Utf-8 Error
+        Err(_) => return argonautica_error_t::ARGONAUTICA_ERROR_UTF8_ENCODE,
     };
     verifier.with_hash(encoded);
 
@@ -80,7 +80,7 @@ pub extern "C" fn argonautica_verify(
 
     let valid = match verifier.verify() {
         Ok(valid) => valid,
-        Err(_) => return argonautica_error_t::ARGONAUTICA_ERROR1,
+        Err(e) => return e.into(),
     };
 
     if valid {

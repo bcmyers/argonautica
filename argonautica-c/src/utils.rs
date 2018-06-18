@@ -84,7 +84,7 @@ mod tests {
                 .configure_lanes(lanes)
                 .configure_memory_size(memory_size)
                 .configure_variant(variant.into())
-                .configure_opt_out_of_secret_key(true)
+                .opt_out_of_secret_key(true)
                 .with_password("P@ssw0rd")
                 .with_salt(vec![1u8; salt_len as usize])
                 .hash()

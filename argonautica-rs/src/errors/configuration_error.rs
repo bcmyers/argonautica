@@ -19,7 +19,7 @@ pub enum ConfigurationError {
     #[fail(display = "Lanes must be greater than 0")]
     LanesTooFewError,
 
-    /// Iterations too many. Lanes must be less than 2^24
+    /// Lanes too many. Lanes must be less than 2^24
     #[fail(display = "Lanes must be less than 2^24")]
     LanesTooManyError,
 

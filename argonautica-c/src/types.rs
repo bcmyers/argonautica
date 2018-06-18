@@ -22,19 +22,6 @@ impl From<argonautica_backend_t> for Backend {
     }
 }
 
-/// Argonautica errors
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-#[repr(C)]
-pub enum argonautica_error_t {
-    /// No error occurred
-    ARGONAUTICA_OK = 0,
-
-    /// TODO:
-    ARGONAUTICA_ERROR1 = 1,
-
-    /// TODO:
-    ARGONAUTICA_ERROR2 = 2,
-}
 
 /// Available argon2 variants
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]

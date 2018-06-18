@@ -13,11 +13,13 @@ extern crate argonautica;
 extern crate itoa;
 extern crate libc;
 
+mod error;
 mod hash;
 mod types;
 mod utils;
 mod verify;
 
+pub use error::*;
 pub use hash::*;
 pub use types::*;
 pub use utils::*;

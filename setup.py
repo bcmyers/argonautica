@@ -1,19 +1,6 @@
 import os
 from setuptools import setup, find_packages
-import subprocess
-import sys
-
-try:
-    from setuptools_rust import Binding, RustExtension
-except ImportError:
-    try:
-        subprocess.check_call([
-            sys.executable, "-m", "pip", "install", "setuptools-rust",
-        ])
-        os.execvp(sys.executable, [sys.executable] + sys.argv)
-    except subprocess.CalledProcessError as e:
-        print("Please install the setuptools-rust package")
-        raise SystemExit(e.returncode)
+from setuptools_rust import Binding, RustExtension
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -71,6 +58,6 @@ setup(
         native=True,
         rust_version=">=1.26.0",
     )],
-    setup_requires=['setuptools-rust>=0.9.2'],
+    setup_requires=['setuptools-rust>=0.10.1'],
     zip_safe=False,
 )

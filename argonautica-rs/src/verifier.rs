@@ -71,7 +71,6 @@ pub struct Verifier {
     secret_key: Option<SecretKey>,
 }
 
-// TODO: Getters
 impl Verifier {
     /// Creates a new [`Verifier`](struct.Verifier.html) with the following configuration:
     /// * `backend`: [`Backend::C`](config/enum.Backend.html#variant.C)
@@ -166,12 +165,12 @@ impl Verifier {
             .configure_iterations(hash_raw.iterations())
             .configure_lanes(hash_raw.lanes())
             .configure_memory_size(hash_raw.memory_size())
-            .configure_opt_out_of_secret_key(true)
             .configure_password_clearing(verifier.config.password_clearing())
             .configure_secret_key_clearing(verifier.config.secret_key_clearing())
             .configure_threads(verifier.config.threads())
             .configure_variant(hash_raw.variant())
             .configure_version(hash_raw.version())
+            .opt_out_of_secret_key(true)
             .with_salt(hash_raw.raw_salt_bytes());
 
         if verifier.additional_data.is_some() {

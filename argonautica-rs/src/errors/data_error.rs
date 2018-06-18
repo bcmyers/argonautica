@@ -33,12 +33,6 @@ pub enum DataError {
     )]
     PasswordUnownedError,
 
-    /// Attempted to use a non-random salt without first having opted out of random salt
-    #[fail(
-        display = "Attempted to use a non-random salt without first having opted out of random salt"
-    )]
-    SaltNonRandomError,
-
     /// Salt too short. Length in bytes must be at least 8
     #[fail(display = "Salt too short. Length in bytes must be at least 8")]
     SaltTooShortError,

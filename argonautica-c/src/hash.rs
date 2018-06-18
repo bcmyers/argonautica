@@ -94,7 +94,7 @@ pub extern "C" fn argonautica_hash(
     version: argonautica_version_t,
 ) -> argonautica_error_t {
     if encoded.is_null() || password.is_null() {
-        return argonautica_error_t::ARGONAUTICA_ERROR1;
+        return argonautica_error_t::ARGONAUTICA_ERROR_NULL_PTR;
     }
 
     let backend: Backend = backend.into();
@@ -114,12 +114,12 @@ pub extern "C" fn argonautica_hash(
         .configure_iterations(iterations)
         .configure_lanes(lanes)
         .configure_memory_size(memory_size)
-        .configure_opt_out_of_secret_key(true)
         .configure_password_clearing(password_clearing)
         .configure_secret_key_clearing(secret_key_clearing)
         .configure_threads(threads)
         .configure_variant(variant)
-        .configure_version(version);
+        .configure_version(version)
+        .opt_out_of_secret_key(true);
 
     // Additional data
     if !additional_data.is_null() {
@@ -150,7 +150,7 @@ pub extern "C" fn argonautica_hash(
 
     let hash = match hasher.hash() {
         Ok(hash) => hash,
-        Err(_) => return argonautica_error_t::ARGONAUTICA_ERROR1,
+        Err(e) => return e.into(),
     };
 
     let hash_cstring = CString::new(hash.as_bytes()).unwrap();
