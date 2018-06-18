@@ -1,7 +1,7 @@
 from enum import Enum
 import multiprocessing
 
-from argonautica.ffi import rust
+from argonautica._rust import lib
 
 
 class Backend(Enum):
@@ -15,8 +15,8 @@ class Backend(Enum):
     moment, if you choose this backend your program will throw an exception when calling hash
     or when calling verify*
     """
-    C = rust.ARGONAUTICA_C
-    Rust = rust.ARGONAUTICA_RUST
+    C = lib.ARGONAUTICA_C
+    Rust = lib.ARGONAUTICA_RUST
 
 
 class Variant(Enum):
@@ -38,9 +38,9 @@ class Variant(Enum):
 
     If you do not know which variant to use, use the default, which is ``Variant.Argon2id``.
     """
-    Argon2d = rust.ARGONAUTICA_ARGON2D
-    Argon2i = rust.ARGONAUTICA_ARGON2I
-    Argon2id = rust.ARGONAUTICA_ARGON2ID
+    Argon2d = lib.ARGONAUTICA_ARGON2D
+    Argon2i = lib.ARGONAUTICA_ARGON2I
+    Argon2id = lib.ARGONAUTICA_ARGON2ID
 
 
 class Version(Enum):
@@ -53,5 +53,5 @@ class Version(Enum):
     The latest version is ``Version._0x13`` (as of 5/18). Unless you have a very specific
     reason not to, use ``Version._0x13``, which is also the default.
     """
-    _0x10 = rust.ARGONAUTICA_0x10
-    _0x13 = rust.ARGONAUTICA_0x13
+    _0x10 = lib.ARGONAUTICA_0x10
+    _0x13 = lib.ARGONAUTICA_0x13

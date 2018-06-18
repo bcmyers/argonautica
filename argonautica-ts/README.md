@@ -1,3 +1,0 @@
-# argonautica-ts
-
-Work in progress (do not attempt to use) ...

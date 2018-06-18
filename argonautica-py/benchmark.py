@@ -1,11 +1,7 @@
 import timeit
 
 from argonautica import Hasher
-from argonautica.config import (
-    DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE,
-    DEFAULT_THREADS, DEFAULT_HASH_LEN, Variant
-)
-from argonautica.data import DEFAULT_SALT_LEN
+from argonautica.defaults import *
 from passlib.hash import argon2
 
 

@@ -4,7 +4,7 @@ from typing import Union
 from argonautica.config import Backend, Variant, Version
 from argonautica.data import RandomSalt
 from argonautica.defaults import *
-from argonautica.ffi import ffi, rust
+from argonautica._rust import ffi, lib
 
 
 class Hasher:
@@ -46,6 +46,11 @@ class Hasher:
         encoded = hasher.hash("P@ssw0rd")
         print(encoded)
     """
+    __slots__ = [
+        'additional_data', 'salt', 'secret_key',
+        'backend', 'hash_len', 'iterations', 'lanes',
+        'memory_size', 'threads', 'variant', 'version',
+    ]
 
     def __init__(
         self,
@@ -123,7 +128,7 @@ def hash(
         salt=salt,
         secret_key=secret_key,
     )
-    encoded_len = rust.argonautica_encoded_len(
+    encoded_len = lib.argonautica_encoded_len(
         hash_len,
         iterations,
         lanes,
@@ -132,7 +137,7 @@ def hash(
         variant.value,
     )
     encoded = ffi.new("char[]", b'\0'*encoded_len)
-    err = rust.argonautica_hash(
+    err = lib.argonautica_hash(
         encoded,
         data.additional_data,
         data.additional_data_len,
@@ -153,7 +158,7 @@ def hash(
         variant.value,
         version.value,
     )
-    if err != rust.ARGONAUTICA_OK:
+    if err != lib.ARGONAUTICA_OK:
         raise Exception("failed with error code {}".format(err))
     hash = ffi.string(encoded).decode("utf-8")
     return hash

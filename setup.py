@@ -5,20 +5,35 @@ import sys
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-try:
-    from setuptools_rust import Binding, RustExtension
-except ImportError:
-    try:
-        subprocess.check_call([
-            sys.executable, "-m", "pip", "install", "setuptools-rust",
-        ])
-        os.execvp(sys.executable, [sys.executable] + sys.argv)
-    except subprocess.CalledProcessError as e:
-        print("Please install the setuptools-rust package")
-        raise SystemExit(e.returncode)
-
 with open(os.path.join(here, "argonautica-py", "README.md"), "r") as f:
     long_description = f.read()
+
+# try:
+#     from setuptools_rust import Binding, RustExtension
+# except ImportError:
+#     try:
+#         subprocess.check_call([
+#             sys.executable, "-m", "pip", "install", "setuptools-rust",
+#         ])
+#         os.execvp(sys.executable, [sys.executable] + sys.argv)
+#     except subprocess.CalledProcessError as e:
+#         print("Please install the setuptools-rust package")
+#         raise SystemExit(e.returncode)
+
+
+def build_native(spec):
+    build = spec.add_external_build(
+        cmd=['cargo', 'build', '--release', '--features', 'simd'],
+        path='.'
+    )
+
+    spec.add_cffi_module(
+        module_path='argonautica._rust',
+        dylib=lambda: build.find_dylib('argonautica_c', in_path='target/release'),
+        header_filename=lambda: build.find_header('argonautica.h', in_path='argonautica-c/target'),
+        rtld_flags=['NOW', 'NODELETE']
+    )
+
 
 setup(
     name="argonautica",
@@ -56,20 +71,24 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
 
-    install_requires=['cffi>=1.11.5', 'typing>=3.6.4'],
+    install_requires=['cffi>=1.11.5', 'milksnake>=0.1.5', 'typing>=3.6.4'],
+    milksnake_tasks=[
+        build_native
+    ],
     packages=["argonautica"],
     package_dir={'': 'argonautica-py'},
     package_data={'argonautica': ['*.h']},
     python_requires='>=3.4',
-    rust_extensions=[RustExtension(
-        'argonautica.rust',
-        'argonautica-c/Cargo.toml',
-        binding=Binding.NoBinding,
-        debug=False,
-        features=["simd"],
-        native=True,
-        rust_version=">=1.26.0",
-    )],
-    setup_requires=["setuptools-rust>=0.9.2"],
+    # rust_extensions=[RustExtension(
+    #     'argonautica.rust',
+    #     'argonautica-c/Cargo.toml',
+    #     binding=Binding.NoBinding,
+    #     debug=False,
+    #     features=["simd"],
+    #     native=True,
+    #     rust_version=">=1.26.0",
+    # )],
+    # setup_requires=['setuptools-rust>=0.9.2'],
+    setup_requires=['milksnake>=0.1.5'],
     zip_safe=False,
 )

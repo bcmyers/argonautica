@@ -23,7 +23,7 @@ crate_type = ["lib"]
 
 [features]
 actix_web = ["actix-web", "env_logger", "futures-timer", "serde"]
-benches = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2"]
+benches = ["argon2rs", "criterion", "md5", "rust-argon2", "sha2", "simd"]
 development = ["bindgen", "blake2-rfc", "cbindgen", "tempdir"]
 simd = []
 

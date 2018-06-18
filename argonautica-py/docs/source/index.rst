@@ -38,7 +38,8 @@ Installation
       - Other linux: Use your distribution's package manager
       - Windows: Download a pre-built binary `here <http://releases.llvm.org/download.html>`_
   * argonautica:
-      - ``pip install argonautica -v`` once you have completed the steps above
+      - ``pip install --upgrade pip``
+      - ``pip install argonautica -v``
       - Unfortunately, this step may take several minutes, as `argonautica <https://github.com/bcmyers/argonautica/tree/master/argonautica-py/>`_ needs to compile it's Rust code for your specific CPU (due to its use of SIMD instructions). The upside, however, is that once compiled, `argonautica <https://github.com/bcmyers/argonautica/tree/master/argonautica-py/>`_ should run blazingly fast
       - For those of you who are wondering why `argonautica <https://github.com/bcmyers/argonautica/tree/master/argonautica-py/>`_ doesn't offer pre-compiled wheels like most other native libraries, it's precisely because of the SIMD instructions. Other native libraries can pre-compile a small number of libraries that work pretty much everywhere (e.g. 64bit macOS, 32bit linux, 64bit linux, 32bit Windows, 64bit Windows), but `argonautica <https://github.com/bcmyers/argonautica/tree/master/argonautica-py/>`_ compiles code that's not just specific to a platform/architecture combination. Rather it's specific to a platform/architecture/cpu combination; so 64bit macOS code on a Haswell processor will be different than 64bit macOS code on a Skylake processor.
 

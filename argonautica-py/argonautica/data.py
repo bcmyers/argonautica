@@ -13,6 +13,7 @@ class RandomSalt:
     The default ``salt`` for both the ``Argon2`` class and the ``Hasher`` class is a
     ``RandomSalt`` with length ``32``.
     """
+    __slots__ = ['len']
 
     def __init__(self, len: int = 32) -> None:
         self.len = len

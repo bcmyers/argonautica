@@ -37,7 +37,7 @@ your specific machine (this is why the pip install argonautica process takes a b
 ## Installation
 
 - Python:
-  - macOS: brew install python3, which requires [Homebrew](<https://brew.sh/)
+  - macOS: brew install python3, which requires [Homebrew](https://brew.sh/)
   - Linux: Use your distribution\'s package manager or follow the instructions
     [here](https://www.python.org/downloads/)
   - Windows: Follow the instructions [here](https://www.python.org/downloads/)

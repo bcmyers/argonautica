@@ -68,6 +68,7 @@ class Argon2:
         is_valid: bool = argon2.verify(hash=encoded, password="P@ssw0rd")
         print(is_valid)
     """
+    __slots__ = ['hasher', 'verifier']
 
     def __init__(
         self,

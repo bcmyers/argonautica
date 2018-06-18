@@ -2,7 +2,7 @@ from typing import Union
 
 from argonautica.config import Backend
 from argonautica.defaults import *
-from argonautica.ffi import ffi, rust
+from argonautica._rust import ffi, lib
 
 
 class Verifier:
@@ -56,6 +56,7 @@ class Verifier:
         )
         print(is_valid)
     """
+    __slots__ = ['additional_data', 'secret_key', 'backend', 'threads']
 
     def __init__(
         self,
@@ -127,7 +128,7 @@ def verify(
         raise Exception("Error")
 
     is_valid = ffi.new("int*", 0)
-    err = rust.argonautica_verify(
+    err = lib.argonautica_verify(
         is_valid,
         additional_data,
         additional_data_len,
@@ -141,7 +142,7 @@ def verify(
         0,
         threads,
     )
-    if err != rust.ARGONAUTICA_OK:
+    if err != lib.ARGONAUTICA_OK:
         raise Exception("ERROR")
 
     if is_valid[0] == 1:
