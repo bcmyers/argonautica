@@ -11,6 +11,7 @@ matrix:
       install:
         - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
         - pip install --upgrade pip
+        - pip install setuptools-rust
         - python setup.py sdist
         - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
@@ -23,6 +24,7 @@ matrix:
       install:
         - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
         - pip install --upgrade pip
+        - pip install setuptools-rust
         - python setup.py sdist
         - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
@@ -35,6 +37,7 @@ matrix:
       install:
         - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
         - pip install --upgrade pip
+        - pip install setuptools-rust
         - python setup.py sdist
         - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
@@ -49,6 +52,7 @@ matrix:
         - pip install --upgrade pip
         - pip install --upgrade setuptools
         - pip install wheel
+        - pip install setuptools-rust
         - python setup.py sdist
         - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
