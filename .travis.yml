@@ -14,6 +14,7 @@ matrix:
         - pip install argon2_cffi passlib
         - pip install setuptools-rust
         - python setup.py sdist
+        - pip uninstall setuptools-rust -y
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -27,6 +28,7 @@ matrix:
         - pip install argon2_cffi passlib
         - pip install setuptools-rust
         - python setup.py sdist
+        - pip uninstall setuptools-rust -y
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -40,6 +42,7 @@ matrix:
         - pip install argon2_cffi passlib
         - pip install setuptools-rust
         - python setup.py sdist
+        - pip uninstall setuptools-rust -y
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -55,6 +58,7 @@ matrix:
         - pip install argon2_cffi passlib
         - pip install setuptools-rust
         - python setup.py sdist
+        - pip uninstall setuptools-rust -y
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
