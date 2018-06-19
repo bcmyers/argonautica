@@ -61,12 +61,6 @@ matrix:
         - python -m unittest
         - python benchmark.py
     - language: rust
-      rust: stable
-      cache: cargo
-      script:
-        - cargo test --release --features="simd serde" -p argonautica
-        - cargo test --release --features="simd" -p argonautica-c -- --nocapture
-    - language: rust
       rust:
         - stable
         - beta
