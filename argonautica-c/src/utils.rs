@@ -90,7 +90,7 @@ mod tests {
                 .with_salt(vec![1u8; salt_len as usize])
                 .hash()
                 .unwrap();
-            (encoded.as_bytes().len() + 1) as size_t
+            (encoded.as_bytes().len() + 1) as c_int
         };
         assert_eq!(computed, expected);
     }
