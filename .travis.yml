@@ -66,5 +66,18 @@ matrix:
       script:
         - cargo test --release --features="simd serde" -p argonautica
         - cargo test --release --features="simd" -p argonautica-c -- --nocapture
+    - language: rust
+      rust:
+        - stable
+        - beta
+        - nightly
+      matrix:
+        allow_failures:
+          - rust: nightly
+        fast_finish: true
+      cache: cargo
+      script:
+        - cargo test --release --features="simd serde" -p argonautica
+        - cargo test --release --features="simd" -p argonautica-c -- --nocapture
 sudo: false
 dist: trusty
