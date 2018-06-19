@@ -107,7 +107,7 @@ other crates currently lack:
       through
       [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
     * <i>Note: SIMD instructions are specific to your CPU; so if you're compiling for
-      machines other than your own, it's unlikely you'll be able to use the SIMD feature</i>
+      machines other than your own, you should not turn on the SIMD feature</i>
 * The ability to hash passwords with a secret key, which not even the
   [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
 * The newest Argon2 variant: Argon2id
@@ -156,7 +156,7 @@ fn main() {
         // makes heavy use of futures, the code you are writing uses both a `Hasher` and
         // a `Verifier`, and you would like both of them to share the same underlying
         // `CpuPool`.
-        .configure_hash_length(16) // Default is `32`
+        .configure_hash_len(16) // Default is `32`
         // 👆 The hash length in bytes is configurable. The default is 32. This is probably
         // a good number to use. 16 is also probably fine. You probably shouldn't go below 16
         .configure_iterations(192) // Default is `192`
@@ -193,12 +193,6 @@ fn main() {
         // the time it takes to hash to the maximum you can reasonably allow for your use-case
         // (e.g. to probably about 300-500 milliseconds for the use-case of hashing user
         // passwords for a website)
-        .configure_opt_out_of_secret_key(true) // Default is `false`
-        // 👆 As an extra security measure, if you want to hash without a secret key, which
-        // is not recommended, you must explicitly declare that this is your intention
-        // by calling this method and setting the `opt_out_of_secret_key` configuration to
-        // `true` (by default, it is set to `false`); otherwise hashing will return an error
-        // when you fail to provide a secret key
         .configure_password_clearing(false) // Default is `false`
         // 👆 It is possible to have the underlying bytes of the password you provided
         // to `Hasher` be erased after each call to `hash`, `hash_raw` or their non-blocking
@@ -237,10 +231,16 @@ fn main() {
         // as Argon2d for the rest, thus providing both side-channel attack protection and
         // brute-force cost savings due to time-memory tradeoffs." If you do not know which
         // variant to use, use the default, which is Argon2id
-        .configure_version(Version::_0x13); // Default is `Version::_0x13`
+        .configure_version(Version::_0x13) // Default is `Version::_0x13`
         // 👆 Argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
         // Unless you have a very specific reason not to, you should use the latest
         // version (0x13), which is also the default
+        .opt_out_of_secret_key(true); // Default is `false`
+        // 👆 As an extra security measure, if you want to hash without a secret key, which
+        // is not recommended, you must explicitly declare that this is your intention
+        // by calling this method and setting the `opt_out_of_secret_key` configuration to
+        // `true` (by default, it is set to `false`); otherwise hashing will return an error
+        // when you fail to provide a secret key
 
     let hash = hasher
         .with_password("P@ssw0rd")

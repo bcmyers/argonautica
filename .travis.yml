@@ -10,9 +10,9 @@ matrix:
       python: "3.6"
       install:
         - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
-        - git clone https://github.com/bcmyers/setuptools-rust.git
-        - cd setuptools-rust && pip install . && cd ..
+        - pip install --upgrade pip
         - python setup.py sdist
+        - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -22,9 +22,9 @@ matrix:
       python: "3.5"
       install:
         - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
-        - git clone https://github.com/bcmyers/setuptools-rust.git
-        - cd setuptools-rust && pip install . && cd ..
+        - pip install --upgrade pip
         - python setup.py sdist
+        - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -34,9 +34,9 @@ matrix:
       python: "3.4"
       install:
         - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
-        - git clone https://github.com/bcmyers/setuptools-rust.git
-        - cd setuptools-rust && pip install . && cd ..
+        - pip install --upgrade pip
         - python setup.py sdist
+        - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -46,11 +46,11 @@ matrix:
       python: "pypy3.5"
       install:
         - curl https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
+        - pip install --upgrade pip
         - pip install --upgrade setuptools
         - pip install wheel
-        - git clone https://github.com/bcmyers/setuptools-rust.git
-        - cd setuptools-rust && pip install . && cd ..
         - python setup.py sdist
+        - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
