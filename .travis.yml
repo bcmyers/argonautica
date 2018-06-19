@@ -13,7 +13,6 @@ matrix:
         - pip install --upgrade pip
         - pip install setuptools-rust
         - python setup.py sdist
-        - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -26,7 +25,6 @@ matrix:
         - pip install --upgrade pip
         - pip install setuptools-rust
         - python setup.py sdist
-        - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -39,7 +37,6 @@ matrix:
         - pip install --upgrade pip
         - pip install setuptools-rust
         - python setup.py sdist
-        - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
@@ -54,7 +51,6 @@ matrix:
         - pip install wheel
         - pip install setuptools-rust
         - python setup.py sdist
-        - pip install -r argonautica-py/requirements-dev.txt
         - pip install dist/argonautica-0.1.0.tar.gz
       script:
         - cd argonautica-py
