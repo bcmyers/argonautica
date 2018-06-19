@@ -28,13 +28,13 @@ impl From<argonautica_backend_t> for Backend {
 #[repr(C)]
 pub enum argonautica_variant_t {
     /// argon2d
-    ARGONAUTICA_ARGON2D = 1,
+    ARGONAUTICA_ARGON2D = 0,
 
     /// argond2i
-    ARGONAUTICA_ARGON2I = 2,
+    ARGONAUTICA_ARGON2I = 1,
 
     /// argon2id
-    ARGONAUTICA_ARGON2ID = 3,
+    ARGONAUTICA_ARGON2ID = 2,
 }
 
 impl From<argonautica_variant_t> for Variant {

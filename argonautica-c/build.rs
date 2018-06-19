@@ -10,7 +10,7 @@ fn main() {
         .with_language(cbindgen::Language::C)
         .generate()
         .expect("Unable to generate bindings");
-    bindings.write_to_file("target/argonautica.h");
+    bindings.write_to_file("include/argonautica.h");
 
     let dir = Path::new("../argonautica-py/argonautica");
     if dir.exists() {

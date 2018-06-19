@@ -31,7 +31,7 @@ is a C/C++ wrapper for
     * `cargo build --release`
 * Use the library
     * The library, which will be called `libargonautica_c.dylib` or something similar (depending on your OS), will be in the `./target/release` directory
-    * The header file, which will be called `argonautica.h`, will be in the `./argonautica-c/target` directory
+    * The header file, which will be called `argonautica.h`, will be in the `./argonautica-c/include` directory
 
 ## License
 

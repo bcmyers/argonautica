@@ -11,7 +11,8 @@ fn base64_len(len: uint32_t) -> usize {
     chars
 }
 
-/// Function that returns the length of a string-encoded hash (in bytes and including the NULL byte)
+/// Function that returns the length of a string-encoded hash (in bytes and including the NULL byte).
+/// If an error occurrs, the function returns -1
 #[no_mangle]
 pub extern "C" fn argonautica_encoded_len(
     hash_len: uint32_t,
@@ -89,7 +90,7 @@ mod tests {
                 .with_salt(vec![1u8; salt_len as usize])
                 .hash()
                 .unwrap();
-            (encoded.as_bytes().len() + 1) as c_int
+            (encoded.as_bytes().len() + 1) as size_t
         };
         assert_eq!(computed, expected);
     }
