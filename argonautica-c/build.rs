@@ -1,12 +1,11 @@
 extern crate cbindgen;
 
-use std::env;
 use std::path::Path;
 
 fn main() {
-    let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    // let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let bindings = cbindgen::Builder::new()
-        .with_crate(crate_dir)
+        .with_crate(".")
         .with_language(cbindgen::Language::C)
         .generate()
         .expect("Unable to generate bindings");
