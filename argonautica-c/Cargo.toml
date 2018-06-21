@@ -3,8 +3,15 @@ name = "argonautica-c"
 version = "0.1.0" # remember to update html_root_url
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
+categories = ["Algorithms", "API bindings", "Authentication", "Cryptography"]
+description = "C/C++ wrapper for argonautica"
+documentation = "https://docs.rs/argonautica-c"
+homepage = "https://github.com/bcmyers/argonautica"
+keywords = ["argon2", "argon2d", "argon2i", "argon2id", "crypto", "cryptography", "hash", "hashing", "password", "security"]
 license = "MIT/Apache-2.0"
-publish = false # TODO
+publish = true # TODO
+readme = "README.md"
+repository = "https://github.com/bcmyers/argonautica"
 
 build = "build.rs"
 
@@ -17,7 +24,7 @@ crate_type = ["cdylib"]
 simd = ["argonautica/simd"]
 
 [dependencies]
-argonautica = { path = "../argonautica-rs" }
+argonautica = { path = "../argonautica-rs" } # TODO
 itoa = "0.4"
 libc = "0.2"
 
