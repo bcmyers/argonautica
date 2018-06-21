@@ -1,8 +1,8 @@
 //! Utility functions for generating random bytes, which can be useful for generating
 //! [`SecretKey`](data/struct.SecretKey.html)s, for example.
 use base64;
-use rand::RngCore;
 use rand::rngs::EntropyRng;
+use rand::RngCore;
 
 use {Error, ErrorKind};
 
@@ -11,7 +11,8 @@ use {Error, ErrorKind};
 pub fn generate_random_bytes(len: u32) -> Result<Vec<u8>, Error> {
     let mut rng = EntropyRng::new();
     let mut bytes = vec![0u8; len as usize];
-    rng.try_fill_bytes(&mut bytes).map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
+    rng.try_fill_bytes(&mut bytes)
+        .map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
     Ok(bytes)
 }
 
@@ -23,7 +24,8 @@ pub fn generate_random_bytes(len: u32) -> Result<Vec<u8>, Error> {
 pub fn generate_random_base64_encoded_string(len: u32) -> Result<String, Error> {
     let mut rng = EntropyRng::new();
     let mut bytes = vec![0u8; len as usize];
-    rng.try_fill_bytes(&mut bytes).map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
+    rng.try_fill_bytes(&mut bytes)
+        .map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
     let output = base64::encode_config(&bytes, base64::STANDARD);
     Ok(output)
 }
@@ -39,7 +41,8 @@ pub fn generate_random_base64_encoded_string_config(
 ) -> Result<String, Error> {
     let mut rng = EntropyRng::new();
     let mut bytes = vec![0u8; len as usize];
-    rng.try_fill_bytes(&mut bytes).map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
+    rng.try_fill_bytes(&mut bytes)
+        .map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
     let output = base64::encode_config(&bytes, config);
     Ok(output)
 }

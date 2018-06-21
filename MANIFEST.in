@@ -8,3 +8,7 @@ include pyproject.toml
 graft argonautica-c
 graft argonautica-rs
 include Cargo.toml
+
+prune argonautica-c/target
+prune argonautica-rs/target
+prune argonautica-rs/tests

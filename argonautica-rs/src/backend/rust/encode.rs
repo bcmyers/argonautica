@@ -21,8 +21,8 @@ impl HashRaw {
 
 #[cfg(test)]
 mod tests {
-    use rand::{RngCore, SeedableRng};
     use rand::rngs::StdRng;
+    use rand::{RngCore, SeedableRng};
 
     use backend::encode_c;
     use hasher::Hasher;

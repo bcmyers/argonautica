@@ -61,8 +61,8 @@ named!(parse_hash<&str, IntermediateStruct>, do_parse!(
 
 #[cfg(test)]
 mod tests {
-    use rand::{RngCore, SeedableRng};
     use rand::rngs::StdRng;
+    use rand::{RngCore, SeedableRng};
 
     use super::*;
     use backend::c::decode_c;

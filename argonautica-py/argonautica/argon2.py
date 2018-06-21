@@ -98,13 +98,13 @@ class Argon2:
             memory_size=memory_size,
             threads=threads,
             variant=variant,
-            version=version,
+            version=version
         )
         self.verifier = Verifier(
             additional_data=additional_data,
             secret_key=secret_key,
             backend=backend,
-            threads=threads,
+            threads=threads
         )
 
     @property

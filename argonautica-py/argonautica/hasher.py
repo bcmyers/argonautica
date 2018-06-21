@@ -95,7 +95,7 @@ class Hasher:
             memory_size=self.memory_size,
             threads=self.threads,
             variant=self.variant,
-            version=self.version,
+            version=self.version
         )
 
 

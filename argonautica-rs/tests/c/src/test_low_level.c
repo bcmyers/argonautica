@@ -21,17 +21,6 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    // TODO: Delete
-    // fprintf(stdout, "\n");
-    // fprintf(stdout, "Additional data:\n");
-    // print_bytes(stdout, hash_input.additional_data, hash_input.additional_data_len);
-    // fprintf(stdout, "Password:\n");
-    // print_bytes(stdout, hash_input.password, hash_input.password_len);
-    // print_bytes(stdout, password2, hash_input.password_len);
-    // fprintf(stdout, "Secret key:\n");
-    // print_bytes(stdout, hash_input.secret_key, hash_input.secret_key_len);
-    // print_bytes(stdout, secret_key2, hash_input.secret_key_len);
-
     // Hash low level
     hash_result_t hash_result = hash_low_level(&hash_input);
     if(hash_result.err != ARGON2_OK) {

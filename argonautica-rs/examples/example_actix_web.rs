@@ -32,11 +32,11 @@ use futures_timer::Delay;
 const MINIMUM_DURATION_IN_MILLIS: u64 = 400;
 
 // Helper method to load the secret key from a .env file. Used in `main` below.
-fn load_secret_key() -> Result<SecretKey, failure::Error> {
+fn load_secret_key() -> Result<SecretKey<'static>, failure::Error> {
     let dotenv_path = env::current_dir()?.join("examples").join("example.env");
     dotenv::from_path(&dotenv_path).map_err(|e| format_err!("{}", e))?;
     let base64_encoded_secret_key = env::var("SECRET_KEY")?;
-    Ok(SecretKey::from_base64_encoded_str(
+    Ok(SecretKey::from_base64_encoded(
         &base64_encoded_secret_key,
     )?)
 }
@@ -45,18 +45,18 @@ fn load_secret_key() -> Result<SecretKey, failure::Error> {
 // which for example purposes is just a HashMap (but in real life would probably be Postgres
 // or something of the sort), as well as instances of our Hasher and Verifier, which we "preload"
 // with our secret key
-struct State {
+struct State<'a> {
     database: Arc<Mutex<HashMap<String, String>>>,
-    hasher: Hasher,
-    verifier: Verifier,
+    hasher: Hasher<'a>,
+    verifier: Verifier<'a>,
 }
 
-impl State {
+impl<'a> State<'a> {
     // Since actix-web uses futures extensively, let's have the Hasher and Verifier
     // share a common CpuPool.  In addition, as mentioned above, we "preload" the Hasher and
     // Verifier with our secret key; so we only have to do this once (at creation of the
     // server in 'main')
-    fn new(secret_key: SecretKey) -> State {
+    fn new(secret_key: &SecretKey<'a>) -> State<'static> {
         let cpu_pool = CpuPool::new(4);
         State {
             database: Arc::new(Mutex::new(HashMap::new())),
@@ -64,14 +64,14 @@ impl State {
                 let mut hasher = Hasher::default();
                 hasher
                     .configure_cpu_pool(cpu_pool.clone())
-                    .with_secret_key(&secret_key);
+                    .with_secret_key(secret_key.to_owned());
                 hasher
             },
             verifier: {
                 let mut verifier = Verifier::default();
                 verifier
                     .configure_cpu_pool(cpu_pool)
-                    .with_secret_key(&secret_key);
+                    .with_secret_key(secret_key.to_owned());
                 verifier
             },
         }
@@ -79,18 +79,18 @@ impl State {
     fn database_ptr(&self) -> Arc<Mutex<HashMap<String, String>>> {
         self.database.clone()
     }
-    fn hasher(&self) -> Hasher {
-        self.hasher.clone()
+    fn hasher(&self) -> Hasher<'static> {
+        self.hasher.to_owned()
     }
-    fn verifier(&self) -> Verifier {
-        self.verifier.clone()
+    fn verifier(&self) -> Verifier<'static> {
+        self.verifier.to_owned()
     }
 }
 
 // Handler for the "/database" route. This just returns a copy of the "database" (in json)
 // In real life, you would obviously restrict access to this route to admins only
 // or something of the sort, but in this example the routes is open to anyone
-fn database(req: HttpRequest<State>) -> HttpResponse {
+fn database(req: HttpRequest<State<'static>>) -> HttpResponse {
     let database_ptr = req.state().database_ptr();
     let database = {
         match database_ptr.lock() {
@@ -118,7 +118,7 @@ struct RegisterRequest {
 // (to prevent attackers from gaining insight into our code); so at the end, we also
 // delay before returning if the function has taken less than the minimum required amount
 // of time.
-fn register(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+fn register(req: HttpRequest<State<'static>>) -> Box<Future<Item = HttpResponse, Error = Error>> {
     let start = Instant::now();
     let database_ptr = req.state().database_ptr();
     let mut hasher = req.state().hasher();
@@ -126,7 +126,7 @@ fn register(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = 
         .map_err(|e| e.into())
         .and_then(move |register_request: RegisterRequest| {
             hasher
-                .with_password(&register_request.password)
+                .with_password(register_request.password.clone())
                 .hash_non_blocking()
                 .map_err(|e| e.into())
                 // Futures are kind finicky; so let's map the result of our
@@ -175,7 +175,7 @@ struct VerifyRequest {
 // As with the "/register" method above, we would like to ensure that calling this route
 // always takes at least a minimum amount of time (to prevent attackers from gaining insight
 // into our code); so we use the same trick with the `futures_timer` crate to ensure that here.
-fn verify(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = Error>> {
+fn verify(req: HttpRequest<State<'static>>) -> Box<Future<Item = HttpResponse, Error = Error>> {
     let start = Instant::now();
     let database_ptr = req.state().database_ptr();
     let mut verifier = req.state().verifier();
@@ -194,7 +194,7 @@ fn verify(req: HttpRequest<State>) -> Box<Future<Item = HttpResponse, Error = Er
         .and_then(move |(hash, verify_request)| {
             verifier
                 .with_hash(&hash)
-                .with_password(&verify_request.password)
+                .with_password(verify_request.password.clone())
                 .verify_non_blocking()
                 .map_err(|e| e.into())
         })
@@ -226,7 +226,7 @@ fn main() -> Result<(), failure::Error> {
     env_logger::init();
     let secret_key = load_secret_key()?;
     server::new(move || {
-        App::with_state(State::new(secret_key.clone()))
+        App::with_state(State::new(&secret_key))
             .middleware(Logger::new("Milliseconds to process request: %D"))
             .resource("/database", |r| r.method(Method::GET).f(database))
             .resource("/register", |r| r.method(Method::POST).f(register))

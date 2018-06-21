@@ -84,7 +84,7 @@ verify_result_t verify_low_level(verify_input_t* input)
         return output;
     }
 
-    // TODO: This is my code
+    // This is my code
     ctx.ad = input->additional_data;
     ctx.adlen = (size_t)(input->additional_data_len);
     ctx.secret = input->secret_key;

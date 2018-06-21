@@ -574,10 +574,7 @@ mod tests {
             .hash();
         match hash {
             Ok(_) => panic!("Should return an error"),
-            Err(e) => assert_eq!(
-                e,
-                Error::new(ErrorKind::PasswordImmutableError)
-            ),
+            Err(e) => assert_eq!(e, Error::new(ErrorKind::PasswordImmutableError)),
         }
         assert!(hasher.password().is_none());
         assert!(hasher.secret_key().is_some());
@@ -592,10 +589,7 @@ mod tests {
             .hash();
         match hash {
             Ok(_) => panic!("Should return an error"),
-            Err(e) => assert_eq!(
-                e,
-                Error::new(ErrorKind::SecretKeyImmutableError)
-            ),
+            Err(e) => assert_eq!(e, Error::new(ErrorKind::SecretKeyImmutableError)),
         }
         assert!(hasher.password().is_some());
         assert!(hasher.secret_key().is_none());
