@@ -1,11 +1,8 @@
 use futures_cpupool::CpuPool;
 
 #[cfg(feature = "serde")]
-use config::default_cpu_pool_serde;
+use config::defaults::default_cpu_pool_serde;
 use config::Backend;
-use config::{
-    default_threads, DEFAULT_BACKEND, DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING,
-};
 
 /// Read-only configuration for [`Verifier`](../struct.Verifier.html). Can be obtained by calling
 /// the [`config`](../struct.Verifier.html#method.config) method on an instance of
@@ -14,15 +11,15 @@ use config::{
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct VerifierConfig {
-    backend: Backend,
+    pub(crate) backend: Backend,
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde")
     )]
-    cpu_pool: Option<CpuPool>,
-    password_clearing: bool,
-    secret_key_clearing: bool,
-    threads: u32,
+    pub(crate) cpu_pool: Option<CpuPool>,
+    pub(crate) password_clearing: bool,
+    pub(crate) secret_key_clearing: bool,
+    pub(crate) threads: u32,
 }
 
 impl VerifierConfig {
@@ -52,29 +49,20 @@ impl VerifierConfig {
 }
 
 impl VerifierConfig {
-    pub(crate) fn default() -> VerifierConfig {
+    pub(crate) fn new(
+        backend: Backend,
+        cpu_pool: Option<CpuPool>,
+        password_clearing: bool,
+        secret_key_clearing: bool,
+        threads: u32,
+    ) -> VerifierConfig {
         VerifierConfig {
-            backend: DEFAULT_BACKEND,
-            cpu_pool: None,
-            password_clearing: DEFAULT_PASSWORD_CLEARING,
-            secret_key_clearing: DEFAULT_SECRET_KEY_CLEARING,
-            threads: default_threads(),
+            backend,
+            cpu_pool,
+            password_clearing,
+            secret_key_clearing,
+            threads,
         }
-    }
-    pub(crate) fn set_backend(&mut self, backend: Backend) {
-        self.backend = backend;
-    }
-    pub(crate) fn set_cpu_pool(&mut self, cpu_pool: CpuPool) {
-        self.cpu_pool = Some(cpu_pool);
-    }
-    pub(crate) fn set_password_clearing(&mut self, boolean: bool) {
-        self.password_clearing = boolean;
-    }
-    pub(crate) fn set_secret_key_clearing(&mut self, boolean: bool) {
-        self.secret_key_clearing = boolean;
-    }
-    pub(crate) fn set_threads(&mut self, threads: u32) {
-        self.threads = threads;
     }
 }
 

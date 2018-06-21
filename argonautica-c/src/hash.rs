@@ -129,7 +129,7 @@ pub extern "C" fn argonautica_hash(
     }
 
     // Password
-    let password = unsafe { ::std::slice::from_raw_parts(password, password_len as usize) };
+    let password = unsafe { ::std::slice::from_raw_parts_mut(password, password_len as usize) };
     hasher.with_password(password);
 
     // Salt
@@ -144,7 +144,7 @@ pub extern "C" fn argonautica_hash(
     // Secret key
     if !secret_key.is_null() {
         let secret_key =
-            unsafe { ::std::slice::from_raw_parts(secret_key, secret_key_len as usize) };
+            unsafe { ::std::slice::from_raw_parts_mut(secret_key, secret_key_len as usize) };
         hasher.with_secret_key(secret_key);
     };
 
@@ -158,12 +158,72 @@ pub extern "C" fn argonautica_hash(
     let hash_ptr = hash_cstring.as_ptr();
 
     unsafe {
-        ::std::ptr::copy_nonoverlapping(
-            hash_ptr,
-            encoded,
-            hash_cstring_len,
-        );
+        ::std::ptr::copy_nonoverlapping(hash_ptr, encoded, hash_cstring_len);
     }
 
     argonautica_error_t::ARGONAUTICA_OK
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::CString;
+
+    use super::*;
+    use {argonautica_encoded_len, argonautica_variant_t};
+
+    #[test]
+    fn test_clearing() {
+        let hash_len = 32;
+        let iterations = 128;
+        let lanes = 4;
+        let memory_size = 128;
+        let salt_len = 8;
+        let variant = argonautica_variant_t::ARGONAUTICA_ARGON2ID;
+        let encoded_len = argonautica_encoded_len(
+            /* hash_len */ hash_len,
+            /* iterations */ iterations,
+            /* lanes */ lanes,
+            /* memory_size */ memory_size,
+            /* salt_len */ salt_len,
+            /* variant */ variant,
+        );
+        let encoded = vec![1u8; encoded_len as usize];
+        let cstring = unsafe { CString::from_vec_unchecked(encoded) };
+        let encoded_ptr = cstring.into_raw();
+        let password = "11111111".to_string();
+        let password_ptr = password.as_bytes().as_ptr() as *mut uint8_t;
+        let password_len = password.as_bytes().len();
+        let secret_key = "22222222".to_string();
+        let secret_key_ptr = secret_key.as_bytes().as_ptr() as *mut uint8_t;
+        let secret_key_len = secret_key.as_bytes().len();
+        let err = argonautica_hash(
+            /* encoded */ encoded_ptr,
+            /* additional_data */ ::std::ptr::null(),
+            /* additional_data_len */ 0,
+            /* password */ password_ptr,
+            /* password_len */ password_len as uint32_t,
+            /* salt */ ::std::ptr::null(),
+            /* salt_len */ salt_len,
+            /* secret_key */ secret_key_ptr,
+            /* secret_key_len */ secret_key_len as uint32_t,
+            /* backend */ argonautica_backend_t::ARGONAUTICA_C,
+            /* hash_len */ hash_len,
+            /* iterations */ iterations,
+            /* lanes */ lanes,
+            /* memory_size */ memory_size,
+            /* password_clearing */ 1,
+            /* secret_key_clearing */ 1,
+            /* threads */ lanes,
+            /* variant */ variant,
+            /* version */ argonautica_version_t::ARGONAUTICA_0x13,
+        );
+        assert_eq!(err, argonautica_error_t::ARGONAUTICA_OK);
+        let password =
+            unsafe { ::std::slice::from_raw_parts(password_ptr as *mut uint8_t, password_len) };
+        assert_eq!(password, &[0u8; 8][..]);
+        let secret_key =
+            unsafe { ::std::slice::from_raw_parts(secret_key_ptr as *mut uint8_t, secret_key_len) };
+        assert_eq!(secret_key, &[0u8; 8][..]);
+        let _ = unsafe { CString::from_raw(encoded_ptr) };
+    }
 }

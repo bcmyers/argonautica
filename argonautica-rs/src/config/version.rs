@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use config::defaults::DEFAULT_VERSION;
-use errors::EncodingError;
 use {Error, ErrorKind};
 
 impl Default for Version {
@@ -23,10 +22,9 @@ impl FromStr for Version {
         match s {
             "16" => Ok(Version::_0x10),
             "19" => Ok(Version::_0x13),
-            _ => Err(
-                Error::new(ErrorKind::EncodingError(EncodingError::VersionEncodeError))
-                    .add_context(format!("String: {}", s)),
-            ),
+            _ => {
+                Err(Error::new(ErrorKind::VersionEncodeError).add_context(format!("String: {}", s)))
+            }
         }
     }
 }
@@ -63,10 +61,7 @@ impl Version {
         match x {
             16 => Ok(Version::_0x10),
             19 => Ok(Version::_0x13),
-            _ => Err(
-                Error::new(ErrorKind::EncodingError(EncodingError::VersionEncodeError))
-                    .add_context(format!("Int: {}", x)),
-            ),
+            _ => Err(Error::new(ErrorKind::VersionEncodeError).add_context(format!("Int: {}", x))),
         }
     }
 }

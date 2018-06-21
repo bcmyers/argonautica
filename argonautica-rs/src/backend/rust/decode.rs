@@ -1,18 +1,15 @@
 use base64;
 
 use config::{Variant, Version};
-use errors::EncodingError;
 use output::HashRaw;
 use {Error, ErrorKind};
 
 pub(crate) fn decode_rust(hash: &str) -> Result<HashRaw, Error> {
     let (rest, intermediate) = parse_hash(hash).map_err(|_| {
-        Error::new(ErrorKind::EncodingError(EncodingError::HashDecodeError))
-            .add_context(format!("Hash: {}", &hash))
+        Error::new(ErrorKind::HashDecodeError).add_context(format!("Hash: {}", &hash))
     })?;
     let raw_hash_bytes = base64::decode_config(rest, base64::STANDARD_NO_PAD).map_err(|_| {
-        Error::new(ErrorKind::EncodingError(EncodingError::HashDecodeError))
-            .add_context(format!("Hash: {}", &hash))
+        Error::new(ErrorKind::HashDecodeError).add_context(format!("Hash: {}", &hash))
     })?;
     let hash_raw = HashRaw {
         iterations: intermediate.iterations,
@@ -64,8 +61,12 @@ named!(parse_hash<&str, IntermediateStruct>, do_parse!(
 
 #[cfg(test)]
 mod tests {
+    use rand::{RngCore, SeedableRng};
+    use rand::rngs::StdRng;
 
     use super::*;
+    use backend::c::decode_c;
+    use hasher::Hasher;
 
     #[test]
     fn test_decode() {
@@ -95,12 +96,8 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // TODO: Turn back on
+    #[ignore] // TODO: Turn back on once implemented decode_c
     fn test_decode_against_c() {
-        use backend::c::decode_c;
-        use hasher::Hasher;
-        use rand::{RngCore, SeedableRng, StdRng};
-
         let mut rng: StdRng = SeedableRng::from_seed([0u8; 32]);
         let mut password = vec![0u8; 12];
         let mut secret_key = vec![0u8; 32];

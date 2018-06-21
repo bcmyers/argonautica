@@ -4,7 +4,6 @@ use std::ffi::CStr;
 
 use libc;
 
-use errors::EncodingError;
 use output::HashRaw;
 use {ffi, Error, ErrorKind};
 
@@ -57,12 +56,9 @@ fn check_error(err: ffi::Argon2_ErrorCodes, hash_raw: &HashRaw) -> Result<(), Er
             Err(Error::new(ErrorKind::MemoryAllocationError))
         }
         ffi::Argon2_ErrorCodes_ARGON2_THREAD_FAIL => Err(Error::new(ErrorKind::ThreadError)),
-        ffi::Argon2_ErrorCodes_ARGON2_ENCODING_FAIL => {
-            Err(
-                Error::new(ErrorKind::EncodingError(EncodingError::HashEncodeError))
-                    .add_context(format!("HashRaw: {:?}", hash_raw)),
-            )
-        }
+        ffi::Argon2_ErrorCodes_ARGON2_ENCODING_FAIL => Err(
+            Error::new(ErrorKind::HashEncodeError).add_context(format!("HashRaw: {:?}", hash_raw))
+        ),
         _ => {
             let err_msg_ptr = unsafe { ffi::argon2_error_message(err) };
             let err_msg_cstr = unsafe { CStr::from_ptr(err_msg_ptr) };

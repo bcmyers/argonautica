@@ -56,7 +56,6 @@ class Verifier:
         )
         print(is_valid)
     """
-    __slots__ = ['additional_data', 'secret_key', 'backend', 'threads']
 
     def __init__(
         self,
@@ -64,7 +63,7 @@ class Verifier:
         secret_key: Union[bytes, str, None],
         additional_data: Union[bytes, str, None] = None,
         backend: Backend = DEFAULT_BACKEND,
-        threads: int = DEFAULT_THREADS
+        threads: int = DEFAULT_THREADS,
     ) -> None:
         self.additional_data = additional_data
         self.secret_key = secret_key
@@ -89,7 +88,7 @@ def verify(
     secret_key: Union[bytes, str, None],
     additional_data:  Union[bytes, str, None] = None,
     backend: Backend = DEFAULT_BACKEND,
-    threads: int = DEFAULT_THREADS
+    threads: int = DEFAULT_THREADS,
 ) -> bool:
     """
     A standalone verify function
@@ -104,7 +103,7 @@ def verify(
         additional_data = additional_data.encode('utf-8')
         additional_data_len = len(additional_data)
     else:
-        raise Exception("Error")
+        raise TypeError("Type of additional_data must be bytes, str, or None")
 
     # Password
     if isinstance(password, bytes):
@@ -113,7 +112,7 @@ def verify(
         password = password.encode('utf-8')
         password_len = len(password)
     else:
-        raise Exception("Error")
+        raise TypeError("Type of password must be bytes or str")
 
     # Secret key
     if secret_key is None:
@@ -125,7 +124,7 @@ def verify(
         secret_key = secret_key.encode('utf-8')
         secret_key_len = len(secret_key)
     else:
-        raise Exception("Error")
+        raise TypeError("Type of secret_key must be bytes, str, or None")
 
     is_valid = ffi.new("int*", 0)
     err = lib.argonautica_verify(
@@ -143,7 +142,9 @@ def verify(
         threads,
     )
     if err != lib.ARGONAUTICA_OK:
-        raise Exception("ERROR")
+        error_msg_ptr = lib.argonautica_error_msg(err)
+        error_msg = ffi.string(error_msg_ptr).decode("utf-8")
+        raise Exception(error_msg)
 
     if is_valid[0] == 1:
         return True

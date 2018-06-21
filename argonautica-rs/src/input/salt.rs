@@ -1,10 +1,6 @@
-use std::ffi::{CStr, CString};
-
 use rand::rngs::EntropyRng;
 use rand::RngCore;
 
-use errors::{DataError, EncodingError};
-use input::Data;
 use {Error, ErrorKind};
 
 impl Default for Salt {
@@ -31,12 +27,6 @@ impl From<String> for Salt {
     }
 }
 
-impl From<CString> for Salt {
-    fn from(s: CString) -> Salt {
-        Salt(Kind::Deterministic(s.into_bytes()))
-    }
-}
-
 impl<'a> From<&'a [u8]> for Salt {
     fn from(bytes: &[u8]) -> Salt {
         Salt(Kind::Deterministic(bytes.to_vec()))
@@ -46,12 +36,6 @@ impl<'a> From<&'a [u8]> for Salt {
 impl<'a> From<&'a str> for Salt {
     fn from(s: &str) -> Salt {
         Salt(Kind::Deterministic(s.as_bytes().to_vec()))
-    }
-}
-
-impl<'a> From<&'a CStr> for Salt {
-    fn from(s: &CStr) -> Salt {
-        Salt(Kind::Deterministic(s.to_bytes().to_vec()))
     }
 }
 
@@ -128,7 +112,7 @@ impl Salt {
     /// Read-only access to the underlying byte buffer as a `&str` if its bytes are valid utf-8
     pub fn to_str(&self) -> Result<&str, Error> {
         let s = ::std::str::from_utf8(self.as_bytes()).map_err(|_| {
-            Error::new(ErrorKind::EncodingError(EncodingError::Utf8EncodeError))
+            Error::new(ErrorKind::Utf8EncodeError)
                 .add_context(format!("Bytes: {:?}", self.as_bytes()))
         })?;
         Ok(s)
@@ -153,26 +137,15 @@ impl Salt {
         let len = self.len();
         if len < 8 {
             return Err(
-                Error::new(ErrorKind::DataError(DataError::SaltTooShortError))
-                    .add_context(format!("Length: {}", len)),
+                Error::new(ErrorKind::SaltTooShortError).add_context(format!("Length: {}", len))
             );
         }
         if len >= ::std::u32::MAX as usize {
             return Err(
-                Error::new(ErrorKind::DataError(DataError::SaltTooLongError))
-                    .add_context(format!("Length: {}", len)),
+                Error::new(ErrorKind::SaltTooLongError).add_context(format!("Length: {}", len))
             );
         }
         Ok(())
-    }
-}
-
-impl Data for Salt {
-    fn c_len(&self) -> u32 {
-        self.len() as u32
-    }
-    fn c_ptr(&self) -> *const u8 {
-        self.as_bytes().as_ptr()
     }
 }
 

@@ -1,5 +1,4 @@
 use config::defaults::DEFAULT_BACKEND;
-use errors::EncodingError;
 use {Error, ErrorKind};
 
 impl Default for Backend {
@@ -36,10 +35,7 @@ impl Backend {
         match x {
             1 => Ok(Backend::C),
             2 => Ok(Backend::Rust),
-            _ => Err(
-                Error::new(ErrorKind::EncodingError(EncodingError::BackendEncodeError))
-                    .add_context(format!("Int: {}", x)),
-            ),
+            _ => Err(Error::new(ErrorKind::BackendEncodeError).add_context(format!("Int: {}", x))),
         }
     }
 }

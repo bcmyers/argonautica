@@ -1,7 +1,3 @@
-use std::ffi::{CStr, CString};
-
-use errors::{DataError, EncodingError};
-use input::Data;
 use {Error, ErrorKind};
 
 impl From<Vec<u8>> for AdditionalData {
@@ -16,12 +12,6 @@ impl From<String> for AdditionalData {
     }
 }
 
-impl From<CString> for AdditionalData {
-    fn from(s: CString) -> AdditionalData {
-        AdditionalData(s.into_bytes())
-    }
-}
-
 impl<'a> From<&'a [u8]> for AdditionalData {
     fn from(bytes: &[u8]) -> AdditionalData {
         AdditionalData(bytes.to_vec())
@@ -31,12 +21,6 @@ impl<'a> From<&'a [u8]> for AdditionalData {
 impl<'a> From<&'a str> for AdditionalData {
     fn from(s: &str) -> AdditionalData {
         AdditionalData(s.as_bytes().to_vec())
-    }
-}
-
-impl<'a> From<&'a CStr> for AdditionalData {
-    fn from(s: &CStr) -> AdditionalData {
-        AdditionalData(s.to_bytes().to_vec())
     }
 }
 
@@ -71,12 +55,12 @@ impl AdditionalData {
     }
     /// Read-only acccess to the underlying byte buffer's length
     pub fn len(&self) -> usize {
-        self.as_bytes().len()
+        self.0.len()
     }
     /// Read-only access to the underlying byte buffer as a `&str` if its bytes are valid utf-8
     pub fn to_str(&self) -> Result<&str, Error> {
         let s = ::std::str::from_utf8(self.as_bytes()).map_err(|_| {
-            Error::new(ErrorKind::EncodingError(EncodingError::Utf8EncodeError))
+            Error::new(ErrorKind::Utf8EncodeError)
                 .add_context(format!("Bytes: {:?}", self.as_bytes()))
         })?;
         Ok(s)
@@ -86,21 +70,10 @@ impl AdditionalData {
 impl AdditionalData {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         if self.len() >= ::std::u32::MAX as usize {
-            return Err(
-                Error::new(ErrorKind::DataError(DataError::AdditionalDataTooLongError))
-                    .add_context(format!("Length: {}", self.0.len())),
-            );
+            return Err(Error::new(ErrorKind::AdditionalDataTooLongError)
+                .add_context(format!("Length: {}", self.0.len())));
         }
         Ok(())
-    }
-}
-
-impl Data for AdditionalData {
-    fn c_len(&self) -> u32 {
-        self.len() as u32
-    }
-    fn c_ptr(&self) -> *const u8 {
-        self.as_bytes().as_ptr()
     }
 }
 

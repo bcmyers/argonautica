@@ -2,15 +2,15 @@ use futures::Future;
 use futures_cpupool::CpuPool;
 use scopeguard;
 
-use config::{default_cpu_pool, default_lanes, Backend, HasherConfig, Variant, Version};
-use errors::{ConfigurationError, DataError};
-use input::{AdditionalData, Password, Salt, SecretKey};
+use config::defaults::{default_cpu_pool, default_lanes};
+use config::{Backend, HasherConfig, Variant, Version};
+use input::{AdditionalData, Container, Password, Salt, SecretKey};
 use output::HashRaw;
 use {Error, ErrorKind};
 
-impl Default for Hasher {
+impl<'a> Default for Hasher<'a> {
     /// Same as the [`new`](struct.Hasher.html#method.new) method
-    fn default() -> Hasher {
+    fn default() -> Hasher<'static> {
         Hasher {
             additional_data: None,
             config: HasherConfig::default(),
@@ -22,20 +22,20 @@ impl Default for Hasher {
 }
 
 /// <b><u>One of the two main structs.</u></b> Use it to turn passwords into hashes
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
-pub struct Hasher {
-    additional_data: Option<AdditionalData>,
-    config: HasherConfig,
+pub struct Hasher<'a> {
+    pub(crate) additional_data: Option<AdditionalData>,
+    pub(crate) config: HasherConfig,
     #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
-    password: Option<Password>,
-    salt: Salt,
+    pub(crate) password: Option<Password<'a>>,
+    pub(crate) salt: Salt,
     #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
-    secret_key: Option<SecretKey>,
+    pub(crate) secret_key: Option<SecretKey<'a>>,
 }
 
-impl Hasher {
+impl<'a> Hasher<'a> {
     /// Creates a new [`Hasher`](struct.Hasher.html) with a sensible default configuration
     /// for the average machine (e.g. an early-2014 MacBook Air).
     ///
@@ -71,7 +71,7 @@ impl Hasher {
     /// * `threads`: The number of logical cores on your machine
     /// * `variant`: [`Variant::Argon2id`](config/enum.Variant.html#variant.Argon2id)
     /// * `version`: [`Version::_0x13`](config/enum.Verion.html#variant._0x13)
-    pub fn new() -> Hasher {
+    pub fn new() -> Hasher<'static> {
         Hasher::default()
     }
     /// Creates a new [`Hasher`](struct.Hasher.html) that is <b>fast but <u>highly</u> insecure</b>.
@@ -84,7 +84,7 @@ impl Hasher {
     /// in approximately 1 millisecond (on average). [MD5](https://github.com/stainless-steel/md5)
     /// does it in about half the time and [sha2](https://github.com/RustCrypto/hashes) with the
     /// SHA-256 algorithm performs about the same as `argonautica`
-    pub fn fast_but_insecure() -> Hasher {
+    pub fn fast_but_insecure() -> Hasher<'a> {
         fn memory_size(lanes: u32) -> u32 {
             let mut counter = 1;
             let memory_size = loop {
@@ -108,7 +108,7 @@ impl Hasher {
             .configure_secret_key_clearing(false)
             .configure_threads(lanes)
             .opt_out_of_secret_key(true)
-            .with_salt("somesalt");
+            .with_salt(&[0u8; 8][..]);
         hasher
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) with a custom backend. The
@@ -118,7 +118,7 @@ impl Hasher {
     /// [`Backend::Rust`](config/enum.Backend.html#variant.Rust) it will error when you
     /// call [`hash`](struct.Hasher.html#method.hash),
     /// [`hash_raw`](struct.Hasher.html#method.hash_raw) or their non-blocking equivalents</i>
-    pub fn configure_backend(&mut self, backend: Backend) -> &mut Hasher {
+    pub fn configure_backend(&mut self, backend: Backend) -> &mut Hasher<'a> {
         self.config.set_backend(backend);
         self
     }
@@ -131,7 +131,7 @@ impl Hasher {
     /// for you on the fly; so even if you never configure [`Hasher`](struct.Hasher.html) with
     /// this method you can still use the non-blocking hashing methods.
     /// The default cpu pool has as many threads as the number of logical cores on your machine
-    pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Hasher {
+    pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Hasher<'a> {
         self.config.set_cpu_pool(cpu_pool);
         self
     }
@@ -140,7 +140,7 @@ impl Hasher {
     ///
     /// See [configuration example](index.html#configuration) for a more detailed discussion
     /// of this parameter
-    pub fn configure_hash_len(&mut self, hash_len: u32) -> &mut Hasher {
+    pub fn configure_hash_len(&mut self, hash_len: u32) -> &mut Hasher<'a> {
         self.config.set_hash_len(hash_len);
         self
     }
@@ -148,7 +148,7 @@ impl Hasher {
     /// iterations. The default is `192`.
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
-    pub fn configure_iterations(&mut self, iterations: u32) -> &mut Hasher {
+    pub fn configure_iterations(&mut self, iterations: u32) -> &mut Hasher<'a> {
         self.config.set_iterations(iterations);
         self
     }
@@ -156,7 +156,7 @@ impl Hasher {
     /// lanes. The default is the number of physical cores on your machine.
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
-    pub fn configure_lanes(&mut self, lanes: u32) -> &mut Hasher {
+    pub fn configure_lanes(&mut self, lanes: u32) -> &mut Hasher<'a> {
         self.config.set_lanes(lanes);
         self
     }
@@ -164,7 +164,7 @@ impl Hasher {
     /// (in kibibytes). The default is `4096`.
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
-    pub fn configure_memory_size(&mut self, memory_size: u32) -> &mut Hasher {
+    pub fn configure_memory_size(&mut self, memory_size: u32) -> &mut Hasher<'a> {
         self.config.set_memory_size(memory_size);
         self
     }
@@ -174,7 +174,7 @@ impl Hasher {
     /// The default is to clear out the password bytes (i.e. `true`).
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
-    pub fn configure_password_clearing(&mut self, boolean: bool) -> &mut Hasher {
+    pub fn configure_password_clearing(&mut self, boolean: bool) -> &mut Hasher<'a> {
         self.config.set_password_clearing(boolean);
         self
     }
@@ -186,7 +186,7 @@ impl Hasher {
     /// [`Hasher`](struct.Hasher.html) for multiple passwords.
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
-    pub fn configure_secret_key_clearing(&mut self, boolean: bool) -> &mut Hasher {
+    pub fn configure_secret_key_clearing(&mut self, boolean: bool) -> &mut Hasher<'a> {
         self.config.set_secret_key_clearing(boolean);
         self
     }
@@ -196,7 +196,7 @@ impl Hasher {
     /// [`Hasher`](struct.Hasher.html) will use the minimum of the two.
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
-    pub fn configure_threads(&mut self, threads: u32) -> &mut Hasher {
+    pub fn configure_threads(&mut self, threads: u32) -> &mut Hasher<'a> {
         self.config.set_threads(threads);
         self
     }
@@ -205,7 +205,7 @@ impl Hasher {
     /// Do <b>not</b> use a different variant unless you have a specific reason to do so.
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
-    pub fn configure_variant(&mut self, variant: Variant) -> &mut Hasher {
+    pub fn configure_variant(&mut self, variant: Variant) -> &mut Hasher<'a> {
         self.config.set_variant(variant);
         self
     }
@@ -215,7 +215,7 @@ impl Hasher {
     /// Do <b>not</b> use a different version unless you have a specific reason to do so.
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
-    pub fn configure_version(&mut self, version: Version) -> &mut Hasher {
+    pub fn configure_version(&mut self, version: Version) -> &mut Hasher<'a> {
         self.config.set_version(version);
         self
     }
@@ -231,9 +231,8 @@ impl Hasher {
     /// call this method in order to produce a string-encoded hash, which is safe to store in a
     /// database and against which you can verify passwords later
     pub fn hash(&mut self) -> Result<String, Error> {
-        use backend::encode_rust;
         let hash_raw = self.hash_raw()?;
-        let hash = encode_rust(&hash_raw);
+        let hash = hash_raw.encode_rust();
         Ok(hash)
     }
     /// <b><u>The primary method (non-blocking version).</u></b>
@@ -242,9 +241,8 @@ impl Hasher {
     /// [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html)
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
     pub fn hash_non_blocking(&mut self) -> impl Future<Item = String, Error = Error> {
-        use backend::encode_rust;
         self.hash_raw_non_blocking().and_then(|hash_raw| {
-            let hash = encode_rust(&hash_raw);
+            let hash = hash_raw.encode_rust();
             Ok::<_, Error>(hash)
         })
     }
@@ -254,28 +252,14 @@ impl Hasher {
     /// hash bytes and the raw salt bytes. In general, you should prefer to use the
     /// [`hash`](struct.Hasher.html#method.hash) method instead of this method
     pub fn hash_raw(&mut self) -> Result<HashRaw, Error> {
-        use backend::hash_raw_c;
-        // ensure password and/or secret_key clearing code will run
         let mut hasher = scopeguard::guard(self, |hasher| {
-            if hasher.config().password_clearing() {
-                hasher.set_password(None);
-            }
-            if hasher.config().secret_key_clearing() {
-                hasher.set_secret_key(None);
-            }
+            hasher.clear();
         });
-        // reset salt if it is random
-        hasher.salt.update()?;
-        // validate inputs
         hasher.validate()?;
-        // calculate hash_raw
-        let hash_raw = match hasher.config().backend() {
-            Backend::C => hash_raw_c(&mut hasher)?,
-            Backend::Rust => {
-                return Err(ErrorKind::ConfigurationError(
-                    ConfigurationError::BackendUnsupportedError,
-                ).into())
-            }
+        hasher.salt.update()?;
+        let hash_raw = match hasher.config.backend() {
+            Backend::C => hasher.hash_raw_c()?,
+            Backend::Rust => return Err(Error::new(ErrorKind::BackendUnsupportedError)),
         };
         Ok(hash_raw)
     }
@@ -283,31 +267,16 @@ impl Hasher {
     /// [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html)
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
     pub fn hash_raw_non_blocking(&mut self) -> impl Future<Item = HashRaw, Error = Error> {
-        // ensure password and/or secret_key clearing code will run
         let hasher = scopeguard::guard(self, |hasher| {
-            if hasher.config().password_clearing() {
-                hasher.set_password(None);
-            }
-            if hasher.config().secret_key_clearing() {
-                hasher.set_secret_key(None);
-            }
+            hasher.clear();
         });
-        // TODO: Random salt?
-
-        // spawn thread
-        let mut hasher = hasher.clone();
+        let mut hasher = hasher.to_owned();
         match hasher.config.cpu_pool() {
-            Some(cpu_pool) => cpu_pool.spawn_fn(move || {
-                let hash_raw = hasher.hash_raw()?;
-                Ok::<_, Error>(hash_raw)
-            }),
+            Some(cpu_pool) => cpu_pool.spawn_fn(move || hasher.hash_raw()),
             None => {
                 let cpu_pool = default_cpu_pool();
                 hasher.config.set_cpu_pool(cpu_pool.clone());
-                cpu_pool.spawn_fn(move || {
-                    let hash_raw = hasher.hash_raw()?;
-                    Ok::<_, Error>(hash_raw)
-                })
+                cpu_pool.spawn_fn(move || hasher.hash_raw())
             }
         }
     }
@@ -316,9 +285,26 @@ impl Hasher {
     /// by calling this method and setting the `opt_out_of_secret_key` configuration to
     /// `true` (by default, it is set to `false`); otherwise hashing will return an error
     /// when you fail to provide a secret key
-    pub fn opt_out_of_secret_key(&mut self, boolean: bool) -> &mut Hasher {
+    pub fn opt_out_of_secret_key(&mut self, boolean: bool) -> &mut Hasher<'a> {
         self.config.set_opt_out_of_secret_key(boolean);
         self
+    }
+    /// Clones the [`Hasher`](struct.Hasher.html), returning a new
+    /// [`Hasher`](struct.Hasher.html) with a `static` lifetime. Use this method if you
+    /// would like to move a [`Hasher`](struct.Hasher.html) to another thread
+    pub fn to_owned(&self) -> Hasher<'static> {
+        let password = self.password.as_ref().map(|password| password.to_owned());
+        let secret_key = self
+            .secret_key
+            .as_ref()
+            .map(|secret_key| secret_key.to_owned());
+        Hasher {
+            additional_data: self.additional_data.clone(),
+            config: self.config.clone(),
+            password,
+            salt: self.salt.clone(),
+            secret_key,
+        }
     }
     /// Allows you to add some additional data to the [`Hasher`](struct.Hasher.html)
     /// that will be hashed alongside the [`Password`](data/struct.Password.html) and
@@ -330,7 +316,7 @@ impl Hasher {
     /// a secret key in that it will be required later in order to verify passwords, and
     /// it is not stored in the string-encoded version of the hash, meaning you will have to
     /// provide it manually to a [`Verifier`](struct.Verifier.html)
-    pub fn with_additional_data<AD>(&mut self, additional_data: AD) -> &mut Hasher
+    pub fn with_additional_data<AD>(&mut self, additional_data: AD) -> &mut Hasher<'a>
     where
         AD: Into<AdditionalData>,
     {
@@ -341,9 +327,9 @@ impl Hasher {
     /// to hash. Hashing requires a password; so you must call this method before calling
     /// [`hash`](struct.Hasher.html#method.hash), [`hash_raw`](struct.Hasher.html#method.hash_raw),
     /// or their non-blocking version
-    pub fn with_password<P>(&mut self, password: P) -> &mut Hasher
+    pub fn with_password<P>(&mut self, password: P) -> &mut Hasher<'a>
     where
-        P: Into<Password>,
+        P: Into<Password<'a>>,
     {
         self.password = Some(password.into());
         self
@@ -356,7 +342,7 @@ impl Hasher {
     /// [`Salt`](data/struct.Salt.html) of different length, you can call this method with
     /// `Salt::random(your_custom_length_in_bytes)`. Using a deterministic
     /// [`Salt`](data/struct.Salt.html) is possible, but discouraged
-    pub fn with_salt<S>(&mut self, salt: S) -> &mut Hasher
+    pub fn with_salt<S>(&mut self, salt: S) -> &mut Hasher<'a>
     where
         S: Into<Salt>,
     {
@@ -368,9 +354,9 @@ impl Hasher {
     /// must save it somewhere (ideally outside your code) to use later, as the only way to
     /// verify passwords against the hash later is to know the secret key. This library
     /// encourages the use of a secret key
-    pub fn with_secret_key<SK>(&mut self, secret_key: SK) -> &mut Hasher
+    pub fn with_secret_key<SK>(&mut self, secret_key: SK) -> &mut Hasher<'a>
     where
-        SK: Into<SecretKey>,
+        SK: Into<SecretKey<'a>>,
     {
         self.secret_key = Some(secret_key.into());
         self
@@ -387,7 +373,7 @@ impl Hasher {
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s
     /// [`Password`](data/struct.Password.html), if any
-    pub fn password(&self) -> Option<&Password> {
+    pub fn password(&self) -> Option<&Password<'a>> {
         self.password.as_ref()
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`Salt`](data/struct.Salt.html)
@@ -396,23 +382,43 @@ impl Hasher {
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s
     /// [`SecretKey`](data/struct.SecretKey.html), if any
-    pub fn secret_key(&self) -> Option<&SecretKey> {
+    pub fn secret_key(&self) -> Option<&SecretKey<'a>> {
         self.secret_key.as_ref()
     }
 }
 
-impl Hasher {
-    pub(crate) fn password_mut(&mut self) -> Option<&mut Password> {
-        self.password.as_mut()
-    }
-    pub(crate) fn secret_key_mut(&mut self) -> Option<&mut SecretKey> {
-        self.secret_key.as_mut()
-    }
-    pub(crate) fn set_password(&mut self, password: Option<Password>) {
-        self.password = password;
-    }
-    pub(crate) fn set_secret_key(&mut self, secret_key: Option<SecretKey>) {
-        self.secret_key = secret_key;
+impl<'a> Hasher<'a> {
+    pub(crate) fn clear(&mut self) {
+        if self.password.is_some() && self.config.password_clearing() {
+            {
+                let password_mut_ref = self.password.as_mut().unwrap();
+                match password_mut_ref.inner {
+                    Container::Borrowed(_) => (),
+                    Container::BorrowedMut(ref mut bytes) => {
+                        unsafe { ::std::ptr::write_bytes(bytes.as_mut_ptr(), 0, bytes.len()) };
+                    }
+                    Container::Owned(ref mut bytes) => {
+                        unsafe { ::std::ptr::write_bytes(bytes.as_mut_ptr(), 0, bytes.len()) };
+                    }
+                }
+            }
+            self.password = None;
+        }
+        if self.secret_key.is_some() && self.config.secret_key_clearing() {
+            {
+                let secret_key_mut_ref = self.secret_key.as_mut().unwrap();
+                match secret_key_mut_ref.inner {
+                    Container::Borrowed(_) => (),
+                    Container::BorrowedMut(ref mut bytes) => {
+                        unsafe { ::std::ptr::write_bytes(bytes.as_mut_ptr(), 0, bytes.len()) };
+                    }
+                    Container::Owned(ref mut bytes) => {
+                        unsafe { ::std::ptr::write_bytes(bytes.as_mut_ptr(), 0, bytes.len()) };
+                    }
+                }
+            }
+            self.secret_key = None;
+        }
     }
     pub(crate) fn validate(&self) -> Result<(), Error> {
         self.config.validate()?;
@@ -422,43 +428,24 @@ impl Hasher {
         match self.password {
             Some(ref password) => {
                 password.validate()?;
-                if self.config.password_clearing() && !password.is_owned() {
-                    return Err(Error::new(ErrorKind::DataError(
-                        DataError::PasswordUnownedError,
-                    )));
+                if self.config.password_clearing() && !password.is_mutable() {
+                    return Err(Error::new(ErrorKind::PasswordImmutableError));
                 }
             }
-            None => {
-                return Err(Error::new(ErrorKind::DataError(
-                    DataError::PasswordMissingError,
-                )))
-            }
+            None => return Err(Error::new(ErrorKind::PasswordMissingError)),
         }
         self.salt.validate()?;
         match self.secret_key {
             Some(ref secret_key) => {
                 secret_key.validate()?;
-                if self.config.secret_key_clearing() && !secret_key.is_owned() {
-                    return Err(Error::new(ErrorKind::DataError(
-                        DataError::SecretKeyUnownedError,
-                    )));
+                if self.config.secret_key_clearing() && !secret_key.is_mutable() {
+                    return Err(Error::new(ErrorKind::SecretKeyImmutableError));
                 }
             }
             None => {
                 if !self.config.opt_out_of_secret_key() {
-                    return Err(Error::new(ErrorKind::DataError(
-                        DataError::SecretKeyMissingError,
-                    )));
+                    return Err(Error::new(ErrorKind::SecretKeyMissingError));
                 }
-            }
-        }
-
-        if let Some(ref secret_key) = self.secret_key {
-            secret_key.validate()?;
-            if self.config.secret_key_clearing() && !secret_key.is_owned() {
-                return Err(Error::new(ErrorKind::DataError(
-                    DataError::SecretKeyUnownedError,
-                )));
             }
         }
         Ok(())
@@ -589,7 +576,7 @@ mod tests {
             Ok(_) => panic!("Should return an error"),
             Err(e) => assert_eq!(
                 e,
-                Error::new(ErrorKind::DataError(DataError::PasswordUnownedError))
+                Error::new(ErrorKind::PasswordImmutableError)
             ),
         }
         assert!(hasher.password().is_none());
@@ -607,7 +594,7 @@ mod tests {
             Ok(_) => panic!("Should return an error"),
             Err(e) => assert_eq!(
                 e,
-                Error::new(ErrorKind::DataError(DataError::SecretKeyUnownedError))
+                Error::new(ErrorKind::SecretKeyImmutableError)
             ),
         }
         assert!(hasher.password().is_some());

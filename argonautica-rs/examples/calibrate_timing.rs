@@ -19,7 +19,7 @@ pub const VERSION: Version = Version::_0x13;
 fn main() -> Result<(), failure::Error> {
     let salt = Salt::random(SALT_LEN);
     let secret_key =
-        SecretKey::from_base64_encoded_str("t9nGEsDxjWtJYdYeExdB6/HU0vg+rT6czv6HSjVjZng=")?;
+        SecretKey::from_base64_encoded("t9nGEsDxjWtJYdYeExdB6/HU0vg+rT6czv6HSjVjZng=")?;
     let threads = num_cpus::get();
     for memory_size in &MEMORY_SIZES {
         for iterations in &ITERATIONS {

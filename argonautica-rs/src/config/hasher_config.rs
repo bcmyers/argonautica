@@ -1,13 +1,7 @@
 use futures_cpupool::CpuPool;
 
-#[cfg(feature = "serde")]
-use config::default_cpu_pool_serde;
-use config::{
-    default_lanes, default_threads, Backend, Flags, Variant, Version, DEFAULT_HASH_LEN,
-    DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE, DEFAULT_OPT_OUT_OF_SECRET_KEY,
-    DEFAULT_PASSWORD_CLEARING, DEFAULT_SECRET_KEY_CLEARING, DEFAULT_VERSION,
-};
-use errors::ConfigurationError;
+use config::defaults::*;
+use config::{Backend, Flags, Variant, Version};
 use {Error, ErrorKind};
 
 const PANIC_WARNING: &str = "Your program will error if you use this configuration";
@@ -108,6 +102,7 @@ impl HasherConfig {
             version: Version::default(),
         }
     }
+    #[allow(dead_code)]
     pub(crate) fn flags(&self) -> Flags {
         let mut flags = Flags::default();
         if self.password_clearing() {
@@ -193,71 +188,61 @@ impl HasherConfig {
 fn validate_backend(backend: Backend) -> Result<(), Error> {
     match backend {
         Backend::C => (),
-        Backend::Rust => {
-            return Err(
-                ErrorKind::ConfigurationError(ConfigurationError::BackendUnsupportedError).into(),
-            )
-        }
+        Backend::Rust => return Err(Error::new(ErrorKind::BackendUnsupportedError)),
     }
     Ok(())
 }
 
 fn validate_hash_len(hash_len: u32) -> Result<(), Error> {
     if hash_len < 4 {
-        return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::HashLenTooShortError,
-        )).add_context(format!("Hash len: {}", hash_len)));
+        return Err(Error::new(ErrorKind::HashLenTooShortError)
+            .add_context(format!("Hash len: {}", hash_len)));
     }
     Ok(())
 }
 
 fn validate_iterations(iterations: u32) -> Result<(), Error> {
     if iterations == 0 {
-        return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::IterationsTooFewError,
-        )).add_context(format!("Iterations: {}", iterations)));
+        return Err(Error::new(ErrorKind::IterationsTooFewError)
+            .add_context(format!("Iterations: {}", iterations)));
     }
     Ok(())
 }
 
 fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
-        return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::LanesTooFewError,
-        )).add_context(format!("Lanes: {}", lanes)));
+        return Err(Error::new(ErrorKind::LanesTooFewError).add_context(format!("Lanes: {}", lanes)));
     }
     if lanes > 0x00ff_ffff {
-        return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::LanesTooManyError,
-        )).add_context(format!("Lanes: {}", lanes)));
+        return Err(
+            Error::new(ErrorKind::LanesTooManyError).add_context(format!("Lanes: {}", lanes))
+        );
     }
     Ok(())
 }
 
 fn validate_memory_size(lanes: u32, memory_size: u32) -> Result<(), Error> {
     if memory_size < 8 * lanes {
-        return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::MemorySizeTooSmallError,
-        )).add_context(format!("Lanes: {}. Memory size: {}", lanes, memory_size)));
+        return Err(Error::new(ErrorKind::MemorySizeTooSmallError)
+            .add_context(format!("Lanes: {}. Memory size: {}", lanes, memory_size)));
     }
     if !(memory_size.is_power_of_two()) {
-        return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::MemorySizeInvalidError,
-        )).add_context(format!("Memory size: {}", memory_size)));
+        return Err(Error::new(ErrorKind::MemorySizeInvalidError)
+            .add_context(format!("Memory size: {}", memory_size)));
     }
     Ok(())
 }
 
 fn validate_threads(threads: u32) -> Result<(), Error> {
     if threads == 0 {
-        return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::ThreadsTooFewError,
-        )).add_context(format!("Threads: {}", threads)));
+        return Err(
+            Error::new(ErrorKind::ThreadsTooFewError).add_context(format!("Threads: {}", threads))
+        );
     }
     if threads > 0x00ff_ffff {
-        return Err(Error::new(ErrorKind::ConfigurationError(
-            ConfigurationError::ThreadsTooManyError,
-        )).add_context(format!("Threads: {}", threads)));
+        return Err(
+            Error::new(ErrorKind::ThreadsTooManyError).add_context(format!("Threads: {}", threads))
+        );
     }
     Ok(())
 }

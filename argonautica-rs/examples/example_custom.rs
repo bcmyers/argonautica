@@ -11,13 +11,11 @@ use argonautica::input::{Salt, SecretKey};
 use argonautica::{Hasher, Verifier};
 
 // Helper method to load the secret key from a .env file. Used in `main` below.
-fn load_secret_key() -> Result<SecretKey, failure::Error> {
+fn load_secret_key() -> Result<SecretKey<'static>, failure::Error> {
     let dotenv_path = env::current_dir()?.join("examples").join("example.env");
     dotenv::from_path(&dotenv_path).map_err(|e| format_err!("{}", e))?;
     let base64_encoded_secret_key = env::var("SECRET_KEY")?;
-    Ok(SecretKey::from_base64_encoded_str(
-        &base64_encoded_secret_key,
-    )?)
+    Ok(SecretKey::from_base64_encoded(&base64_encoded_secret_key)?)
 }
 
 fn main() -> Result<(), failure::Error> {

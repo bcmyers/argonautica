@@ -9,7 +9,6 @@ pub extern "C" fn argonautica_error_msg(err: argonautica_error_t) -> *const c_ch
     err.to_str()
 }
 
-
 /// Argonautica errors
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[repr(C)]
@@ -134,54 +133,36 @@ impl From<Error> for argonautica_error_t {
         use argonautica::ErrorKind::*;
         use argonautica_error_t::*;
         match err.kind() {
+            AdditionalDataTooLongError => ARGONAUTICA_ERROR_ADDITIONAL_DATA_TOO_LONG,
+            BackendEncodeError => ARGONAUTICA_ERROR_BUG,
+            BackendUnsupportedError => ARGONAUTICA_ERROR_BACKEND_UNSUPPORTED,
+            Base64DecodeError => ARGONAUTICA_ERROR_BASE64_DECODE,
             Bug => ARGONAUTICA_ERROR_BUG,
+            HashDecodeError => ARGONAUTICA_ERROR_HASH_DECODE,
+            HashLenTooShortError => ARGONAUTICA_ERROR_HASH_LEN_TOO_SHORT,
+            HashMissingError => ARGONAUTICA_ERROR_HASH_MISSING,
+            IterationsTooFewError => ARGONAUTICA_ERROR_ITERATIONS_TOO_FEW,
+            LanesTooFewError => ARGONAUTICA_ERROR_LANES_TOO_FEW,
+            LanesTooManyError => ARGONAUTICA_ERROR_LANES_TOO_MANY,
             MemoryAllocationError => ARGONAUTICA_ERROR_MEMORY_ALLOCATION,
+            MemorySizeInvalidError => ARGONAUTICA_ERROR_MEMORY_SIZE_INVALID,
+            MemorySizeTooSmallError => ARGONAUTICA_ERROR_MEMORY_SIZE_TOO_SMALL,
             OsRngError => ARGONAUTICA_ERROR_OS_RNG,
+            PasswordImmutableError => ARGONAUTICA_ERROR_BUG,
+            PasswordMissingError => ARGONAUTICA_ERROR_PASSWORD_MISSING,
+            PasswordTooLongError => ARGONAUTICA_ERROR_PASSWORD_TOO_LONG,
+            PasswordTooShortError => ARGONAUTICA_ERROR_PASSWORD_TOO_SHORT,
+            SaltTooLongError => ARGONAUTICA_ERROR_SALT_TOO_LONG,
+            SaltTooShortError => ARGONAUTICA_ERROR_SALT_TOO_SHORT,
+            SecretKeyImmutableError => ARGONAUTICA_ERROR_BUG,
+            SecretKeyMissingError => ARGONAUTICA_ERROR_BUG,
+            SecretKeyTooLongError => ARGONAUTICA_ERROR_SECRET_KEY_TOO_LONG,
             ThreadError => ARGONAUTICA_ERROR_THREAD,
-            ConfigurationError(inner) => {
-                use argonautica::errors::ConfigurationError::*;
-                match inner {
-                    BackendUnsupportedError => ARGONAUTICA_ERROR_BACKEND_UNSUPPORTED,
-                    HashLenTooShortError => ARGONAUTICA_ERROR_HASH_LEN_TOO_SHORT,
-                    IterationsTooFewError => ARGONAUTICA_ERROR_ITERATIONS_TOO_FEW,
-                    LanesTooFewError => ARGONAUTICA_ERROR_LANES_TOO_FEW,
-                    LanesTooManyError => ARGONAUTICA_ERROR_LANES_TOO_MANY,
-                    MemorySizeInvalidError => ARGONAUTICA_ERROR_MEMORY_SIZE_INVALID,
-                    MemorySizeTooSmallError => ARGONAUTICA_ERROR_MEMORY_SIZE_TOO_SMALL,
-                    ThreadsTooFewError => ARGONAUTICA_ERROR_THREADS_TOO_FEW,
-                    ThreadsTooManyError => ARGONAUTICA_ERROR_THREADS_TOO_MANY,
-                    __Nonexhaustive => ARGONAUTICA_ERROR_BUG,
-                }
-            },
-            DataError(inner) => {
-                use argonautica::errors::DataError::*;
-                match inner {
-                    AdditionalDataTooLongError => ARGONAUTICA_ERROR_ADDITIONAL_DATA_TOO_LONG,
-                    HashMissingError => ARGONAUTICA_ERROR_HASH_MISSING,
-                    PasswordMissingError => ARGONAUTICA_ERROR_PASSWORD_MISSING,
-                    PasswordTooShortError => ARGONAUTICA_ERROR_PASSWORD_TOO_SHORT,
-                    PasswordTooLongError => ARGONAUTICA_ERROR_PASSWORD_TOO_LONG,
-                    PasswordUnownedError => ARGONAUTICA_ERROR_BUG,
-                    SaltTooShortError => ARGONAUTICA_ERROR_SALT_TOO_SHORT,
-                    SaltTooLongError => ARGONAUTICA_ERROR_SALT_TOO_LONG,
-                    SecretKeyMissingError => ARGONAUTICA_ERROR_BUG,
-                    SecretKeyTooLongError => ARGONAUTICA_ERROR_SECRET_KEY_TOO_LONG,
-                    SecretKeyUnownedError => ARGONAUTICA_ERROR_BUG,
-                    __Nonexhaustive => ARGONAUTICA_ERROR_BUG,
-                }
-            },
-            EncodingError(inner) => {
-                use argonautica::errors::EncodingError::*;
-                match inner {
-                    BackendEncodeError => ARGONAUTICA_ERROR_BUG,
-                    Base64DecodeError => ARGONAUTICA_ERROR_BASE64_DECODE,
-                    HashDecodeError => ARGONAUTICA_ERROR_HASH_DECODE,
-                    Utf8EncodeError => ARGONAUTICA_ERROR_UTF8_ENCODE,
-                    VariantEncodeError => ARGONAUTICA_ERROR_BUG,
-                    VersionEncodeError => ARGONAUTICA_ERROR_BUG,
-                    __Nonexhaustive => ARGONAUTICA_ERROR_BUG,
-                }
-            },
+            ThreadsTooFewError => ARGONAUTICA_ERROR_THREADS_TOO_FEW,
+            ThreadsTooManyError => ARGONAUTICA_ERROR_THREADS_TOO_MANY,
+            Utf8EncodeError => ARGONAUTICA_ERROR_UTF8_ENCODE,
+            VariantEncodeError => ARGONAUTICA_ERROR_BUG,
+            VersionEncodeError => ARGONAUTICA_ERROR_BUG,
             __Nonexhaustive => ARGONAUTICA_ERROR_BUG,
         }
     }

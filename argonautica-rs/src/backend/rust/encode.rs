@@ -2,27 +2,28 @@ use base64;
 
 use output::HashRaw;
 
-pub(crate) fn encode_rust(hash_raw: &HashRaw) -> String {
-    let hash_encoded = base64::encode_config(hash_raw.raw_hash_bytes(), base64::STANDARD_NO_PAD);
-    let salt_encoded = base64::encode_config(hash_raw.raw_salt_bytes(), base64::STANDARD_NO_PAD);
-
-    format!(
-        "${}$v={}$m={},t={},p={}${}${}",
-        hash_raw.variant().as_str(),
-        hash_raw.version().as_str(),
-        hash_raw.memory_size(),
-        hash_raw.iterations(),
-        hash_raw.lanes(),
-        salt_encoded,
-        hash_encoded,
-    )
+impl HashRaw {
+    pub(crate) fn encode_rust(&self) -> String {
+        let hash_encoded = base64::encode_config(self.raw_hash_bytes(), base64::STANDARD_NO_PAD);
+        let salt_encoded = base64::encode_config(self.raw_salt_bytes(), base64::STANDARD_NO_PAD);
+        format!(
+            "${}$v={}$m={},t={},p={}${}${}",
+            self.variant().as_str(),
+            self.version().as_str(),
+            self.memory_size(),
+            self.iterations(),
+            self.lanes(),
+            salt_encoded,
+            hash_encoded,
+        )
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use rand::{RngCore, SeedableRng, StdRng};
+    use rand::{RngCore, SeedableRng};
+    use rand::rngs::StdRng;
 
-    use super::*;
     use backend::encode_c;
     use hasher::Hasher;
 
@@ -48,7 +49,7 @@ mod tests {
                     .with_password(&password[..])
                     .hash_raw()
                     .unwrap();
-                let hash1 = encode_rust(&hash_raw);
+                let hash1 = hash_raw.encode_rust();
                 let hash2 = encode_c(&hash_raw).unwrap();
                 assert_eq!(hash1, hash2);
             }

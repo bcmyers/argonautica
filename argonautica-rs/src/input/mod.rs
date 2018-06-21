@@ -15,14 +15,13 @@
 //! produces a [`Salt`](struct.Salt.html) that will create new crytographically-secure,
 //! random bytes after each hash.
 mod additional_data;
-mod data;
+mod container;
 mod password;
 mod salt;
 mod secret_key;
 
 pub use self::additional_data::AdditionalData;
+pub(crate) use self::container::Container;
 pub use self::password::Password;
 pub use self::salt::Salt;
 pub use self::secret_key::SecretKey;
-
-pub(crate) use self::data::{Data, DataMut};

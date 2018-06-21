@@ -69,14 +69,8 @@ mod tests {
         salt_len: u32,
         variant: argonautica_variant_t,
     ) {
-        let computed = argonautica_encoded_len(
-            hash_len,
-            iterations,
-            lanes,
-            memory_size,
-            salt_len,
-            variant,
-        );
+        let computed =
+            argonautica_encoded_len(hash_len, iterations, lanes, memory_size, salt_len, variant);
         let expected = {
             let mut hasher = Hasher::default();
             let encoded = hasher

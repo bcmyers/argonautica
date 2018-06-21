@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use backend::{decode_rust, encode_rust};
+use backend::decode_rust;
 use config::{Variant, Version};
 use Error;
 
@@ -44,7 +44,7 @@ pub struct HashRaw {
 impl HashRaw {
     /// Converts the [`HashRaw`](struct.HashRaw.html) to a string-encoded hash
     pub fn to_string(&self) -> String {
-        encode_rust(self)
+        self.encode_rust()
     }
     /// Obtain the iterations configuration that was used to produce this hash
     pub fn iterations(&self) -> u32 {

@@ -68,13 +68,13 @@ pub extern "C" fn argonautica_verify(
     }
 
     // Password
-    let password = unsafe { ::std::slice::from_raw_parts(password, password_len as usize) };
+    let password = unsafe { ::std::slice::from_raw_parts_mut(password, password_len as usize) };
     verifier.with_password(password);
 
     // Secret key
     if !secret_key.is_null() {
         let secret_key =
-            unsafe { ::std::slice::from_raw_parts(secret_key, secret_key_len as usize) };
+            unsafe { ::std::slice::from_raw_parts_mut(secret_key, secret_key_len as usize) };
         verifier.with_secret_key(secret_key);
     }
 
@@ -84,9 +84,13 @@ pub extern "C" fn argonautica_verify(
     };
 
     if valid {
-        unsafe { *is_valid = 1; };
+        unsafe {
+            *is_valid = 1;
+        };
     } else {
-        unsafe { *is_valid = 0; };
+        unsafe {
+            *is_valid = 0;
+        };
     }
 
     argonautica_error_t::ARGONAUTICA_OK

@@ -22,7 +22,6 @@ impl From<argonautica_backend_t> for Backend {
     }
 }
 
-
 /// Available argon2 variants
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[repr(C)]

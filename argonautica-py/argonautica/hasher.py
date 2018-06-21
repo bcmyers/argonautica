@@ -46,11 +46,6 @@ class Hasher:
         encoded = hasher.hash("P@ssw0rd")
         print(encoded)
     """
-    __slots__ = [
-        'additional_data', 'salt', 'secret_key',
-        'backend', 'hash_len', 'iterations', 'lanes',
-        'memory_size', 'threads', 'variant', 'version',
-    ]
 
     def __init__(
         self,
@@ -128,6 +123,7 @@ def hash(
         salt=salt,
         secret_key=secret_key,
     )
+
     encoded_len = lib.argonautica_encoded_len(
         hash_len,
         iterations,
@@ -136,6 +132,8 @@ def hash(
         data.salt_len,
         variant.value,
     )
+    if encoded_len < 0:
+        raise Exception("Error calculating length of string-encoded hash")
     encoded = ffi.new("char[]", b'\0'*encoded_len)
     err = lib.argonautica_hash(
         encoded,
@@ -159,7 +157,9 @@ def hash(
         version.value,
     )
     if err != lib.ARGONAUTICA_OK:
-        raise Exception("failed with error code {}".format(err))
+        error_msg_ptr = lib.argonautica_error_msg(err)
+        error_msg = ffi.string(error_msg_ptr).decode("utf-8")
+        raise Exception(error_msg)
     hash = ffi.string(encoded).decode("utf-8")
     return hash
 
@@ -183,7 +183,7 @@ class _Data:
             self.additional_data = additional_data.encode('utf-8')
             self.additional_data_len = len(self.additional_data)
         else:
-            raise Exception("Error")
+            raise TypeError("Type of additional_data must be bytes, str, or None")
 
         if isinstance(password, bytes):
             self.password = password
@@ -192,7 +192,7 @@ class _Data:
             self.password = password.encode("utf-8")
             self.password_len = len(self.password)
         else:
-            raise Exception("TODO")
+            raise TypeError("Type of password must be bytes or str")
 
         if isinstance(salt, RandomSalt):
             self.salt = ffi.NULL
@@ -204,7 +204,7 @@ class _Data:
             self.salt = salt.encode('utf-8')
             self.salt_len = len(self.salt)
         else:
-            raise Exception("Error")
+            raise TypeError("Type of salt must be bytes, RandomSalt, or str")
 
         if secret_key is None:
             self.secret_key = ffi.NULL
@@ -216,4 +216,7 @@ class _Data:
             self.secret_key = secret_key.encode('utf-8')
             self.secret_key_len = len(self.secret_key)
         else:
-            raise Exception("Error")
+            raise TypeError("Type of secret_key must be bytes, str, or None")
+
+    def __repr__(self) -> str:
+        return str(self.__dict__)

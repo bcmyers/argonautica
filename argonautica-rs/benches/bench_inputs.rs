@@ -137,16 +137,30 @@ const PASSWORD: &str = "P@ssw0rd";
 const VARIANT: Variant = DEFAULT_VARIANT;
 const VERSION: Version = DEFAULT_VERSION;
 
-#[derive(Clone)]
-struct Bench {
-    hasher: Option<Hasher>,
+struct Bench<'a> {
+    hasher: Option<Hasher<'a>>,
     iterations: u32,
     memory_size: u32,
     threads: u32,
 }
 
-impl Bench {
-    fn setup(mut self) -> Bench {
+impl<'a> Clone for Bench<'a> {
+    fn clone(&self) -> Bench<'a> {
+        let hasher = match self.hasher {
+            Some(ref hasher) => Some(hasher.to_owned()),
+            None => None,
+        };
+        Bench {
+            hasher,
+            iterations: self.iterations,
+            memory_size: self.memory_size,
+            threads: self.threads,
+        }
+    }
+}
+
+impl<'a> Bench<'a> {
+    fn setup(mut self) -> Bench<'a> {
         let mut hasher = argonautica::Hasher::default();
         hasher
             .configure_hash_len(HASH_LEN)
@@ -159,9 +173,7 @@ impl Bench {
             .configure_variant(VARIANT)
             .configure_version(VERSION)
             .with_salt(Salt::random(SALT_LEN))
-            .with_secret_key(
-                SecretKey::from_base64_encoded_str(BASE64_ENCODED_SECRET_KEY).unwrap(),
-            );
+            .with_secret_key(SecretKey::from_base64_encoded(BASE64_ENCODED_SECRET_KEY).unwrap());
         self.hasher = Some(hasher);
         self
     }

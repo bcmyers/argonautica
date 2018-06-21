@@ -10,7 +10,7 @@
 
 [argonautica-c](https://github.com/bcmyers/argonautica/tree/master/argonautica-c)
 is a C/C++ wrapper for
-[argonautica-rs](https://github.com/bcmyers/argonautica/tree/master/argonautica-rs).
+[argonautica](https://crates.io/crates/argonautica).
 
 ## Installation
 

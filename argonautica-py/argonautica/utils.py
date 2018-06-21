@@ -70,7 +70,7 @@ def decode(hash: str) -> DecodedHash:
     """
     l = RE_HASH.findall(hash)
     if len(l) != 5:
-        raise Exception("Invalid hash")
+        raise ValueError("Invalid hash. Failed to decode hash. Hash: {}".format(hash))
 
     # Variant
     variant_str = l[0]
@@ -81,26 +81,26 @@ def decode(hash: str) -> DecodedHash:
     elif variant_str == "argon2id":
         variant = Variant.Argon2id
     else:
-        raise Exception("Invalid hash")
+        raise ValueError("Invalid hash. Failed to decode hash. Hash: {}".format(hash))
 
     # Version
     l2 = RE_VERSION.findall(l[1])
     if len(l2) != 1:
-        raise Exception("Invalid hash")
+        raise ValueError("Invalid hash. Failed to decode hash. Hash: {}".format(hash))
     version_str = l2[0]
     if version_str == "16":
         version = Version._0x10
     elif version_str == "19":
         version = Version._0x13
     else:
-        raise Exception("Invalid hash")
+        raise ValueError("Invalid hash. Failed to decode hash. Hash: {}".format(hash))
 
     # Memory size, iterations, lanes
     l3 = RE_OTHER.findall(l[2])
     if len(l3) != 1:
-        raise Exception("Invalid hash")
+        raise ValueError("Invalid hash. Failed to decode hash. Hash: {}".format(hash))
     if len(l3[0]) != 3:
-        raise Exception("Invalid hash")
+        raise ValueError("Invalid hash. Failed to decode hash. Hash: {}".format(hash))
     iterations = int(l3[0][1])
     lanes = int(l3[0][2])
     memory_size = int(l3[0][0])
@@ -127,5 +127,5 @@ def _base64_decode(base64_encoded: str) -> bytes:
     try:
         decoded = base64.standard_b64decode(base64_encoded)
     except:
-        raise Exception("Invalid hash")
+        raise ValueError("Invalid hash. Failed to decode hash. Hash: {}".format(hash))
     return decoded

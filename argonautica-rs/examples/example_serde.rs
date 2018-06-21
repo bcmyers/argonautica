@@ -19,13 +19,14 @@ fn serialize_hasher() -> Result<String, failure::Error> {
     println!("{}\n", &j);
     // *** Serialized Hasher ***
     // {
-    //   "additionalData": [1, 2, 3, 4],
+    //   "additionalData": [1,2,3,4],
     //   "config": {
     //     "backend": "c",
     //     "hashLen": 32,
-    //     "iterations": 256,
+    //     "iterations": 192,
     //     "lanes": 4,
     //     "memorySize": 4096,
+    //     "optOutOfSecretKey": false,
     //     "passwordClearing": false,
     //     "secretKeyClearing": false,
     //     "threads": 4,
@@ -33,7 +34,7 @@ fn serialize_hasher() -> Result<String, failure::Error> {
     //     "version": "_0x13"
     //   },
     //   "salt": {
-    //     "deterministic": [1, 2, 3, 4, 5, 6, 7, 8]
+    //     "deterministic": [1,2,3,4,5,6,7,8]
     //   }
     // }
     Ok(j)
@@ -45,14 +46,15 @@ fn deserialize_hasher(j: &str) -> Result<argonautica::Hasher, failure::Error> {
     println!("{:#?}\n", &hasher);
     // *** Deserialized Hasher ***
     // Hasher {
-    //     additional_data: Some(AdditionalData([1, 2, 3, 4])),
+    //     additional_data: Some(AdditionalData([1,2,3,4])),
     //     config: HasherConfig {
     //         backend: C,
     //         cpu_pool: None,
     //         hash_len: 32,
-    //         iterations: 256,
+    //         iterations: 192,
     //         lanes: 4,
     //         memory_size: 4096,
+    //         opt_out_of_secret_key: false,
     //         password_clearing: false,
     //         secret_key_clearing: false,
     //         threads: 4,
@@ -60,7 +62,7 @@ fn deserialize_hasher(j: &str) -> Result<argonautica::Hasher, failure::Error> {
     //         version: _0x13
     //     },
     //     password: None,
-    //     salt: Salt(Deterministic([1, 2, 3, 4, 5, 6, 7, 8])),
+    //     salt: Salt(Deterministic([1,2,3,4,5,6,7,8])),
     //     secret_key: None
     // }
     Ok(hasher)
@@ -79,14 +81,28 @@ fn serialize_verifier() -> Result<String, failure::Error> {
     println!("{}\n", &j);
     // *** Serialized Verifier ***
     // {
-    //   "additionalData": [1, 2, 3, 4],
-    //   "config": {
-    //     "backend": "c",
-    //     "passwordClearing": false,
-    //     "secretKeyClearing": false,
-    //     "threads": 4
+    //   "hash": {
+    //     "encoded": "$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q"
     //   },
-    //   "hash": "$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q"
+    //   "hasher": {
+    //     "additionalData": [1,2,3,4],
+    //     "config": {
+    //       "backend": "c",
+    //       "hashLen": 32,
+    //       "iterations": 192,
+    //       "lanes": 4,
+    //       "memorySize": 4096,
+    //       "optOutOfSecretKey": false,
+    //       "passwordClearing": false,
+    //       "secretKeyClearing": false,
+    //       "threads": 4,
+    //       "variant": "argon2id",
+    //       "version": "_0x13"
+    //     },
+    //     "salt": {
+    //       "random": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    //     }
+    //   }
     // }
     Ok(j)
 }
@@ -97,19 +113,27 @@ fn deserialize_verifier(j: &str) -> Result<argonautica::Verifier, failure::Error
     println!("{:#?}\n", &verifier);
     // *** Deserialized Verifier ***
     // Verifier {
-    //     additional_data: Some(AdditionalData([1, 2, 3, 4])),
-    //     config: VerifierConfig {
-    //         backend: C,
-    //         cpu_pool: None,
-    //         password_clearing: false,
-    //         secret_key_clearing: false,
-    //         threads: 4
-    //     },
-    //     hash: Some("$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q"),
-    //     hash_raw: None,
-    //     latest: Hash,
-    //     password: None,
-    //     secret_key: None
+    //     hash: Encoded("$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q"),
+    //     hasher: Hasher {
+    //         additional_data: Some(AdditionalData([1,2,3,4])),
+    //         config: HasherConfig {
+    //             backend: C,
+    //             cpu_pool: None,
+    //             hash_len: 32,
+    //             iterations: 192,
+    //             lanes: 4,
+    //             memory_size: 4096,
+    //             opt_out_of_secret_key: false,
+    //             password_clearing: false,
+    //             secret_key_clearing: false,
+    //             threads: 4,
+    //             variant: Argon2id,
+    //             version: _0x13
+    //         },
+    //         password: None,
+    //         salt: Salt(Random([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])),
+    //         secret_key: None
+    //     }
     // }
     Ok(verifier)
 }

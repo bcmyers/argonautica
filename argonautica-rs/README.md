@@ -24,11 +24,11 @@ The <b>argonautica</b> crate was designed:
   [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 
 <b>argonautica</b> was built with a simple use-case in mind: hashing passwords for storage in a
-website's database. That said, it's also <u>"feature-complete"</u>, meaning you can do
-anything with argonautica that you can do with the cannonical
-[C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2.
+website's database. That said, it's also "feature-complete", meaning anything you can do with
+the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2
+you can do with argonautica*.
 
-<i>\* Indeed, argonautica even has a feature that even the cannonical C implementation currently
+<i>\* Indeed, argonautica has a feature that even the cannonical C implementation
 lacks, i.e. hashing passwords with secret keys (the C implementation implements this, but
 does not expose it publicly)</i>
 
@@ -198,19 +198,17 @@ fn main() {
         // to `Hasher` be erased after each call to `hash`, `hash_raw` or their non-blocking
         // equivalents. If you want this extra security feature, set this configuration
         // to `true` (the default is `false`). If you set this configuration to `true`,
-        // you will be required to provide `Hasher` with an owned password (e.g.
-        // a `String` or a `Vec<u8>` instead of a `&str` or a `&[u8]`), since the only way
-        // `Hasher` can ensure all the underlying bytes of the password are indeed
-        // erased is to own the data
+        // you will be required to provide `Hasher` with a mutable password (e.g.
+        // a `String`, a `Vec<u8>`, a `&mut str`, or a `&mut [u8]` instead of a
+        // `&str` or a `&[u8]`)
         .configure_secret_key_clearing(false) // Default is `false`
         // 👆 It is also possible to have the underlying bytes of the secret key you provided
         // to `Hasher` be erased after each call to `hash`, `hash_raw` or their non-blocking
         // equivalents. If you want this extra security feature, set this configuration
         // to `true` (the default is `false`). If you set this configuration to `true`,
-        // you will be required to provide `Hasher` with an owned secret key (e.g.
-        // a `String` or a `Vec<u8>` instead of a `&str` or a `&[u8]`), since the only way
-        // `Hasher` can ensure all the underlying bytes of the secret key are indeed
-        // erased is to own the data
+        // you will be required to provide `Hasher` with a mutable secret key (e.g.
+        // a `String`, a `Vec<u8>`, a `&mut str`, or a `&mut [u8]` instead of a `&str`
+        // or a `&[u8]`)
         .configure_threads(2) // Default is number of logical cores on your machine
         // 👆 If you have configured `Hasher` to use more than one lane (see above), you
         // can get the hashing algorithm to run in parallel during some parts of the

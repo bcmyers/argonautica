@@ -1,196 +1,182 @@
-use std::ffi::{CStr, CString};
+use std::fmt;
 
-use errors::{DataError, EncodingError};
-use input::{Data, DataMut};
+use input::Container;
 use {Error, ErrorKind};
 
-impl From<Vec<u8>> for Password {
-    fn from(bytes: Vec<u8>) -> Password {
+impl<'a> From<&'a str> for Password<'a> {
+    fn from(s: &'a str) -> Password<'a> {
         Password {
-            bytes: bytes,
-            is_owned: true,
+            inner: Container::Borrowed(s.as_bytes()),
         }
     }
 }
 
-impl From<String> for Password {
-    fn from(s: String) -> Password {
+impl<'a> From<&'a mut str> for Password<'a> {
+    fn from(s: &'a mut str) -> Password<'a> {
+        let bytes = unsafe { s.as_bytes_mut() };
         Password {
-            bytes: s.into_bytes(),
-            is_owned: true,
+            inner: Container::BorrowedMut(bytes),
         }
     }
 }
 
-impl From<CString> for Password {
-    fn from(s: CString) -> Password {
+impl<'a> From<&'a String> for Password<'a> {
+    fn from(s: &'a String) -> Password<'a> {
         Password {
-            bytes: s.into_bytes(),
-            is_owned: true,
+            inner: Container::Borrowed(s.as_bytes()),
         }
     }
 }
 
-impl<'a> From<&'a [u8]> for Password {
-    fn from(bytes: &[u8]) -> Password {
+impl<'a> From<&'a mut String> for Password<'a> {
+    fn from(s: &'a mut String) -> Password<'a> {
+        let bytes = unsafe { s.as_bytes_mut() };
         Password {
-            bytes: bytes.to_vec(),
-            is_owned: false,
+            inner: Container::BorrowedMut(bytes),
         }
     }
 }
 
-impl<'a> From<&'a str> for Password {
-    fn from(s: &str) -> Password {
+impl<'a> From<String> for Password<'a> {
+    fn from(s: String) -> Password<'a> {
         Password {
-            bytes: s.as_bytes().to_vec(),
-            is_owned: false,
+            inner: Container::Owned(s.into_bytes()),
         }
     }
 }
 
-impl<'a> From<&'a CStr> for Password {
-    fn from(s: &CStr) -> Password {
+impl<'a> From<&'a [u8]> for Password<'a> {
+    fn from(bytes: &'a [u8]) -> Password<'a> {
         Password {
-            bytes: s.to_bytes().to_vec(),
-            is_owned: false,
+            inner: Container::Borrowed(bytes),
         }
     }
 }
 
-impl<'a> From<&'a Vec<u8>> for Password {
-    fn from(bytes: &Vec<u8>) -> Password {
+impl<'a> From<&'a mut [u8]> for Password<'a> {
+    fn from(bytes: &'a mut [u8]) -> Password<'a> {
         Password {
-            bytes: bytes.clone(),
-            is_owned: false,
+            inner: Container::BorrowedMut(bytes),
         }
     }
 }
 
-impl<'a> From<&'a String> for Password {
-    fn from(s: &String) -> Password {
+impl<'a> From<&'a Vec<u8>> for Password<'a> {
+    fn from(bytes: &'a Vec<u8>) -> Password<'a> {
         Password {
-            bytes: s.clone().into_bytes(),
-            is_owned: false,
+            inner: Container::Borrowed(bytes),
         }
     }
 }
 
-impl<'a> From<&'a Password> for Password {
-    fn from(password: &Password) -> Password {
+impl<'a> From<&'a mut Vec<u8>> for Password<'a> {
+    fn from(bytes: &'a mut Vec<u8>) -> Password<'a> {
         Password {
-            bytes: password.as_bytes().to_vec(),
-            is_owned: false,
+            inner: Container::BorrowedMut(bytes),
         }
     }
 }
 
-/// Type-safe struct representing the raw bytes of your password
-///
-/// <i>Note that is <u>unlikely</u> to apply to you unless you are using advanced features:
-///
-/// If you construct a [`Password`](struct.Password.html) from a borrowed value (as opposed to
-/// an owned value), you will <b>not</b> be able to use it with a [`Hasher`](../struct.Hasher.html)
-/// or a [`Verifier`](../struct.Verifier.html) whose "password clearing" configuration is set to
-/// `true` (this configuration is set to `false` by default; see
-/// [here](../index.html#configuration) for more details on the "password clearing"
-/// configuration). This limitation (again, only when "password clearing" is set to `true`)
-/// is required because when you construct a [`Password`](struct.Password.html) from a borrowed
-/// value, `argonautica` cannot guarantee that all the underlying bytes of the
-/// [`Password`](struct.Password.html) will indeed be erased after hashing and/or verifying,
-/// which is the whole point of the "password clearing" feature.</i>
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct Password {
-    bytes: Vec<u8>,
-    is_owned: bool,
+impl<'a> From<Vec<u8>> for Password<'a> {
+    fn from(bytes: Vec<u8>) -> Password<'a> {
+        Password {
+            inner: Container::Owned(bytes),
+        }
+    }
 }
 
-impl Password {
+impl<'a> From<&'a Password<'a>> for Password<'a> {
+    fn from(sk: &'a Password<'a>) -> Password<'a> {
+        let bytes = match sk.inner {
+            Container::Borrowed(ref bytes) => &**bytes,
+            Container::BorrowedMut(ref bytes) => &**bytes,
+            Container::Owned(ref bytes) => bytes,
+        };
+        Password {
+            inner: Container::Borrowed(bytes),
+        }
+    }
+}
+
+impl<'a> From<&'a mut Password<'a>> for Password<'a> {
+    fn from(sk: &'a mut Password<'a>) -> Password<'a> {
+        match sk.inner {
+            Container::Borrowed(ref bytes) => Password {
+                inner: Container::Borrowed(&**bytes),
+            },
+            Container::BorrowedMut(ref mut bytes) => Password {
+                inner: Container::BorrowedMut(&mut **bytes),
+            },
+            Container::Owned(ref mut bytes) => Password {
+                inner: Container::BorrowedMut(&mut *bytes),
+            },
+        }
+    }
+}
+
+impl<'a> fmt::Debug for Password<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "****")
+    }
+}
+
+/// Type-safe struct representing the raw bytes of a password
+#[derive(Eq, PartialEq, Hash)]
+pub struct Password<'a> {
+    pub(crate) inner: Container<'a>,
+}
+
+impl<'a> Password<'a> {
     /// Read-only access to the underlying byte buffer
     pub fn as_bytes(&self) -> &[u8] {
-        &self.bytes
+        match self.inner {
+            Container::Borrowed(ref bytes) => bytes,
+            Container::BorrowedMut(ref bytes) => bytes,
+            Container::Owned(ref bytes) => bytes,
+        }
     }
-    /// Return `true` if [`Password`](struct.Password.html) was constructed from an owned value;
-    /// `false` otherwise
-    pub fn is_owned(&self) -> bool {
-        self.is_owned
+    /// Indicates whether the underlying byte buffer is mutable or not. The underlying byte
+    /// buffer is mutable when the [`Password`](struct.Password.html) was constructed
+    /// from an owned value (such as a `String` or a `Vec<u8>`) or from a mutable reference
+    /// (such as a `&mut str` or a `&mut [u8]`). It is not mutable when the
+    /// [`Password`](struct.Password.html) was constructed from an immutable reference
+    /// (such as a `&str` or a `&[u8]`). The [`Password`](struct.Password.html) must be mutable
+    /// in order to hash or verify with the `password_clearing` configuration set to `true`
+    pub fn is_mutable(&self) -> bool {
+        match self.inner {
+            Container::Borrowed(_) => false,
+            _ => true,
+        }
     }
-    /// Read-only acccess to the underlying byte buffer's length
+    /// Read-only acccess to the underlying byte buffer's length (in number of bytes)
     pub fn len(&self) -> usize {
-        self.bytes.len()
+        self.as_bytes().len()
+    }
+    /// Clones the underlying byte buffer and returns a new
+    /// [`Password`](struct.Password.html) with a `static` lifetime. Use this method if you
+    /// would like to move a [`Password`](struct.Password.html) to another thread
+    pub fn to_owned(&self) -> Password<'static> {
+        Password {
+            inner: self.inner.to_owned(),
+        }
     }
     /// Read-only access to the underlying byte buffer as a `&str` if its bytes are valid utf-8
     pub fn to_str(&self) -> Result<&str, Error> {
-        let s = ::std::str::from_utf8(self.as_bytes()).map_err(|_| {
-            Error::new(ErrorKind::EncodingError(EncodingError::Utf8EncodeError))
-                .add_context(format!("Bytes: {:?}", self.as_bytes()))
-        })?;
+        let s = ::std::str::from_utf8(self.as_bytes())
+            .map_err(|_| Error::new(ErrorKind::Utf8EncodeError))?;
         Ok(s)
     }
 }
 
-impl Password {
+impl<'a> Password<'a> {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         if self.len() == 0 {
-            return Err(ErrorKind::DataError(DataError::PasswordTooShortError).into());
+            return Err(Error::new(ErrorKind::PasswordTooShortError));
         }
         if self.len() >= ::std::u32::MAX as usize {
-            return Err(
-                Error::new(ErrorKind::DataError(DataError::PasswordTooLongError))
-                    .add_context(format!("Length: {}", self.len())),
-            );
+            return Err(Error::new(ErrorKind::PasswordTooLongError)
+                .add_context(format!("Length: {}", self.len())));
         }
         Ok(())
-    }
-}
-
-impl Data for Password {
-    fn c_len(&self) -> u32 {
-        self.len() as u32
-    }
-    fn c_ptr(&self) -> *const u8 {
-        self.as_bytes().as_ptr()
-    }
-}
-
-impl DataMut for Password {
-    fn c_mut_ptr(&mut self) -> *mut u8 {
-        self.c_ptr() as *mut u8
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_password_is_owned() {
-        let password: Password = vec![0u8].into();
-        assert!(password.is_owned());
-
-        let password: Password = "string".to_string().into();
-        assert!(password.is_owned());
-
-        let password: Password = "str".into();
-        assert!(!password.is_owned());
-
-        let password: Password = (&[0u8][..]).into();
-        assert!(!password.is_owned());
-
-        let password: Password = vec![0u8].into();
-        let password: Password = (&password).into();
-        assert!(!password.is_owned());
-    }
-
-    #[test]
-    fn test_send() {
-        fn assert_send<T: Send>() {}
-        assert_send::<Password>();
-    }
-
-    #[test]
-    fn test_sync() {
-        fn assert_sync<T: Sync>() {}
-        assert_sync::<Password>();
     }
 }
