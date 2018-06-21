@@ -3,13 +3,13 @@ name = "argonautica"
 version = "0.1.0" # remember to update html_root_url
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
-categories = ["Algorithms", "API bindings", "Authentication", "Cryptography"]
+categories = ["algorithms", "api-bindings", "authentication", "cryptography"]
 description = "Idiomatic Argon2 password hashing for Rust"
 documentation = "https://docs.rs/argonautica"
 homepage = "https://github.com/bcmyers/argonautica"
 keywords = ["argon2", "cryptography", "hash", "password", "security"]
 license = "MIT/Apache-2.0"
-publish = true # TODO
+publish = false # TODO
 readme = "README.md"
 repository = "https://github.com/bcmyers/argonautica"
 

@@ -3,7 +3,7 @@ name = "argonautica-c"
 version = "0.1.0" # remember to update html_root_url
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
-categories = ["Algorithms", "API bindings", "Authentication", "Cryptography"]
+categories = ["algorithms", "api-bindings", "authentication", "cryptography"]
 description = "C/C++ wrapper for argonautica"
 documentation = "https://docs.rs/argonautica-c"
 homepage = "https://github.com/bcmyers/argonautica"
@@ -24,7 +24,7 @@ crate_type = ["cdylib"]
 simd = ["argonautica/simd"]
 
 [dependencies]
-argonautica = { path = "../argonautica-rs" } # TODO
+argonautica = { version = "0.1", path = "../argonautica-rs" }
 itoa = "0.4"
 libc = "0.2"
 
