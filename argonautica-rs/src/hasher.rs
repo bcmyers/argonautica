@@ -66,7 +66,7 @@ impl<'a> Hasher<'a> {
     /// * `memory_size`: `4096` kibibytes
     /// * `opt_out_of_secret_key`: `false`
     /// * `password_clearing`: `false`
-    /// * `salt`: random [`Salt`](data/struct.Salt.html) of length 32 bytes that renews with every hash
+    /// * `salt`: random [`Salt`](input/struct.Salt.html) of length 32 bytes that renews with every hash
     /// * `secret_key_clearing`: `false`
     /// * `threads`: The number of logical cores on your machine
     /// * `variant`: [`Variant::Argon2id`](config/enum.Variant.html#variant.Argon2id)
@@ -223,10 +223,10 @@ impl<'a> Hasher<'a> {
     ///
     /// After you have configured a [`Hasher`](struct.Hasher.html) to your liking and provided
     /// it will all the data you would like to hash, e.g.
-    /// * a [`Password`](data/struct.Password.html),
-    /// * a [`Salt`](data/struct.Password.html) (note: it is recommened you use the default random salt),
-    /// * a [`SecretKey`](data/struct.SecretKey.html),
-    /// * [`AdditionalData`](data/struct.AdditionalData.html) (optional),
+    /// * a [`Password`](input/struct.Password.html),
+    /// * a [`Salt`](input/struct.Password.html) (note: it is recommened you use the default random salt),
+    /// * a [`SecretKey`](input/struct.SecretKey.html),
+    /// * [`AdditionalData`](input/struct.AdditionalData.html) (optional),
     ///
     /// call this method in order to produce a string-encoded hash, which is safe to store in a
     /// database and against which you can verify passwords later
@@ -307,9 +307,9 @@ impl<'a> Hasher<'a> {
         }
     }
     /// Allows you to add some additional data to the [`Hasher`](struct.Hasher.html)
-    /// that will be hashed alongside the [`Password`](data/struct.Password.html) and
-    /// other pieces of data you would like to hash (i.e. the [`Salt`](data/struct.Salt.html) and
-    /// an optional [`SecretKey`](data/struct.SecretKey.html)).
+    /// that will be hashed alongside the [`Password`](input/struct.Password.html) and
+    /// other pieces of data you would like to hash (i.e. the [`Salt`](input/struct.Salt.html) and
+    /// an optional [`SecretKey`](input/struct.SecretKey.html)).
     ///
     /// Including additional data in your hash is not very common; so it is unlikely you will
     /// need to use this method. If, however, you do add additional data, note that it is like
@@ -335,13 +335,13 @@ impl<'a> Hasher<'a> {
         self
     }
     /// Allows you to provide [`Hasher`](struct.Hasher.html) with a custom
-    /// [`Salt`](data/struct.Salt.html) to include in the hash. The default
+    /// [`Salt`](input/struct.Salt.html) to include in the hash. The default
     /// [`Hasher`](struct.Hasher.html) is configured to use a random
-    /// [`Salt`](data/struct.Salt.html) of 32 bytes; so there is no need
+    /// [`Salt`](input/struct.Salt.html) of 32 bytes; so there is no need
     /// to call this method. If you would like to use a random
-    /// [`Salt`](data/struct.Salt.html) of different length, you can call this method with
+    /// [`Salt`](input/struct.Salt.html) of different length, you can call this method with
     /// `Salt::random(your_custom_length_in_bytes)`. Using a deterministic
-    /// [`Salt`](data/struct.Salt.html) is possible, but discouraged
+    /// [`Salt`](input/struct.Salt.html) is possible, but discouraged
     pub fn with_salt<S>(&mut self, salt: S) -> &mut Hasher<'a>
     where
         S: Into<Salt>,
@@ -362,7 +362,7 @@ impl<'a> Hasher<'a> {
         self
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s
-    /// [`AdditionalData`](data/struct.AdditionalData.html), if any
+    /// [`AdditionalData`](input/struct.AdditionalData.html), if any
     pub fn additional_data(&self) -> Option<&AdditionalData> {
         self.additional_data.as_ref()
     }
@@ -372,16 +372,16 @@ impl<'a> Hasher<'a> {
         &self.config
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s
-    /// [`Password`](data/struct.Password.html), if any
+    /// [`Password`](input/struct.Password.html), if any
     pub fn password(&self) -> Option<&Password<'a>> {
         self.password.as_ref()
     }
-    /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`Salt`](data/struct.Salt.html)
+    /// Read-only access to the [`Hasher`](struct.Hasher.html)'s [`Salt`](input/struct.Salt.html)
     pub fn salt(&self) -> &Salt {
         &self.salt
     }
     /// Read-only access to the [`Hasher`](struct.Hasher.html)'s
-    /// [`SecretKey`](data/struct.SecretKey.html), if any
+    /// [`SecretKey`](input/struct.SecretKey.html), if any
     pub fn secret_key(&self) -> Option<&SecretKey<'a>> {
         self.secret_key.as_ref()
     }

@@ -288,7 +288,7 @@
 #![deny(
     missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
 )]
-#![doc(html_root_url = "https://docs.rs/argonautica/0.1.1")]
+#![doc(html_root_url = "https://docs.rs/argonautica/0.1.2")]
 
 extern crate base64;
 #[macro_use]
@@ -328,5 +328,3 @@ pub mod input;
 pub mod output;
 pub mod utils;
 pub use verifier::Verifier;
-
-// TODO: Logging

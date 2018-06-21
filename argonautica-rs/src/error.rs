@@ -43,7 +43,10 @@ impl Error {
     }
     /// Adds additional context to the [`Error`](struct.Error.html). The additional context will be appended to
     /// the end of the [`Error`](struct.Error.html)'s display string
-    pub fn add_context<S: AsRef<str>>(mut self, context: S) -> Error {
+    pub fn add_context<S>(mut self, context: S) -> Error
+    where
+        S: AsRef<str>
+    {
         self.display = format!("{}: {}", self.kind, context.as_ref());
         self
     }

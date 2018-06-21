@@ -1,8 +1,8 @@
 //! Type-safe structs representing data to hash (i.e.
-//! [`Password`](data/struct.Password.html),
-//! [`Salt`](data/struct.Salt.html),
-//! [`SecretKey`](data/struct.SecretKey.html), and
-//! [`AdditionalData`](data/struct.AdditionalData.html))
+//! [`Password`](input/struct.Password.html),
+//! [`Salt`](input/struct.Salt.html),
+//! [`SecretKey`](input/struct.SecretKey.html), and
+//! [`AdditionalData`](input/struct.AdditionalData.html))
 //!
 //! All the stucts below can be constructed from
 //! [`Vec<u8>`](https://doc.rust-lang.org/std/vec/struct.Vec.html),

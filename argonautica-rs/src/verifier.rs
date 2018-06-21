@@ -116,9 +116,9 @@ impl<'a> Verifier<'a> {
     /// After you have configured [`Verifier`](struct.Verifier.html) to your liking and provided
     /// it will all the data it needs to verify a password, i.e.
     /// * a string-encoded hash or [`HashRaw`](output/struct.HashRaw.html),
-    /// * a [`Password`](data/struct.Password.html),
-    /// * a [`SecretKey`](data/struct.SecretKey.html) (if required),
-    /// * [`AdditionalData`](data/struct.AdditionalData.html) (if required),
+    /// * a [`Password`](input/struct.Password.html),
+    /// * a [`SecretKey`](input/struct.SecretKey.html) (if required),
+    /// * [`AdditionalData`](input/struct.AdditionalData.html) (if required),
     ///
     /// call this method to verify that the password matches the hash or
     /// [`HashRaw`](output/struct.HashRaw.html)
@@ -232,7 +232,7 @@ impl<'a> Verifier<'a> {
         self
     }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s
-    /// [`AdditionalData`](data/struct.AdditionalData.html), if any
+    /// [`AdditionalData`](input/struct.AdditionalData.html), if any
     pub fn additional_data(&self) -> Option<&AdditionalData> {
         self.hasher.additional_data()
     }
@@ -265,12 +265,12 @@ impl<'a> Verifier<'a> {
         }
     }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s
-    /// [`Password`](data/struct.Password.html), if any
+    /// [`Password`](input/struct.Password.html), if any
     pub fn password(&self) -> Option<&Password<'a>> {
         self.hasher.password()
     }
     /// Read-only access to the [`Verifier`](struct.Verifier.html)'s
-    /// [`SecretKey`](data/struct.SecretKey.html), if any
+    /// [`SecretKey`](input/struct.SecretKey.html), if any
     pub fn secret_key(&self) -> Option<&SecretKey<'a>> {
         self.hasher.secret_key()
     }

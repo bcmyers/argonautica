@@ -1,5 +1,5 @@
 //! Utility functions for generating random bytes, which can be useful for generating
-//! [`SecretKey`](data/struct.SecretKey.html)s, for example.
+//! [`SecretKey`](input/struct.SecretKey.html)s, for example.
 use base64;
 use rand::rngs::EntropyRng;
 use rand::RngCore;
