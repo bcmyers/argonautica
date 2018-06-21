@@ -47,9 +47,8 @@ fn main() {
     let hash = hasher
         .with_password("P@ssw0rd")
         .with_secret_key("\
-            secret key that you should really store in \
-            an environment variable instead of in code, \
-            but this is just an example\
+            secret key that you should really store in a .env file \
+            instead of in code, but this is just an example\
         ")
         .hash()
         .unwrap();
@@ -73,15 +72,14 @@ fn main() {
     let mut verifier = Verifier::default();
     let is_valid = verifier
         .with_hash("
-            $argon2id$v=19$m=4096,t=128,p=2$\
-            539gu1a/qkTRCHKPuECV7jcRgWH/hRDjxidNdQJ7cKs$\
-            On6oPYf4jttaWb4kRCyyffDVYkBF+R4cEBl8WADZhw0\
+            $argon2id$v=19$m=4096,t=192,p=4$\
+            o2y5PU86Vt+sr93N7YUGgC7AMpTKpTQCk4tNGUPZMY4$\
+            yzP/ukZRPIbZg6PvgnUUobUMbApfF9RH6NagL9L4Xr4\
         ")
         .with_password("P@ssw0rd")
         .with_secret_key("\
-            secret key that you should really store in \
-            an environment variable instead of in code, \
-            but this is just an example\
+            secret key that you should really store in a .env file \
+            instead of in code, but this is just an example\
         ")
         .verify()
         .unwrap();
