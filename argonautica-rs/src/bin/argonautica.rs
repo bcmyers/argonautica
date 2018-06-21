@@ -4,10 +4,14 @@ use argonautica::Hasher;
 
 fn main() {
     let mut hasher = Hasher::default();
-    let encoded = hasher
-        .opt_out_of_secret_key(true)
+    let hash = hasher
         .with_password("P@ssw0rd")
+        .with_secret_key("\
+            secret key that you should really store in a .env file \
+            instead of in code, but this is just an example\
+        ")
         .hash()
         .unwrap();
-    println!("{}", &encoded);
+    println!("{}", &hash);
+    // 👆 prints a hash, which will be random since the default Hasher uses a random salt
 }
