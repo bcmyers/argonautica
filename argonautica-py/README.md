@@ -16,7 +16,7 @@ There are several Python packages that implement argon2, including the excellent
 
 * AFAIK, **argonautica** is the only Python implementation of argon2 that supports hashing with secret keys. Not even the [cannonical C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2 exposes this feature publicly (it's in the code, but unfortunately not accessable via the public API).
 
-* AFAIK, **argonautica** is the only Python implementation of argon2 to use [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions to peform it's hashing algorithm, which means it can be quite fast. The downside is that you have to compile it for your specific machine (this is why the `pip install argonautica` process takes time). That said, on the developer's early 2014 Macbook Air, which has [SIMD](https://en.wikipedia.org/wiki/SIMD) instruction through [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions), argonautica runs ~30% faster than passlib on default settings.
+* **argonautica** is the only Python implementation of argon2 to use [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions to peform it's hashing algorithm, which means it can be quite fast. The downside is that you have to compile it for your specific machine (this is why the `pip install argonautica` process takes time). That said, on the developer's early 2014 Macbook Air, which has [SIMD](https://en.wikipedia.org/wiki/SIMD) instruction through [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions), argonautica runs ~30% faster than passlib on default settings.
 
 * **argonautica** supports the latest argon2 variant: argon2id, which, unless you have a reason not to, you should be using. A number of Python implementations do not yet support this variant.
 
