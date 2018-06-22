@@ -80,7 +80,27 @@ hasher = Hasher(secret_key='somesecret`)
                 # using a secret key (this is not recommended)
                 
 hasher.hash_len = 32
-# 👆 Blah blah blah (TODO)
+# 👆 The hash length in bytes is configurable. The default is 32. 
+# This is probably a good number to use. 16 is also probably fine. 
+# You probably shouldn't go below 16
+
+hasher.iterations = 192
+# 👆 Argon2 has a notion of "iterations" or "time cost". All else equal 
+# and generally speaking, the greater the number of iterations, the 
+# longer it takes to perform the hash and the more secure the resulting 
+# hash. More iterations basically means more CPU load. This and "memory 
+# size" (see below) are the two primary parameters to adjust in order 
+# to increase or decrease the security of your hash. The default is
+# 192 iterations, which was chosen because, along with the default 
+# memory size of 4096, this leads to a hashing time of approximately 
+# 300 milliseconds on the early-2014 Macbook Air that is the developer's 
+# machine. If you're going to use argonautica in production, you should 
+# probably tweak this parameter (and the memory size parameter) in order 
+# to increase the time it takes to hash to the maximum you can 
+# reasonably allow for your use-case (e.g. to probably about 300-500 
+# milliseconds for the use-case of hashing user passwords for a website)
+
+# TODO
 ```
 
 ## License
