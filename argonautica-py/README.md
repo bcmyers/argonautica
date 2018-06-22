@@ -31,15 +31,15 @@ There are several Python packages that implement argon2, including the excellent
 
 ## Installation
 
-- Rust:
+- **Rust:**
   - Follow the instructions [here](https://www.rust-lang.org/en-US/install.html), which will just tell you to run the following command in your terminal and follow the on-screen instructions: `curl https://sh.rustup.rs -sSf \| sh`
-- LLVM:
+- **LLVM:**
   - macOS: `brew install llvm`, which requires [Homebrew](https://brew.sh/)
   - Debian-based linux: `apt-get install llvm-dev libclang-dev clang`
   - Arch linux: `pacman -S clang`
   - Other linux: Use your distribution's package manager
   - Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
-- argonautica:
+- **argonautica:**
   - `pip install --upgrade pip` or `pip install setuptools-rust`. Note: setuptool-rust is not required if you have pip version 10.0 or above
   - `pip install argonautica -v`. Unfortunately, this step may take several minutes, as argonautica needs to compile it's Rust code for your specific CPU (due to its use of SIMD instructions). The upside, however, is that once compiled, argonautica should run blazingly fast
 
@@ -71,5 +71,14 @@ print(is_valid)
 ### Configuration
 
 ```python3
-todo
+from argonautica import Hasher
+
+hasher = hasher(secret_key='somesecret`)
+                # 👆 A secret key is required to instantiate
+                # a Hasher, a Verifier, or an Argon2, but you
+                # are allowed to pass `None` in order to forgoe
+                # using a secret key (this is not recommended)
+                
+hasher.hash_len = 32
+# 👆 Blah blah blah (TODO)
 ```
