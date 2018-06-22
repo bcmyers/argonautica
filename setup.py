@@ -20,7 +20,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     project_urls={
-        "Docs": "TODO",
+        "Docs": "https://github.com/bcmyers/argonautica/tree/v0.1.4/argonautica-py",
         "Github": "https://github.com/bcmyers/argonautica",
     },
     url="https://github.com/bcmyers/argonautica",
