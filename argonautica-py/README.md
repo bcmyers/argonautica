@@ -14,13 +14,14 @@ Argon2 won the [Password Hashing Competition](https://password-hashing.net/) in 
 
 There are several Python packages that implement argon2, including the excellent [passlib](http://passlib.readthedocs.io/en/stable/), but...
 
-* **argonautica** is the only implementation written in [Rust](https://www.rust-lang.org/en-US/) (as opposed to C or C++). [Rust](https://www.rust-lang.org/en-US/) is a \"systems programming language that runs blazingly fast, prevents segfaults, and guarantees thread safety.\"
+* AFAIK, **argonautica** is the only Python implementation of argon2 that supports hashing with secret keys. Not even the [cannonical C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2 exposes this feature publicly (it's in the code, but unfortunately not accessable via the public API).
 
-* AFAIK, **argonautica** is the only implementation of argon2 in Python that supports hashing with secret keys. Not even the [cannonical C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2 exposes this feature publicly (it's in the code, but unfortunately not accessable via the public API).
+* AFAIK, **argonautica** is the only Python implementation of argon2 to use [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions to peform it's hashing algorithm, which means it can be quite fast. The downside is that you have to compile it for your specific machine (this is why the `pip install argonautica` process takes time). That said, on the developer's early 2014 Macbook Air, which has [SIMD](https://en.wikipedia.org/wiki/SIMD) instruction through [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions), argonautica runs ~30% faster than passlib on default settings.
 
-* Another feature of **argonautica** is that it uses [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions to peform it's hashing algorithm, which means it can be quite fast. The downside is that you have to compile it for your specific machine (this is why the `pip install argonautica` process takes time). That said, on the developer's early 2014 Macbook Air, which has [SIMD](https://en.wikipedia.org/wiki/SIMD) instruction through [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions), argonautica runs ~30% faster than the passlib implementation on default settings.
+* **argonautica** supports the latest argon2 variant: argon2id, which, unless you have a reason not to, you should be using. A number of Python implementations do not yet support this variant.
 
-* Finally, I number of Python implementations don't support the latest argon2 variant: argon2id, which, unless you have a reason not to, you should be using for your hashes.
+* Finally, **argonautica** is the only Python implementation of argon2 written in [Rust](https://www.rust-lang.org/en-US/) (as opposed to C or C++). [Rust](https://www.rust-lang.org/en-US/) is a \"systems programming language that runs blazingly fast, prevents segfaults, and guarantees thread safety.\"
+
 
 ## Requirements
 
