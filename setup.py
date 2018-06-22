@@ -10,7 +10,7 @@ with open(os.path.join(here, "argonautica-py", "README.md"), "r") as f:
 
 setup(
     name="argonautica",
-    version="0.1.0",
+    version="0.1.3",
 
     author="Brian Myers",
     author_email="brian.carl.myers@gmail.com",
