@@ -25,9 +25,9 @@ There are several Python packages that implement argon2, including the excellent
 
 ## Requirements
 
-- [Python](https://www.python.org/) version 3.4.0 or higher (or [PyPy](http://pypy.org/) version 3.5 or higher)
-- [Rust](https://www.rust-lang.org/en-US/) version 1.26.0 or higher
-- [LLVM](https://llvm.org/) version 3.9.0 or higher
+- [Python](https://www.python.org/) version 3.4 or higher (or [PyPy](http://pypy.org/) version 3.5 or higher)
+- [Rust](https://www.rust-lang.org/en-US/) version 1.26 or higher
+- [LLVM](https://llvm.org/) version 3.9 or higher
 
 ## Installation
 
