@@ -136,7 +136,7 @@ impl<'a> Hasher<'a> {
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom hash length
-    /// (in bytes). The default is `32`.
+    /// (in number of bytes). The default is `32`.
     ///
     /// See [configuration example](index.html#configuration) for a more detailed discussion
     /// of this parameter
@@ -169,9 +169,14 @@ impl<'a> Hasher<'a> {
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to erase the password bytes
-    /// after each call to [`hash`](struct.Hasher.html#method.hash)
-    /// or [`hash_raw`](struct.Hasher.html#method.hash_raw) (or their non-blocking versions).
-    /// The default is to clear out the password bytes (i.e. `true`).
+    /// after each call to [`hash`](struct.Hasher.html#method.hash),
+    /// [`hash_raw`](struct.Hasher#method.hash_raw), or their non-blocking equivalents.
+    /// The default is to <b>not</b> clear out the password
+    /// bytes (i.e. `false`). If you set this option to `true`, you must provide
+    /// [`Hasher`](struct.Hasher.html) with a mutable password, e.g. a password
+    /// constructed from a `String`, `Vec<u8>`, `&mut str`, `&mut [u8]`, etc. as opposed to
+    /// one constructed from a `&str`, `&[u8]`, etc., or else hashing will return an
+    /// [`Error`](struct.Error.html).
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_password_clearing(&mut self, boolean: bool) -> &mut Hasher<'a> {
@@ -179,11 +184,14 @@ impl<'a> Hasher<'a> {
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to erase the secret key bytes
-    /// after each call to [`hash`](struct.Hasher.html#method.hash)
-    /// or [`hash_raw`](struct.Hasher.html#method.hash_raw) (or their non-blocking version).
-    /// The default is to <b>not</b> clear out the secret key bytes (i.e. `false`).
-    /// This default was chosen to make it easier to keep using the same
-    /// [`Hasher`](struct.Hasher.html) for multiple passwords.
+    /// after each call to [`hash`](struct.Hasher.html#method.hash),
+    /// [`hash_raw`](struct.Hasher#method.hash_raw), or their non-blocking equivalents.
+    /// The default is to <b>not</b> clear out the secret key
+    /// bytes (i.e. `false`). If you set this option to `true`, you must provide
+    /// [`Hasher`](struct.Hasher.html) with a mutable secret key, e.g. a secret key
+    /// constructed from a `String`, `Vec<u8>`, `&mut str`, `&mut [u8]`, etc. as opposed to
+    /// one constructed from a `&str`, `&[u8]`, etc., or else hashing will return an
+    /// [`Error`](struct.Error.html).
     ///
     /// See [configuration example](index.html#configuration) for a more details on this parameter
     pub fn configure_secret_key_clearing(&mut self, boolean: bool) -> &mut Hasher<'a> {

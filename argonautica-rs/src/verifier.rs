@@ -50,6 +50,7 @@ impl<'a> Verifier<'a> {
     ///       needs it ([`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking))
     /// * `password_clearing`: `false`
     /// * `secret_key_clearing`: `false`
+    /// * `threads`: The number of logical cores on your machine
     pub fn new() -> Verifier<'a> {
         Verifier::default()
     }
@@ -76,20 +77,25 @@ impl<'a> Verifier<'a> {
         self
     }
     /// Allows you to configure [`Verifier`](struct.Verifier.html) to erase the password bytes
-    /// after each call to [`verify`](struct.Verifier.html#method.verify) or
-    /// [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking).
-    /// The default is to clear out the password bytes after each call to these methods
-    /// (i.e. `true`).
+    /// after each call to [`verify`](struct.Verifier.html#method.verify)
+    /// or its non-blocking equivalent. The default is to <b>not</b> clear out the password
+    /// bytes (i.e. `false`). If you set this option to `true`, you must provide
+    /// [`Verifier`](struct.Verifier.html) with a mutable password, e.g. a password
+    /// constructed from a `String`, `Vec<u8>`, `&mut str`, `&mut [u8]`, etc. as opposed to
+    /// one constructed from a `&str`, `&[u8]`, etc., or else verifying will return an
+    /// [`Error`](struct.Error.html).
     pub fn configure_password_clearing(&mut self, boolean: bool) -> &mut Verifier<'a> {
         self.hasher.config.set_password_clearing(boolean);
         self
     }
     /// Allows you to configure [`Verifier`](struct.Verifier.html) to erase the secret key bytes
-    /// after each call to [`verify`](struct.Verifier.html#method.verify) or
-    /// [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking).
-    /// The default is to <b>not</b> clear out the secret key bytes after each call to these
-    /// methods (i.e. `false`). This default was chosen to make it easier to use the same
-    /// [`Verifier`](struct.Verifier.html) for multiple passwords.
+    /// after each call to [`verify`](struct.Verifier.html#method.verify)
+    /// or its non-blocking equivalent. The default is to <b>not</b> clear out the secret key
+    /// bytes (i.e. `false`). If you set this option to `true`, you must provide
+    /// [`Verifier`](struct.Verifier.html) with a mutable secret key, e.g. a secret key
+    /// constructed from a `String`, `Vec<u8>`, `&mut str`, `&mut [u8]`, etc. as opposed to
+    /// one constructed from a `&str`, `&[u8]`, etc., or else verifying will return an
+    /// [`Error`](struct.Error.html).
     pub fn configure_secret_key_clearing(&mut self, boolean: bool) -> &mut Verifier<'a> {
         self.hasher.config.set_secret_key_clearing(boolean);
         self
@@ -205,7 +211,7 @@ impl<'a> Verifier<'a> {
         self
     }
     /// Allows you to provide [`Verifier`](struct.Verifier.html) with the hash to verify
-    /// against (in the form of a [`RawHash`](output/struct.HashRaw.html) like those produced
+    /// against (in the form of a [`HashRaw`](output/struct.HashRaw.html) like those produced
     /// by the [`hash_raw`](struct.Hasher.html#method.hash_raw) or
     /// [`hash_raw_non_blocking`](struct.Hasher.html#method.hash_raw_non_blocking)
     /// methods on [`Hasher`](struct.Hasher.html))

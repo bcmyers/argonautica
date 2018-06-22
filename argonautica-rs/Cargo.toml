@@ -1,6 +1,6 @@
 [package]
 name = "argonautica"
-version = "0.1.3" # remember to update html_root_url
+version = "0.1.4" # remember to update html_root_url
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
 categories = ["algorithms", "api-bindings", "authentication", "cryptography"]

@@ -15,7 +15,7 @@ matrix:
         - pip install setuptools-rust
         - python setup.py sdist
         - pip uninstall setuptools-rust -y
-        - pip install dist/argonautica-0.1.3.tar.gz
+        - pip install dist/argonautica-0.1.4.tar.gz
       script:
         - cd argonautica-py
         - python -m unittest
@@ -29,7 +29,7 @@ matrix:
         - pip install setuptools-rust
         - python setup.py sdist
         - pip uninstall setuptools-rust -y
-        - pip install dist/argonautica-0.1.3.tar.gz
+        - pip install dist/argonautica-0.1.4.tar.gz
       script:
         - cd argonautica-py
         - python -m unittest
@@ -43,7 +43,7 @@ matrix:
         - pip install setuptools-rust
         - python setup.py sdist
         - pip uninstall setuptools-rust -y
-        - pip install dist/argonautica-0.1.3.tar.gz
+        - pip install dist/argonautica-0.1.4.tar.gz
       script:
         - cd argonautica-py
         - python -m unittest
@@ -59,7 +59,7 @@ matrix:
         - pip install setuptools-rust
         - python setup.py sdist
         - pip uninstall setuptools-rust -y
-        - pip install dist/argonautica-0.1.3.tar.gz
+        - pip install dist/argonautica-0.1.4.tar.gz
       script:
         - cd argonautica-py
         - python -m unittest
@@ -68,7 +68,9 @@ matrix:
       rust: stable
       cache: cargo
       script:
-        - cargo test --release --features="simd serde" -p argonautica
-        - cargo test --release --features="simd" -p argonautica-c -- --nocapture
+        - cd argonautica-rs
+        - cargo test --release --features="simd serde"
+        - cd ../argonautica-c
+        - cargo test --release --features="simd"
 sudo: false
 dist: trusty
