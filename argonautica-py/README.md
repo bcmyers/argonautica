@@ -1,4 +1,4 @@
-# [argonautica](https://en.wikipedia.org/wiki/Argonautica)
+# argonautica-py
 
 [![Build Status](https://travis-ci.org/bcmyers/argonautica.svg?branch=master)](https://travis-ci.org/bcmyers/argonautica)
 [![Github.com](https://img.shields.io/badge/github-bcmyers%2Fargonautica-blue.svg)](http://www.github.com/bcmyers/argonautica)
@@ -73,7 +73,7 @@ print(is_valid)
 ```python3
 from argonautica import Hasher
 
-hasher = hasher(secret_key='somesecret`)
+hasher = Hasher(secret_key='somesecret`)
                 # 👆 A secret key is required to instantiate
                 # a Hasher, a Verifier, or an Argon2, but you
                 # are allowed to pass `None` in order to forgoe
