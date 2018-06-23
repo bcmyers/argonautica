@@ -231,6 +231,24 @@ hash2 = hash_raw.encode()
 assert(hash == hash2)
 ``` 
 
+**Argon2**
+
+``Argon2`` is a class that essentially hold both a ``Hasher`` and a ``Verifier``. If you'd like to use just one class that knows how both to hash and to verify, instantiate an ``Argon2``.
+
+
+```python3
+from argonautica import Argon2             
+
+argon2 = Argon2(secret_key='somesecret')   
+
+hash = argon2.hash(password='P@ssw0rd')    
+print(hash)
+
+is_valid = argon2.verify(hash=hash, password=`P@ssw0rd`)
+assert(is_valid)
+```
+
+
 ## License
 
 **argonautica** is licensed under either of:
