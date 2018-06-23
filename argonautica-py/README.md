@@ -10,6 +10,15 @@
 
 Argon2 won the [Password Hashing Competition](https://password-hashing.net/) in 2015, a several year project to identify a successor to [bcrypt](https://en.wikipedia.org/wiki/Bcrypt), [scrypt](https://en.wikipedia.org/wiki/Scrypt), and other common hashing algorithms.
 
+**argonautica** was built with a simple use-case in mind: hashing passwords for storage in a
+website's database. That said, it's also "feature-complete", meaning anything you can do with
+the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2
+you can do with argonautica*.
+
+<i>\* Indeed, argonautica has a feature that even the cannonical C implementation
+lacks, i.e. hashing passwords with secret keys (the C implementation implements this, but
+does not expose it publicly)</i>
+
 ## Alternatives
 
 There are several Python packages that implement argon2, including the excellent [passlib](http://passlib.readthedocs.io/en/stable/), but...
