@@ -40,7 +40,7 @@ class Verifier:
         additional_data:    Union[bytes, str, None, Void] = VOID,
         backend:            Union[Backend, Void] = VOID,
         secret_key:         Union[bytes, str, None, Void] = VOID,
-        threads:            Union[int, Void] = VOID,
+        threads:            Union[int, Void] = VOID
     ) -> bool:
         if isinstance(additional_data, Void):
             additional_data = self.additional_data
