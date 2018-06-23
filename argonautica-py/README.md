@@ -75,7 +75,7 @@ is_valid = verifier.verify(                   # or ... is_valid = argon2.verify(
     hash='$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q',
     password='P@ssw0rd',
 )
-print(is_valid)
+assert(is_valid)
 ```
 
 ### Configuration
@@ -176,7 +176,7 @@ hasher.version = Version._0x13 # Default is Version._0x13
 
 hash = hasher.hash(
 	password='P@ssw0rd', 
-	salt=RandomSalt(32),   # You can set your own salt, or use the default: RandomSalt(32)
+	salt='somesalt',       # You can set your own salt, or use the default: RandomSalt(32)
 	additional_data=None   # You can hash with additional data, but this use-case is rare
 )
 assert(hash == 'TODO')
@@ -203,6 +203,23 @@ assert(is_valid)
 **mypy**
 
 * **argonautica** uses type annotations for [mypy](http://mypy-lang.org/) everywhere in the code, which, in the author's humble opinion, are a very useful form of documentation; so if you're ever confused about what types to use for arguments, just pop open the code and take a look at the function signatures.
+
+**RandomSalt**
+
+* ``RandomSalt`` is a special kind of salt that will create new random salt bytes before each hash. A RandomSalt knows its length (in number of bytes). The default ``Hasher`` uses a ``RandomSalt`` with length of 32 bytes, but you can use your own ``RandomSalt`` of with custom length. When you instantiate a ``RandomSalt``, the constructor takes a len, e.g. ``my_random_salt = RandomSalt(16)``
+
+```python3
+from argonautica import Hasher
+from argonautica.data import RandomSalt
+
+hasher = Hasher(
+	salt=RandomSalt(16), # Here we're using a RandomSalt of length of 16 bytes
+                         # instead of the default, which is a RandomSalt of length 32 bytes
+	secret_key="somesecret"
+)
+hash = hasher.hash(password='P@ssw0rd')
+print(hash)
+```
 
 **HashRaw**
 
