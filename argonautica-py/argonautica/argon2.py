@@ -4,6 +4,7 @@ from argonautica.config import Backend, Variant, Version
 from argonautica.data import RandomSalt
 from argonautica.defaults import *
 from argonautica.hasher import Hasher
+from argonautica.utils import Void, VOID
 from argonautica.verifier import Verifier
 
 
@@ -12,41 +13,47 @@ class Argon2:
     A class that knows both how to hash and how to verify.
     """
 
+    __slots__ = [
+        'hasher',
+        'verifier'
+    ]
+
     def __init__(
         self,
         *,
-        secret_key: Union[bytes, str, None],
-        additional_data: Union[bytes, str, None] = None,
-        salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
-        backend: Backend = DEFAULT_BACKEND,
-        hash_len: int = DEFAULT_HASH_LEN,
-        iterations: int = DEFAULT_ITERATIONS,
-        lanes: int = DEFAULT_LANES,
-        memory_size: int = DEFAULT_MEMORY_SIZE,
-        threads: int = DEFAULT_THREADS,
-        variant: Variant = DEFAULT_VARIANT,
-        version: Version = DEFAULT_VERSION
+        secret_key:         Union[bytes, str, None],
+
+        additional_data:    Union[bytes, str, None] = None,
+        backend:            Backend = DEFAULT_BACKEND,
+        hash_len:           int = DEFAULT_HASH_LEN,
+        iterations:         int = DEFAULT_ITERATIONS,
+        lanes:              int = DEFAULT_LANES,
+        memory_size:        int = DEFAULT_MEMORY_SIZE,
+        salt:               Union[bytes, RandomSalt, str] = DEFAULT_SALT,
+        threads:            int = DEFAULT_THREADS,
+        variant:            Variant = DEFAULT_VARIANT,
+        version:            Version = DEFAULT_VERSION
     ) -> None:
         """
         The Argon2 constructor
         """
         self.hasher = Hasher(
             additional_data=additional_data,
-            salt=salt,
-            secret_key=secret_key,
             backend=backend,
             hash_len=hash_len,
             iterations=iterations,
             lanes=lanes,
             memory_size=memory_size,
+            salt=salt,
+            secret_key=secret_key,
             threads=threads,
             variant=variant,
             version=version
         )
         self.verifier = Verifier(
             additional_data=additional_data,
-            secret_key=secret_key,
             backend=backend,
+            secret_key=secret_key,
             threads=threads
         )
 
@@ -142,7 +149,23 @@ class Argon2:
     def version(self, value: Version) -> None:
         self.hasher.version = value
 
-    def hash(self, password: Union[bytes, str]) -> str:
+    def hash(
+        self,
+        *,
+        password:           Union[bytes, str],
+
+        additional_data:    Union[bytes, str, None, Void] = VOID,
+        backend:            Union[Backend, Void] = VOID,
+        hash_len:           Union[int, Void] = VOID,
+        iterations:         Union[int, Void] = VOID,
+        lanes:              Union[int, Void] = VOID,
+        memory_size:        Union[int, Void] = VOID,
+        salt:               Union[bytes, RandomSalt, str, Void] = VOID,
+        secret_key:         Union[bytes, str, None, Void] = VOID,
+        threads:            Union[int, Void] = VOID,
+        variant:            Union[Variant, Void] = VOID,
+        version:            Union[Version, Void] = VOID
+    ) -> str:
         """
         The ``hash`` method.
 
@@ -151,9 +174,32 @@ class Argon2:
         ``Argon2`` instance (i.e. based on its ``salt``, ``secret_key``, ``iterations``,
         ``memory_size`` etc.).
         """
-        return self.hasher.hash(password=password)
+        return self.hasher.hash(
+            additional_data=additional_data,
+            backend=backend,
+            hash_len=hash_len,
+            iterations=iterations,
+            lanes=lanes,
+            memory_size=memory_size,
+            password=password,
+            salt=salt,
+            secret_key=secret_key,
+            threads=threads,
+            variant=variant,
+            version=version
+        )
 
-    def verify(self, hash: str, password: Union[bytes, str]) -> bool:
+    def verify(
+        self,
+        *,
+        hash:               str,
+        password:           Union[bytes, str],
+
+        additional_data:    Union[bytes, str, None, Void] = VOID,
+        backend:            Union[Backend, Void] = VOID,
+        secret_key:         Union[bytes, str, None, Void] = VOID,
+        threads:            Union[int, Void] = VOID,
+    ) -> bool:
         """
         The ``verify`` method.
 
@@ -166,4 +212,11 @@ class Argon2:
         ``Argon2`` instance before calling ``verify`` in order for a valid hash / password
         pair to return ``True``.
         """
-        return self.verifier.verify(hash=hash, password=password)
+        return self.verifier.verify(
+            additional_data=additional_data,
+            backend=backend,
+            hash=hash,
+            password=password,
+            secret_key=secret_key,
+            threads=threads
+        )

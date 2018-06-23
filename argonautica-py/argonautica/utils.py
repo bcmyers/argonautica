@@ -1,6 +1,6 @@
 import base64
 import re
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from argonautica.config import Variant, Version
 
@@ -28,8 +28,13 @@ class HashRaw:
     * ``version`` (of type ``Version``)
     """
     __slots__ = [
-        'iterations', 'lanes', 'memory_size',
-        'raw_hash_bytes', 'raw_salt_bytes', 'variant', 'version'
+        'iterations',
+        'lanes',
+        'memory_size',
+        'raw_hash_bytes',
+        'raw_salt_bytes',
+        'variant',
+        'version'
     ]
 
     def __init__(
@@ -68,7 +73,7 @@ def decode(hash: str) -> HashRaw:
     * \${standard base64-encoded raw salt bytes (without padding)}
     * \${standard base64-encoded raw hash bytes (without padding)}
 
-    This function accepts a string-encoded hash and returns a ``DecodedHash`` instance,
+    This function accepts a string-encoded hash and returns a ``HashRaw`` instance,
     which give you access to these underlying components.
     """
     l = RE_HASH.findall(hash)
@@ -132,3 +137,11 @@ def _base64_decode(base64_encoded: str) -> bytes:
     except:
         raise ValueError("Invalid hash. Failed to decode hash. Hash: {}".format(hash))
     return decoded
+
+
+class Void:
+    __slots__: List[str] = []
+    pass
+
+
+VOID = Void()

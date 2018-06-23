@@ -21,7 +21,7 @@ does not expose it publicly)</i>
 
 ## Alternatives
 
-There are several Python packages that implement argon2, including the excellent [passlib](http://passlib.readthedocs.io/en/stable/), but...
+There are several Python packages that implement argon2, including the excellent [passlib](http://passlib.readthedocs.io/en/stable/), which uses [argon2_cffi](https://github.com/hynek/argon2_cffi), but...
 
 * AFAIK, **argonautica** is the only Python implementation of argon2 that supports hashing with secret keys. Not even the [cannonical C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2 exposes this feature publicly (it's in the code, but unfortunately not accessable via the public API).
 
@@ -62,6 +62,7 @@ from argonautica import Hasher             # or ... from argonautica import Argo
 hasher = Hasher(secret_key='somesecret')   # or ... argon2 = Argon2(secret_key='somesecret')
 hash = hasher.hash(password='P@ssw0rd')    # or ... hash = argon2.hash(password='P@ssw0rd')
 print(hash)
+# 👆 prints a random hash as the defeault `Hasher` uses a random salt by default
 ```
 
 ### Verifying

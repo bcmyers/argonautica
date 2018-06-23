@@ -2,7 +2,7 @@ import unittest
 
 from argonautica import Hasher
 from argonautica.config import Variant, Version
-from argonautica.utils import decode, DecodedHash
+from argonautica.utils import decode
 
 
 class TestHash2(unittest.TestCase):
@@ -35,7 +35,7 @@ class TestHash2(unittest.TestCase):
     def test_hash_0x10_2d(self):
         self.hasher.variant = Variant.Argon2d
         self.hasher.version = Version._0x10
-        encoded = self.hasher.hash(self.password)
+        encoded = self.hasher.hash(password=self.password)
         decoded = decode(encoded)
         obtained = decoded.raw_hash_bytes
         expected = bytes([
@@ -48,7 +48,7 @@ class TestHash2(unittest.TestCase):
     def test_hash_0x10_2i(self):
         self.hasher.variant = Variant.Argon2i
         self.hasher.version = Version._0x10
-        encoded = self.hasher.hash(self.password)
+        encoded = self.hasher.hash(password=self.password)
         decoded = decode(encoded)
         obtained = decoded.raw_hash_bytes
         expected = bytes([
@@ -61,7 +61,7 @@ class TestHash2(unittest.TestCase):
     def test_hash_0x10_2id(self):
         self.hasher.variant = Variant.Argon2id
         self.hasher.version = Version._0x10
-        encoded = self.hasher.hash(self.password)
+        encoded = self.hasher.hash(password=self.password)
         decoded = decode(encoded)
         obtained = decoded.raw_hash_bytes
         expected = bytes([
@@ -74,7 +74,7 @@ class TestHash2(unittest.TestCase):
     def test_hash_0x13_2d(self):
         self.hasher.variant = Variant.Argon2d
         self.hasher.version = Version._0x13
-        encoded = self.hasher.hash(self.password)
+        encoded = self.hasher.hash(password=self.password)
         decoded = decode(encoded)
         obtained = decoded.raw_hash_bytes
         expected = bytes([
@@ -87,7 +87,7 @@ class TestHash2(unittest.TestCase):
     def test_hash_0x13_2i(self):
         self.hasher.variant = Variant.Argon2i
         self.hasher.version = Version._0x13
-        encoded = self.hasher.hash(self.password)
+        encoded = self.hasher.hash(password=self.password)
         decoded = decode(encoded)
         obtained = decoded.raw_hash_bytes
         expected = bytes([
@@ -100,7 +100,7 @@ class TestHash2(unittest.TestCase):
     def test_hash_0x13_2id(self):
         self.hasher.variant = Variant.Argon2id
         self.hasher.version = Version._0x13
-        encoded = self.hasher.hash(self.password)
+        encoded = self.hasher.hash(password=self.password)
         decoded = decode(encoded)
         obtained = decoded.raw_hash_bytes
         expected = bytes([

@@ -11,7 +11,7 @@ class TestHash1(unittest.TestCase):
 
     def test_hash1(self):
         hasher = Hasher(secret_key=None)
-        encoded = hasher.hash(self.password)
+        encoded = hasher.hash(password=self.password)
 
         verifier = Verifier(secret_key=None)
         is_valid = verifier.verify(password=self.password, hash=encoded)
@@ -31,7 +31,7 @@ class TestHash1(unittest.TestCase):
 
     def test_hash2(self):
         hasher = Hasher(secret_key=None, additional_data="data")
-        encoded = hasher.hash(self.password)
+        encoded = hasher.hash(password=self.password)
 
         verifier = Verifier(secret_key=None)
         is_valid = verifier.verify(password=self.password, hash=encoded)
@@ -51,7 +51,7 @@ class TestHash1(unittest.TestCase):
 
     def test_hash3(self):
         hasher = Hasher(secret_key="secret")
-        encoded = hasher.hash(self.password)
+        encoded = hasher.hash(password=self.password)
 
         verifier = Verifier(secret_key=None)
         is_valid = verifier.verify(password=self.password, hash=encoded)
@@ -71,7 +71,7 @@ class TestHash1(unittest.TestCase):
 
     def test_hash4(self):
         hasher = Hasher(secret_key="secret", additional_data="data")
-        encoded = hasher.hash(self.password)
+        encoded = hasher.hash(password=self.password)
 
         verifier = Verifier(secret_key=None)
         is_valid = verifier.verify(password=self.password, hash=encoded)
@@ -92,7 +92,7 @@ class TestHash1(unittest.TestCase):
     def test_overflow(self):
         hasher = Hasher(secret_key=None, hash_len=0x1000000000)
         try:
-            encoded = hasher.hash(self.password)
+            encoded = hasher.hash(password=self.password)
         except OverflowError:
             pass
 

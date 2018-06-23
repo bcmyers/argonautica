@@ -5,27 +5,43 @@ from argonautica.config import Backend, Variant, Version
 from argonautica.data import RandomSalt
 from argonautica.defaults import *
 from argonautica.ffi import ffi, lib
+from argonautica.utils import Void, VOID
 
 
 class Hasher:
     """
-    A class that knows how to hash (but not how to verify)
+    A class that knows how to hash
     """
+
+    __slots__ = [
+        'additional_data',
+        'backend',
+        'hash_len',
+        'iterations',
+        'lanes',
+        'memory_size',
+        'salt',
+        'secret_key',
+        'threads',
+        'variant',
+        'version'
+    ]
 
     def __init__(
         self,
-        secret_key: Union[bytes, str, None],
         *,
-        additional_data: Union[bytes, str, None] = None,
-        salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
-        backend: Backend = DEFAULT_BACKEND,
-        hash_len: int = DEFAULT_HASH_LEN,
-        iterations: int = DEFAULT_ITERATIONS,
-        lanes: int = DEFAULT_LANES,
-        memory_size: int = DEFAULT_MEMORY_SIZE,
-        threads: int = DEFAULT_THREADS,
-        variant: Variant = DEFAULT_VARIANT,
-        version: Version = DEFAULT_VERSION
+        secret_key:         Union[bytes, str, None],
+
+        additional_data:    Union[bytes, str, None] = None,
+        backend:            Backend = DEFAULT_BACKEND,
+        hash_len:           int = DEFAULT_HASH_LEN,
+        iterations:         int = DEFAULT_ITERATIONS,
+        lanes:              int = DEFAULT_LANES,
+        memory_size:        int = DEFAULT_MEMORY_SIZE,
+        salt:               Union[bytes, RandomSalt, str] = DEFAULT_SALT,
+        threads:            int = DEFAULT_THREADS,
+        variant:            Variant = DEFAULT_VARIANT,
+        version:            Version = DEFAULT_VERSION
     ) -> None:
         self.additional_data = additional_data
         self.salt = salt
@@ -39,7 +55,23 @@ class Hasher:
         self.variant = variant
         self.version = version
 
-    def hash(self, password: Union[bytes, str]) -> str:
+    def hash(
+        self,
+        *,
+        password:           Union[bytes, str],
+
+        additional_data:    Union[bytes, str, None, Void] = VOID,
+        backend:            Union[Backend, Void] = VOID,
+        hash_len:           Union[int, Void] = VOID,
+        iterations:         Union[int, Void] = VOID,
+        lanes:              Union[int, Void] = VOID,
+        memory_size:        Union[int, Void] = VOID,
+        salt:               Union[bytes, RandomSalt, str, Void] = VOID,
+        secret_key:         Union[bytes, str, None, Void] = VOID,
+        threads:            Union[int, Void] = VOID,
+        variant:            Union[Variant, Void] = VOID,
+        version:            Union[Version, Void] = VOID
+    ) -> str:
         """
         The ``hash`` method.
 
@@ -48,36 +80,59 @@ class Hasher:
         ``Hasher`` instance (i.e. based on its ``salt``, ``secret_key``, ``iterations``,
         ``memory_size`` etc.).
         """
+        if isinstance(additional_data, Void):
+            additional_data = self.additional_data
+        if isinstance(backend, Void):
+            backend = self.backend
+        if isinstance(hash_len, Void):
+            hash_len = self.hash_len
+        if isinstance(iterations, Void):
+            iterations = self.iterations
+        if isinstance(lanes, Void):
+            lanes = self.lanes
+        if isinstance(memory_size, Void):
+            memory_size = self.memory_size
+        if isinstance(salt, Void):
+            salt = self.salt
+        if isinstance(secret_key, Void):
+            secret_key = self.secret_key
+        if isinstance(threads, Void):
+            threads = self.threads
+        if isinstance(variant, Void):
+            variant = self.variant
+        if isinstance(version, Void):
+            version = self.version
         return hash(
-            password,
-            additional_data=self.additional_data,
-            salt=self.salt,
-            secret_key=self.secret_key,
-            backend=self.backend,
-            hash_len=self.hash_len,
-            iterations=self.iterations,
-            lanes=self.lanes,
-            memory_size=self.memory_size,
-            threads=self.threads,
-            variant=self.variant,
-            version=self.version
+            additional_data=additional_data,
+            backend=backend,
+            hash_len=hash_len,
+            iterations=iterations,
+            lanes=lanes,
+            memory_size=memory_size,
+            password=password,
+            salt=salt,
+            secret_key=secret_key,
+            threads=threads,
+            variant=variant,
+            version=version
         )
 
 
 def hash(
-    password: Union[bytes, str],
     *,
-    secret_key: Union[bytes, str, None],
-    additional_data: Union[bytes, str, None] = None,
-    salt: Union[bytes, RandomSalt, str] = DEFAULT_SALT,
-    backend: Backend = DEFAULT_BACKEND,
-    hash_len: int = DEFAULT_HASH_LEN,
-    iterations: int = DEFAULT_ITERATIONS,
-    lanes: int = DEFAULT_LANES,
-    memory_size: int = DEFAULT_MEMORY_SIZE,
-    threads: int = DEFAULT_THREADS,
-    variant: Variant = DEFAULT_VARIANT,
-    version: Version = DEFAULT_VERSION
+    password:           Union[bytes, str],
+    secret_key:         Union[bytes, str, None],
+
+    additional_data:    Union[bytes, str, None] = None,
+    backend:            Backend = DEFAULT_BACKEND,
+    hash_len:           int = DEFAULT_HASH_LEN,
+    iterations:         int = DEFAULT_ITERATIONS,
+    lanes:              int = DEFAULT_LANES,
+    memory_size:        int = DEFAULT_MEMORY_SIZE,
+    salt:               Union[bytes, RandomSalt, str] = DEFAULT_SALT,
+    threads:            int = DEFAULT_THREADS,
+    variant:            Variant = DEFAULT_VARIANT,
+    version:            Version = DEFAULT_VERSION
 ) -> str:
     """
     A standalone hash function
@@ -133,10 +188,10 @@ class _Data:
     def __init__(
         self,
         *,
-        additional_data: Union[bytes, str, None],
-        password: Union[bytes, str],
-        salt: Union[bytes, RandomSalt, str],
-        secret_key: Union[bytes, str, None]
+        additional_data:    Union[bytes, str, None],
+        password:           Union[bytes, str],
+        salt:               Union[bytes, RandomSalt, str],
+        secret_key:         Union[bytes, str, None]
     ) -> None:
         if additional_data is None:
             self.additional_data = ffi.NULL

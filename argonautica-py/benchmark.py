@@ -7,7 +7,7 @@ from passlib.hash import argon2
 
 def argonautica():
     hasher = Hasher(secret_key=None, variant=Variant.Argon2i)
-    hasher.hash("P@ssw0rd")
+    hasher.hash(password="P@ssw0rd")
 
 
 def passlib():
