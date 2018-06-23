@@ -4,6 +4,8 @@
 [![Github.com](https://img.shields.io/badge/github-bcmyers%2Fargonautica-blue.svg)](http://www.github.com/bcmyers/argonautica)
 ![License](https://img.shields.io/crates/l/argonautica.svg)
 
+## WIP (almost ready to use, but not quite yet)
+
 ## Overview
 
 **argonautica** is a Python package for hashing passwords that uses the cryptographically-secure [argon2](https://en.wikipedia.org/wiki/Argon2) hashing algorithm.
@@ -73,6 +75,7 @@ print(is_valid)
 ```python3
 from argonautica import Hasher, Verifier
 from argonautica.config import Backend, Variant, Version
+from argonautica.data import RandomSalt
 
 hasher = Hasher(secret_key=None)
                 # 👆 A secret key is required to instantiate
@@ -160,13 +163,27 @@ hasher.version = Version._0x13
 # Unless you have a very specific reason not to, you should use the latest
 # version (0x13), which is also the default
 
-hash = hasher.hash(password='P@ssw0rd')
+hash = hasher.hash(
+	password='P@ssw0rd', 
+	salt=RandomSalt(32), 
+	additional_data=None
+)
 assert(hash == 'TODO')
 
-verifier = Verifier(secret=None)
-verifier.backend = Backend.C
-verifier.threads = 4
-is_valid = verifier.verify(hash=hash, password='P@ssw0rd`)
+verifier = Verifier(secret_key=None) 
+	                # 👆 A secret key is required to instantiate
+	                # a Hasher, a Verifier, or an Argon2, but you
+	                # are allowed to pass `None` in order to forgo
+	                # using a secret key (this is not recommended)
+
+verifier.backend = Backend.C 		# As with Hasher, you can configure a Verifier's backend
+verifier.threads = 4 				# As with Hasher, you can configure a Verifier's threads
+
+is_valid = verifier.verify(
+	hash=hash, 
+	password='P@ssw0rd`
+	additional_data=None,
+)
 assert(is_valid)
 ```
 
