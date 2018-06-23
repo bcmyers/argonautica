@@ -72,6 +72,7 @@ print(is_valid)
 
 ```python3
 from argonautica import Hasher
+from argonautica.config import Backend, Variant, Version
 
 hasher = Hasher(secret_key='somesecret`)
                 # 👆 A secret key is required to instantiate
@@ -79,6 +80,14 @@ hasher = Hasher(secret_key='somesecret`)
                 # are allowed to pass `None` in order to forgoe
                 # using a secret key (this is not recommended)
                 
+hasher.backend = Backend.C
+# 👆 argonautica was designed to support multiple backends (meaning multiple
+# implementations of the underlying Argon2 algorithm). Currently only the C backend
+# is supported, which uses the cannonical argon2 library written in C to actually
+# do the work. In the future a Rust backend will also be supported, but,
+# for the moment, you must use Backend.C, which is the default. Using
+# Backend.Rust will result in an error (again, for the moment).
+
 hasher.hash_len = 32
 # 👆 The hash length in bytes is configurable. The default is 32. 
 # This is probably a good number to use. 16 is also probably fine. 
