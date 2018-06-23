@@ -251,7 +251,7 @@ assert(hash == hash2)
 
 **Argon2**
 
-``Argon2`` is a class that essentially hold both a ``Hasher`` and a ``Verifier``. If you'd like to use just one class that knows how both to hash and to verify, instantiate an ``Argon2``.
+``Argon2`` is a convenience class that holds both a ``Hasher`` and a ``Verifier``. If you'd like to use just one class that knows how both to hash and to verify, instantiate an ``Argon2``.
 
 
 ```python3

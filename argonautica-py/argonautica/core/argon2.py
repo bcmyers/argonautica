@@ -95,7 +95,7 @@ class Argon2:
         additional_data:    Union[bytes, str, None, Void] = VOID,
         backend:            Union[Backend, Void] = VOID,
         secret_key:         Union[bytes, str, None, Void] = VOID,
-        threads:            Union[int, Void] = VOID,
+        threads:            Union[int, Void] = VOID
     ) -> bool:
         return self.verifier.verify(
             additional_data=additional_data,
