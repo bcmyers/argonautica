@@ -186,8 +186,8 @@ verifier = Verifier(secret_key=None)
 	                # are allowed to pass `None` in order to forgo
 	                # using a secret key (this is not recommended)
 
-verifier.backend = Backend.C 	# As with Hasher, you can configure a Verifier's backend
-verifier.threads = 4 			# As with Hasher, you can configure a Verifier's threads
+verifier.backend = Backend.C  # As with Hasher, you can configure a Verifier's backend
+verifier.threads = 4          # As with Hasher, you can configure a Verifier's threads
 
 is_valid = verifier.verify(
 	hash=hash, 
@@ -208,7 +208,7 @@ assert(is_valid)
 * Hashing with **argonautica** produces a string-encoded hash, but sometimes you might want the "raw material" behind this hash, i.e. the raw hash bytes, the raw salt bytes, or raw parameters, which are the three component parts of a string-encoded hash. To obtain these raw parts...
 
 ```python3
-from argonautica.utils import decode
+from argonautica.utils import decode, HashRaw
 
 hash = '$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q'
 
@@ -226,7 +226,7 @@ version = hash_raw.version           # Version._0x13
 raw_hash_bytes = hash_raw.raw_hash_bytes  # b'[\x00\xf6\xff\x01\x86N\xec;\xbb\x80V\xf2\xc2\xcc\xd1'
 raw_salt_bytes = hash_raw.raw_salt_bytes  # b'somesalt'
 
-# To turn a `HashRaw` back into a string-encoded hash, use the `encode` method
+# Turn a `HashRaw` back into a string-encoded hash using the `encode` method
 hash2 = hash_raw.encode()
 assert(hash == hash2)
 ``` 
