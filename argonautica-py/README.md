@@ -95,7 +95,7 @@ hasher = Hasher(secret_key=None)
                 
 hasher.backend = Backend.C # Default is Backend.C
 # 👆 argonautica was designed to support multiple backends (meaning multiple
-# implementations of the underlying Argon2 algorithm). Currently only the 
+# implementations of the underlying argon2 algorithm). Currently only the 
 # C backend is supported, which uses the cannonical argon2 library written 
 # in C to actually do the work. In the future a Rust backend will also be
 # supported, but, for the moment, you must use Backend.C, which is the 
@@ -124,7 +124,7 @@ hasher.iterations = 192 # Default is 192
 # milliseconds for the use-case of hashing user passwords for a website)
 
 hasher.lanes = multiprocessing.cpu_count() # Default is multiprocessing.cpu_count()
-# 👆 argon2 can break up its work into one or more "lanes" during some parts of
+# 👆 Argon2 can break up its work into one or more "lanes" during some parts of
 # the hashing algorithm. If you configure it with multiple lanes and you also
 # use multiple threads (see below) the hashing algorithm will performed its
 # work in parallel in some parts, potentially speeding up the time it takes to
@@ -132,7 +132,7 @@ hasher.lanes = multiprocessing.cpu_count() # Default is multiprocessing.cpu_coun
 # the number of lanes is set to the number of logical cores on your machine
 
 hasher.memory_size = 4096 # Default is 4096
-# 👆 argon2 has a notion of "memory size" or "memory cost" (in kibibytes). All else
+# 👆 Argon2 has a notion of "memory size" or "memory cost" (in kibibytes). All else
 # equal and generally speaking, the greater the memory size, the longer it takes to
 # perform the hash and the more secure the resulting hash. More memory size basically
 # means more memory used. This and "iterations" (see above) are, again, generally
@@ -169,7 +169,7 @@ hasher.variant = Variant.Argon2id # Default is Variant.Argon2id
 # variant to use, use the default, which is Argon2id
 
 hasher.version = Version._0x13 # Default is Version._0x13
-# 👆 argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
+# 👆 Argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
 # Unless you have a very specific reason not to, you should use the latest
 # version (0x13), which is also the default
 
