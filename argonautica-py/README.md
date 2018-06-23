@@ -71,13 +71,13 @@ print(is_valid)
 ### Configuration
 
 ```python3
-from argonautica import Hasher
+from argonautica import Hasher, Verifier
 from argonautica.config import Backend, Variant, Version
 
 hasher = Hasher(secret_key=None)
                 # 👆 A secret key is required to instantiate
                 # a Hasher, a Verifier, or an Argon2, but you
-                # are allowed to pass `None` in order to forgoe
+                # are allowed to pass `None` in order to forgo
                 # using a secret key (this is not recommended)
                 
 hasher.backend = Backend.C
@@ -159,6 +159,15 @@ hasher.version = Version._0x13
 # 👆 argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
 # Unless you have a very specific reason not to, you should use the latest
 # version (0x13), which is also the default
+
+hash = hasher.hash(password='P@ssw0rd')
+assert(hash == 'TODO')
+
+verifier = Verifier(secret=None)
+verifier.backend = Backend.C
+verifier.threads = 4
+is_valid = verifier.verify(hash=hash, password='P@ssw0rd`)
+assert(is_valid)
 ```
 
 ## License
