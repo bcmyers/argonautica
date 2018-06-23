@@ -22,7 +22,7 @@ def passlib():
 
 
 if __name__ == "__main__":
-    iterations = 10
+    iterations = 100
 
     print("Running argonautica for {} iterations ...".format(iterations))
     setup = "from __main__ import argonautica"

@@ -1,8 +1,8 @@
 from typing import Union
 
 from argonautica.config import Backend
+from argonautica.core.ffi import ffi, lib
 from argonautica.defaults import *
-from argonautica.ffi import ffi, lib
 from argonautica.utils import Void, VOID
 
 

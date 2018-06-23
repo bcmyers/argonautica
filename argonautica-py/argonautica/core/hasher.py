@@ -2,9 +2,9 @@ import base64
 from typing import Union
 
 from argonautica.config import Backend, Variant, Version
+from argonautica.core.ffi import ffi, lib
 from argonautica.data import RandomSalt
 from argonautica.defaults import *
-from argonautica.ffi import ffi, lib
 from argonautica.utils import Void, VOID
 
 
@@ -72,14 +72,6 @@ class Hasher:
         variant:            Union[Variant, Void] = VOID,
         version:            Union[Version, Void] = VOID
     ) -> str:
-        """
-        The ``hash`` method.
-
-        This function accepts a password of type ``bytes`` or ``str`` and returns an
-        encoded hash of type ``str``. The hash will be created based on the configuration of the
-        ``Hasher`` instance (i.e. based on its ``salt``, ``secret_key``, ``iterations``,
-        ``memory_size`` etc.).
-        """
         if isinstance(additional_data, Void):
             additional_data = self.additional_data
         if isinstance(backend, Void):
@@ -137,13 +129,12 @@ def hash(
     """
     A standalone hash function
     """
-    data = _Data(
+    data = Validator(
         additional_data=additional_data,
         password=password,
         salt=salt,
         secret_key=secret_key,
     )
-
     encoded_len = lib.argonautica_encoded_len(
         hash_len,
         iterations,
@@ -184,7 +175,7 @@ def hash(
     return hash
 
 
-class _Data:
+class Validator:
     def __init__(
         self,
         *,

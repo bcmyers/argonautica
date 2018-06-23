@@ -1,16 +1,16 @@
 from typing import Union
 
 from argonautica.config import Backend, Variant, Version
+from argonautica.core.hasher import Hasher
+from argonautica.core.verifier import Verifier
 from argonautica.data import RandomSalt
 from argonautica.defaults import *
-from argonautica.hasher import Hasher
 from argonautica.utils import Void, VOID
-from argonautica.verifier import Verifier
 
 
 class Argon2:
     """
-    A class that knows both how to hash and how to verify.
+    A class that knows how to hash and how to verify.
     """
 
     __slots__ = [
@@ -34,9 +34,6 @@ class Argon2:
         variant:            Variant = DEFAULT_VARIANT,
         version:            Version = DEFAULT_VERSION
     ) -> None:
-        """
-        The Argon2 constructor
-        """
         self.hasher = Hasher(
             additional_data=additional_data,
             backend=backend,
@@ -74,14 +71,6 @@ class Argon2:
         variant:            Union[Variant, Void] = VOID,
         version:            Union[Version, Void] = VOID
     ) -> str:
-        """
-        The ``hash`` method.
-
-        This function accepts a password of type ``bytes`` or ``str`` and returns an
-        encoded hash of type ``str``. The hash will be created based on the configuration of the
-        ``Argon2`` instance (i.e. based on its ``salt``, ``secret_key``, ``iterations``,
-        ``memory_size`` etc.).
-        """
         return self.hasher.hash(
             additional_data=additional_data,
             backend=backend,
@@ -108,18 +97,6 @@ class Argon2:
         secret_key:         Union[bytes, str, None, Void] = VOID,
         threads:            Union[int, Void] = VOID,
     ) -> bool:
-        """
-        The ``verify`` method.
-
-        This function accepts a hash of type ``str`` and a  password of type ``bytes`` or ``str``.
-        It returns ``True`` if the hash and password match or ``False`` is the hash and
-        password do not match.
-
-        If the hash was created with a ``secret_key`` (recommended) and/or ``additional_data``
-        (not necessarily recommended), you will need to have set these properties on the
-        ``Argon2`` instance before calling ``verify`` in order for a valid hash / password
-        pair to return ``True``.
-        """
         return self.verifier.verify(
             additional_data=additional_data,
             backend=backend,

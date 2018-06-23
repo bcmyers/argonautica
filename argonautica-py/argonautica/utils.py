@@ -16,16 +16,6 @@ class HashRaw:
 
     You can obtain an instance of this class by calling the ``decode`` function on
     a string-encoded hash.
-
-    It contains the following instance variables:
-
-    * ``iterations`` (of type ``int``)
-    * ``lanes`` (of type ``int``)
-    * ``memory_size`` (of type ``int``)
-    * ``raw_hash_bytes`` (of type ``bytes``)
-    * ``raw_salt_bytes`` (of type ``bytes``)
-    * ``variant`` (of type ``Variant``)
-    * ``version`` (of type ``Version``)
     """
     __slots__ = [
         'iterations',
@@ -40,13 +30,13 @@ class HashRaw:
     def __init__(
         self,
         *,
-        iterations: int,
-        lanes: int,
-        memory_size: int,
-        raw_hash_bytes: bytes,
-        raw_salt_bytes: bytes,
-        variant: Variant,
-        version: Version
+        iterations:         int,
+        lanes:              int,
+        memory_size:        int,
+        raw_hash_bytes:     bytes,
+        raw_salt_bytes:     bytes,
+        variant:            Variant,
+        version:            Version
     ) -> None:
         self.iterations = iterations
         self.lanes = lanes

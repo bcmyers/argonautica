@@ -10,8 +10,8 @@ from cffi import FFI
 def init_ffi() -> Tuple[FFI, Any]:
     ffi = FFI()
 
-    here = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(here, "argonautica.h"), 'r') as f:
+    argonautica_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    with open(os.path.join(argonautica_dir, "argonautica.h"), 'r') as f:
         header = f.read()
     directive_regex = re.compile(r'^\s*#.*?$(?m)')
     header = directive_regex.sub('', header)
@@ -24,8 +24,7 @@ def init_ffi() -> Tuple[FFI, Any]:
         rust_path = glob(rust_glob)[0]
     except:
         try:
-            here = os.path.abspath(os.path.dirname(__file__))
-            rust_glob = os.path.join(here, "rust.*")
+            rust_glob = os.path.join(argonautica_dir, "rust.*")
             rust_path = glob(rust_glob)[0]
         except:
             raise Exception("Error")

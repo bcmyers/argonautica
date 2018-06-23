@@ -1,7 +1,7 @@
 from enum import Enum
 import multiprocessing
 
-from argonautica.ffi import lib
+from argonautica.core.ffi import lib
 
 
 class Backend(Enum):
