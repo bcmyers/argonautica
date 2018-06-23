@@ -85,7 +85,6 @@ import multiprocessing
 
 from argonautica import Hasher, Verifier
 from argonautica.config import Backend, Variant, Version
-from argonautica.data import RandomSalt
 
 hasher = Hasher(secret_key=None)
                 # 👆 A secret key (passed as a keyword argument) 
@@ -206,15 +205,16 @@ assert(is_valid)
 
 **RandomSalt**
 
-* ``RandomSalt`` is a special kind of salt that will create new random salt bytes before each hash. A RandomSalt knows its length (in number of bytes). The default ``Hasher`` uses a ``RandomSalt`` with length of 32 bytes, but you can use your own ``RandomSalt`` of with custom length. When you instantiate a ``RandomSalt``, the constructor takes a len, e.g. ``my_random_salt = RandomSalt(16)``
+* ``RandomSalt`` is a special kind of salt that will create new random salt bytes before each hash. A RandomSalt knows its length (in number of bytes). The default ``Hasher`` uses a ``RandomSalt`` with length of 32 bytes, but you can use your own ``RandomSalt`` of custom length. When you instantiate a ``RandomSalt``, the constructor takes a length, e.g. ``my_random_salt = RandomSalt(16)``
 
 ```python3
 from argonautica import Hasher
 from argonautica.data import RandomSalt
 
 hasher = Hasher(
-	salt=RandomSalt(16), # Here we're using a RandomSalt of length of 16 bytes
-                         # instead of the default, which is a RandomSalt of length 32 bytes
+	salt=RandomSalt(16), 
+	# 👆 Here we're using a RandomSalt of length of 16 bytes
+	# instead of the default, which is a RandomSalt of length 32 bytes
 	secret_key="somesecret"
 )
 hash = hasher.hash(password='P@ssw0rd')
