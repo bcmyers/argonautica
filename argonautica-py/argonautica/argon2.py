@@ -57,6 +57,78 @@ class Argon2:
             threads=threads
         )
 
+    def hash(
+        self,
+        *,
+        password:           Union[bytes, str],
+
+        additional_data:    Union[bytes, str, None, Void] = VOID,
+        backend:            Union[Backend, Void] = VOID,
+        hash_len:           Union[int, Void] = VOID,
+        iterations:         Union[int, Void] = VOID,
+        lanes:              Union[int, Void] = VOID,
+        memory_size:        Union[int, Void] = VOID,
+        salt:               Union[bytes, RandomSalt, str, Void] = VOID,
+        secret_key:         Union[bytes, str, None, Void] = VOID,
+        threads:            Union[int, Void] = VOID,
+        variant:            Union[Variant, Void] = VOID,
+        version:            Union[Version, Void] = VOID
+    ) -> str:
+        """
+        The ``hash`` method.
+
+        This function accepts a password of type ``bytes`` or ``str`` and returns an
+        encoded hash of type ``str``. The hash will be created based on the configuration of the
+        ``Argon2`` instance (i.e. based on its ``salt``, ``secret_key``, ``iterations``,
+        ``memory_size`` etc.).
+        """
+        return self.hasher.hash(
+            additional_data=additional_data,
+            backend=backend,
+            hash_len=hash_len,
+            iterations=iterations,
+            lanes=lanes,
+            memory_size=memory_size,
+            password=password,
+            salt=salt,
+            secret_key=secret_key,
+            threads=threads,
+            variant=variant,
+            version=version
+        )
+
+    def verify(
+        self,
+        *,
+        hash:               str,
+        password:           Union[bytes, str],
+
+        additional_data:    Union[bytes, str, None, Void] = VOID,
+        backend:            Union[Backend, Void] = VOID,
+        secret_key:         Union[bytes, str, None, Void] = VOID,
+        threads:            Union[int, Void] = VOID,
+    ) -> bool:
+        """
+        The ``verify`` method.
+
+        This function accepts a hash of type ``str`` and a  password of type ``bytes`` or ``str``.
+        It returns ``True`` if the hash and password match or ``False`` is the hash and
+        password do not match.
+
+        If the hash was created with a ``secret_key`` (recommended) and/or ``additional_data``
+        (not necessarily recommended), you will need to have set these properties on the
+        ``Argon2`` instance before calling ``verify`` in order for a valid hash / password
+        pair to return ``True``.
+        """
+        return self.verifier.verify(
+            additional_data=additional_data,
+            backend=backend,
+            hash=hash,
+            password=password,
+            secret_key=secret_key,
+            threads=threads
+        )
+
     @property
     def additional_data(self) -> Union[bytes, str, None]:
         return self.hasher.additional_data
@@ -148,75 +220,3 @@ class Argon2:
     @version.setter
     def version(self, value: Version) -> None:
         self.hasher.version = value
-
-    def hash(
-        self,
-        *,
-        password:           Union[bytes, str],
-
-        additional_data:    Union[bytes, str, None, Void] = VOID,
-        backend:            Union[Backend, Void] = VOID,
-        hash_len:           Union[int, Void] = VOID,
-        iterations:         Union[int, Void] = VOID,
-        lanes:              Union[int, Void] = VOID,
-        memory_size:        Union[int, Void] = VOID,
-        salt:               Union[bytes, RandomSalt, str, Void] = VOID,
-        secret_key:         Union[bytes, str, None, Void] = VOID,
-        threads:            Union[int, Void] = VOID,
-        variant:            Union[Variant, Void] = VOID,
-        version:            Union[Version, Void] = VOID
-    ) -> str:
-        """
-        The ``hash`` method.
-
-        This function accepts a password of type ``bytes`` or ``str`` and returns an
-        encoded hash of type ``str``. The hash will be created based on the configuration of the
-        ``Argon2`` instance (i.e. based on its ``salt``, ``secret_key``, ``iterations``,
-        ``memory_size`` etc.).
-        """
-        return self.hasher.hash(
-            additional_data=additional_data,
-            backend=backend,
-            hash_len=hash_len,
-            iterations=iterations,
-            lanes=lanes,
-            memory_size=memory_size,
-            password=password,
-            salt=salt,
-            secret_key=secret_key,
-            threads=threads,
-            variant=variant,
-            version=version
-        )
-
-    def verify(
-        self,
-        *,
-        hash:               str,
-        password:           Union[bytes, str],
-
-        additional_data:    Union[bytes, str, None, Void] = VOID,
-        backend:            Union[Backend, Void] = VOID,
-        secret_key:         Union[bytes, str, None, Void] = VOID,
-        threads:            Union[int, Void] = VOID,
-    ) -> bool:
-        """
-        The ``verify`` method.
-
-        This function accepts a hash of type ``str`` and a  password of type ``bytes`` or ``str``.
-        It returns ``True`` if the hash and password match or ``False`` is the hash and
-        password do not match.
-
-        If the hash was created with a ``secret_key`` (recommended) and/or ``additional_data``
-        (not necessarily recommended), you will need to have set these properties on the
-        ``Argon2`` instance before calling ``verify`` in order for a valid hash / password
-        pair to return ``True``.
-        """
-        return self.verifier.verify(
-            additional_data=additional_data,
-            backend=backend,
-            hash=hash,
-            password=password,
-            secret_key=secret_key,
-            threads=threads
-        )
