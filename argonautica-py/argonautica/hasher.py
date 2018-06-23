@@ -10,41 +10,6 @@ from argonautica.ffi import ffi, lib
 class Hasher:
     """
     A class that knows how to hash (but not how to verify)
-
-    To instantiate it, just invoke it's constructor with a secret key (which can be ``None``), e.g.
-    ``Hasher(secret_key=None)``. This will create a ``Hasher`` instance with the same default
-    values as the ``Argon2`` class above (see above).
-
-    You can change any one of these default values by calling the constructor with
-    keyword arguments matching its properties (for a list of these properties, again,
-    see ``Argon2`` above), e.g.
-
-    .. code-block:: python
-
-        from argonautica import Hasher
-
-        hasher = Hasher(iterations=256, secret_key="somesecret")
-
-    or by first instantiating a default ``Hasher`` and then modifying it's properties, e.g.
-
-    .. code-block:: python
-
-        from argonautica import Hasher
-
-        hasher = Hasher(secret_key=None)
-        hasher.iterations = 256
-        hasher.secret_key = "somesecret"
-
-    Once you have configured a particular ``Hasher`` instance to your liking, you can use
-    it to hash by calling the ``hash`` method, e.g.
-
-    .. code-block:: python
-
-        from argonautica import Hasher
-
-        hasher = Hasher(iterations=256, secret_key="somesecret")
-        encoded = hasher.hash("P@ssw0rd")
-        print(encoded)
     """
 
     def __init__(

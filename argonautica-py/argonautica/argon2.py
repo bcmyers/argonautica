@@ -9,64 +9,7 @@ from argonautica.verifier import Verifier
 
 class Argon2:
     """
-    A class that knows how to hash and how to verify.
-
-    To instantiate it, just invoke it's constructor with a secret key (which can be ``None``), e.g.
-    ``Argon2(secret_key=None)``. This will create an ``Argon2`` instance with the
-    following default values:
-
-    * additional_data: ``None``
-    * backend: ``Backend.C``
-    * hash_len: ``32``
-    * iterations: ``192``
-    * lanes: ``the number of logical cores on your machine``
-    * memory_size: ``4096``
-    * salt: ``RandomSalt(32)``
-    * threads: ``the number of logical cores on your machine``
-    * variant: ``Variant.Argon2id``
-    * version: ``Version._0x13``
-
-    You can change any one of these default values by calling the constructor with
-    keyword arguments matching the names above, e.g.
-
-    .. code-block:: python
-
-        from argonautica import Argon2
-
-        argon2 = Argon2(iterations=256, secret_key="somesecret")
-
-    or by first instantiating a default ``Argon2`` and then modifying it's properties, e.g.
-
-    .. code-block:: python
-
-        from argonautica import Argon2
-
-        argon2 = Argon2(secret_key=None)
-        argon2.iterations = 256
-        argon2.secret_key = "somesecret"
-
-    Once you have configured a particular ``Argon2`` instance to your liking, you can use
-    it to hash by calling the ``hash`` method, e.g.
-
-    .. code-block:: python
-
-        from argonautica import Argon2
-
-        argon2 = Argon2(iterations=256, secret_key="somesecret")
-        encoded = argon2.hash("P@ssw0rd")
-        print(encoded)
-
-    Once you have a hash, you can use your instance of ``Argon2`` to verify that
-    a particular password matches that hash by calling the ``verify`` method, e.g.
-
-    .. code-block:: python
-
-        from argonautica import Argon2
-
-        argon2 = Argon2(iterations=256, secret_key="somesecret")
-        encoded = argon2.hash("P@ssw0rd")
-        is_valid: bool = argon2.verify(hash=encoded, password="P@ssw0rd")
-        print(is_valid)
+    A class that knows both how to hash and how to verify.
     """
 
     def __init__(
@@ -109,18 +52,6 @@ class Argon2:
 
     @property
     def additional_data(self) -> Union[bytes, str, None]:
-        """
-        The ``additional_data`` input, which defaults to ``None`` and has the type
-        ``Union[bytes, str, None]``.
-
-        Although typically not used, the argon2 algorithm allows users to provide arbitrary
-        "additional data" to the hash function that impacts its result. This additional data,
-        however, is not encoded into the resulting hash string (it's kind of like a secondary
-        secret key). This means that, later, when you would like to verify a password against
-        a hash created with additional data, you will have to provide the same additional data
-        that was used to create the hash to the ``verify`` function, ``Verifier.verify`` method,
-        or ``Argon2.verify`` method in order to properly validate a valid password / hash pair.
-        """
         return self.hasher.additional_data
 
     @additional_data.setter
@@ -130,17 +61,6 @@ class Argon2:
 
     @property
     def backend(self) -> Backend:
-        """
-        The ``backend`` configuration, which defaults to ``Backend.C`` and has the type
-        ``Backend``.
-
-        argonautica-py was designed to support multiple backends (meaning multiple
-        implementations of the underlying argon2 algorithm). Currently only the C backend
-        is supported, which uses the cannonical Argon2 library written in C to actually
-        do the work. In the future hopefully a Rust backend will also be supported, but,
-        for the moment, you must use ``Backend.C``, which is the default. Using
-        ``Backend.Rust`` will result in an exception (again, for the moment).
-        """
         return self.hasher.backend
 
     @backend.setter
@@ -150,15 +70,6 @@ class Argon2:
 
     @property
     def hash_len(self) -> int:
-        """
-        The ``hash_len`` configuration, which defaults to ``32`` and has the type ``int``.
-
-        The hash length in bytes is configurable. The default is ``32``. This is probably
-        a good number to use. ``16`` is also probably fine. You probably shouldn't go below ``16``.
-
-        This configuration is only used for hashing (it will be read from the encoded hash
-        string during verification as opposed to being provided by the user as during hashing).
-        """
         return self.hasher.hash_len
 
     @hash_len.setter
@@ -167,25 +78,6 @@ class Argon2:
 
     @property
     def iterations(self) -> int:
-        """
-        The ``iterations`` configuration, which defaults to ``192`` and has the type ``int``.
-
-        Argon2 has a notion of "iterations" or "time cost". All else equal and generally
-        speaking, the greater the number of iterations, the longer it takes to perform the
-        hash and the more secure the resulting hash. More iterations basically means more
-        CPU load. This and ``memory size`` (see below) are the two primary parameters to
-        adjust in order to increase or decrease the security of your hash. The default is
-        ``192`` iterations, which was chosen because, along with the default memory size of
-        ``4096``, this leads to a hashing time of approximately ``300`` milliseconds on the
-        early-2014 Macbook Air that is the developer's machine. If you're going to use
-        argonautica in production, you should probably tweak this parameter (and the memory
-        size parameter) in order to increase the time it takes to hash to the maximum you
-        can reasonably allow for your use-case (e.g. to probably about ``300``-``500``
-        milliseconds for the use-case of hashing user passwords for a website).
-
-        This configuration is only used for hashing (it will be read from the encoded hash
-        string during verification as opposed to being provided by the user as during hashing).
-        """
         return self.hasher.iterations
 
     @iterations.setter
@@ -194,19 +86,6 @@ class Argon2:
 
     @property
     def lanes(self) -> int:
-        """
-        The ``lanes`` configuration, which defaults to ``the number of logical cores on
-        your machine`` and has the type ``int``.
-
-        Argon2 can break up its work into one or more "lanes" during some parts of the hashing
-        algorithm. If you configure it with multiple lanes and you also use multiple threads
-        (see below) the hashing algorithm will performed its work in parallel in some parts,
-        potentially speeding up the time it takes to produce a hash without diminishing the
-        security of the result.
-
-        This configuration is only used for hashing (it will be read from the encoded hash
-        string during verification as opposed to being provided by the user as during hashing).
-        """
         return self.hasher.lanes
 
     @lanes.setter
@@ -215,26 +94,6 @@ class Argon2:
 
     @property
     def memory_size(self) -> int:
-        """
-        The ``memory_size`` configuration, which defaults to ``4096`` and has the type ``int``.
-
-        Argon2 has a notion of "memory size" or "memory cost" (in kibibytes). All else
-        equal and generally speaking, the greater the memory size, the longer it takes to
-        perform the hash and the more secure the resulting hash. More memory size basically
-        means more memory used. This and ``iterations`` (see above) are, again, generally
-        speaking, the two parameters to adjust in order to increase or decrease the
-        security of your hash. The default is ``4096`` kibibytes, which was chosen because,
-        again, along with the default iterations of ``192``, this leads to a hashing time of
-        approximately ``300`` milliseconds on the early-2014 Macbook Air that is the
-        developer's machine. If you're going to use argonautica in production, you should
-        probably tweak this parameter (and the iterations parameter) in order to increase
-        the time it takes to hash to the maximum you can reasonably allow for your use-case
-        (e.g. to probably about ``300``-``500`` milliseconds for the use-case of hashing user
-        passwords for a website).
-
-        This configuration is only used for hashing (it will be read from the encoded hash
-        string during verification as opposed to being provided by the user as during hashing).
-        """
         return self.hasher.memory_size
 
     @memory_size.setter
@@ -243,28 +102,6 @@ class Argon2:
 
     @property
     def salt(self) -> Union[bytes, RandomSalt, str]:
-        """
-        The ``salt`` input, which defaults to ``SaltRandom(32)`` and has the type
-        ``Union[bytes, SaltRandom, str]``.
-
-        Argon2 requires a salt of at least 8 bytes, which, unlike the secret key, is not sensitive
-        data (it is encoded in the resulting hash using base64 encoding; so anyone with the hash
-        can easily figure out the salt that was used to create it, which is fine).
-
-        That said, you have two decisions to make when choosing a salt: 1) The length of the salt
-        in bytes, and 2) Whether you want a "random" salt, meaning a salt whose byte buffer
-        will be filled with new random bytes before each hash, or a "deterministic" salt,
-        meaning a salt whose bytes you specify and which can remain the same for each hash.
-        Setting ``salt`` to an instance of the ``RandomSalt`` class, which allows you to
-        specify a length, will lead to hashing with a "random" salt. Setting ``salt`` to an
-        instance of ``bytes`` or ``str`` will lead to hashing with a "deterministic" salt.
-
-        Generally speaking, "random" salts are more secure and longer salts are more secure. It
-        is not recommended that you hash with a "deterministic" salt.
-
-        This input is only used for hashing (it will be read from the encoded hash
-        string during verification as opposed to being provided by the user as during hashing).
-        """
         return self.hasher.salt
 
     @salt.setter
@@ -273,19 +110,6 @@ class Argon2:
 
     @property
     def secret_key(self) -> Union[bytes, str, None]:
-        """
-        The ``secret_key`` input, which defaults to ``None`` and has the type
-        ``Union[bytes, str, None]``.
-
-        Argon2 allows you to hash with a ``secret_key``. Even though the default ``secret_key``
-        is ``None``, it is recommended that you hash with a ``secret_key`` that is not ``None``.
-
-        The ``secret_key`` is not encoded into the resulting hash string. This means that, later,
-        when you would like to verify a password against a hash created with additional data,
-        you will have to provide the same secret key that was used to create the hash to the
-        ``verify`` function, ``Verifier.verify`` method, or ``Argon2.verify`` method in order to
-        properly validate a valid password / hash pair.
-        """
         return self.hasher.secret_key
 
     @secret_key.setter
@@ -295,19 +119,6 @@ class Argon2:
 
     @property
     def threads(self) -> int:
-        """
-        The ``threads`` configuration, which defaults to ``the numeber of logical cores on
-        your machine`` and has the type ``int``.
-
-        If you have configured ``lanes`` (see above) to be more than one, you can get the
-        hashing algorithm to run in parallel during some parts of the computation by setting
-        the number of threads to be greater than one as well, potentially speeding up the time
-        it takes to produce a hash without diminishing the security of the result.
-        By default, the number of threads is set to the number of logical cores on your
-        machine. If you set the number of ``threads`` to a number greater than the number of
-        ``lanes``, the algorithm will automatically reduce the number of ``threads`` to the
-        number of ``lanes``.
-        """
         return self.hasher.threads
 
     @threads.setter
@@ -317,24 +128,6 @@ class Argon2:
 
     @property
     def variant(self) -> Variant:
-        """
-        The ``variant`` configuration, which defaults to ``Variant.Argon2id`` and has the
-        type ``Variant``.
-
-        Argon2 has three variants: Argon2d, Argon2i, and Argon2id. Here is how these
-        variants are explained in the RFC: "Argon2 has one primary variant: Argon2id,
-        and two supplementary variants: Argon2d and Argon2i. Argon2d uses data-dependent
-        memory access, which makes it suitable for ... applications with no threats from
-        side-channel timing attacks. Argon2i uses data-independent memory access, which
-        is preferred for password hashing and password-based key derivation. Argon2id
-        works as Argon2i for the first half of the first iteration over the memory, and
-        as Argon2d for the rest, thus providing both side-channel attack protection and
-        brute-force cost savings due to time-memory tradeoffs." If you do not know which
-        variant to use, use the default, which is ``Variant.Argon2id``.
-
-        This configuration is only used for hashing (it will be read from the encoded hash
-        string during verification as opposed to being provided by the user as during hashing).
-        """
         return self.hasher.variant
 
     @variant.setter
@@ -343,17 +136,6 @@ class Argon2:
 
     @property
     def version(self) -> Version:
-        """
-        The ``version`` configuration, which defaults to ``Version._0x13`` and has the
-        type ``Version``.
-
-        Argon2 has two versions: 0x10 and 0x13. The latest version is 0x13 (as of 5/18).
-        Unless you have a very specific reason not to, you should use the latest
-        version (0x13), which is also the default.
-
-        This configuration is only used for hashing (it will be read from the encoded hash
-        string during verification as opposed to being provided by the user as during hashing).
-        """
         return self.hasher.version
 
     @version.setter

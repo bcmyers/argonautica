@@ -1,6 +1,7 @@
 .DS_Store
 .vscode/
 todo.txt
+foo.py
 
 **/*.rs.bk
 bindings.rs

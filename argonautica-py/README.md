@@ -197,6 +197,38 @@ is_valid = verifier.verify(
 assert(is_valid)
 ```
 
+### Miscellaneous
+
+**mypy**
+
+* **argonautica** uses type annotations for [mypy](http://mypy-lang.org/) everywhere in the code, which, in the author's humble opinion, are a very useful form of documentation; so if you're ever confused about what types to use for arguments, just pop open the code and take a look at the function signatures.
+
+**HashRaw**
+
+* Hashing with **argonautica** produces a string-encoded hash, but sometimes you might want the "raw material" behind this hash, i.e. the raw hash bytes, the raw salt bytes, or raw parameters, which are the three component parts of a string-encoded hash. To obtain these raw parts...
+
+```python3
+from argonautica.utils import decode
+
+# Create a `HashRaw` using the `decode` function
+hash_raw = decode('$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q')
+
+# Pull out the "raw parameters"
+iterations = hash_raw.iterations 	  	# 128
+lanes = hash_raw.lanes             	# 2
+memory_size = hash_raw.memory_size 	# 4096
+variant = hash_raw.variant			 	# Variant.Argon2id
+version = hash_raw.version		     	# Version._0x13
+
+# Pull out the "raw bytes"
+raw_hash_bytes = hash_raw.raw_hash_bytes  # b'[\x00\xf6\xff\x01\x86N\xec;\xbb\x80V\xf2\xc2\xcc\xd1'
+raw_salt_bytes = hash_raw.raw_salt_bytes  # b'somesalt'
+
+# To turn a `HashRaw` back into a string-encoded hash, use the `encode` method
+hash2 = hash_raw.encode()
+assert(hash == hash2)
+``` 
+
 ## License
 
 **argonautica** is licensed under either of:

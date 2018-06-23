@@ -10,11 +10,11 @@ RE_OTHER = re.compile(r"m=([0-9]+),t=([0-9]+),p=([0-9]+)")
 RE_VERSION = re.compile(r"v=([0-9]+)")
 
 
-class DecodedHash:
+class HashRaw:
     """
     A class that represents a string-encoded hash that has been decoded into its constituent parts.
 
-    You can obtain an instance of this class by calling the ``decode`` function above on
+    You can obtain an instance of this class by calling the ``decode`` function on
     a string-encoded hash.
 
     It contains the following instance variables:
@@ -51,8 +51,11 @@ class DecodedHash:
         self.variant = variant
         self.version = version
 
+    def encode(self) -> str:
+        return 'TODO'
 
-def decode(hash: str) -> DecodedHash:
+
+def decode(hash: str) -> HashRaw:
     """
     The ``decode`` function takes a string-encoded hash and decodes it into its component parts
 
@@ -109,7 +112,7 @@ def decode(hash: str) -> DecodedHash:
     raw_salt_bytes = _base64_decode(l[3])
     raw_hash_bytes = _base64_decode(l[4])
 
-    return DecodedHash(
+    return HashRaw(
         iterations=iterations,
         lanes=lanes,
         memory_size=memory_size,
