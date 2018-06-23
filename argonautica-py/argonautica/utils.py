@@ -130,7 +130,7 @@ def _base64_decode(base64_encoded: str) -> bytes:
 
 
 class Void:
-    __slots__: List[str] = []
+    __slots__ = []  # type: List[str]
     pass
 
 
