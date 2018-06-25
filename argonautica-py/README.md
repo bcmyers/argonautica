@@ -187,8 +187,8 @@ assert(hash == '$argon2id$v=19$m=4096,t=192,p=4$c29tZXNhbHQ$4LiXqhNK7fzhZRa3DEHa
 
 verifier = Verifier(secret_key=None)
 verifier.additional_data = None  # As with Hasher, you can configure a Verifier's additional data
-verifier.backend = Backend.C      # As with Hasher, you can configure a Verifier's backend
-verifier.threads = 4              # As with Hasher, you can configure a Verifier's threads
+verifier.backend = Backend.C     # As with Hasher, you can configure a Verifier's backend
+verifier.threads = 4             # As with Hasher, you can configure a Verifier's threads
 
 is_valid = verifier.verify(
     hash=hash,
@@ -201,7 +201,7 @@ assert(is_valid)
 
 **mypy**
 
-- **argonautica** uses type annotations for [mypy](http://mypy-lang.org/) everywhere in the code, which, in the author's humble opinion, are a very useful form of documentation; so if you're ever confused about what types to use for arguments, just pop open the code and take a look at the function signatures.
+- **argonautica** uses [mypy](http://mypy-lang.org/) type annotations everywhere in the code, which, in the author's humble opinion, is a very useful form of documentation; so if you're ever confused about what types to use for arguments, just pop open the code and take a look at the function signatures.
 
 **RandomSalt**
 
@@ -231,7 +231,7 @@ from argonautica.utils import decode, HashRaw
 hash = '$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q'
 
 # Create a `HashRaw` using the `decode` function
-hash_raw: HashRaw = decode(hash)
+hash_raw = decode(hash)
 
 # Pull out the raw parameters
 iterations = hash_raw.iterations     # 128

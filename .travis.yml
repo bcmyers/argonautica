@@ -20,6 +20,13 @@ matrix:
         - cd argonautica-py
         - python -m unittest
         - python benchmark.py
+        - python examples/argon2.py
+        - python examples/configuration.py
+        - python exmaples/configurations2.py
+        - python examples/hash_raw.py
+        - python examples/hasher.py
+        - python examples/random_salt.py
+        - python examples/verifier.py
     - language: python
       python: "3.5"
       install:

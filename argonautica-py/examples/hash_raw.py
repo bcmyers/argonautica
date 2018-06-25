@@ -3,7 +3,7 @@ from argonautica.utils import decode, HashRaw
 hash = '$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q'
 
 # Create a `HashRaw` using the `decode` function
-hash_raw: HashRaw = decode(hash)
+hash_raw = decode(hash)
 
 # Pull out the raw parameters
 iterations = hash_raw.iterations     # 128
