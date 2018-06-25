@@ -56,10 +56,10 @@ There are several Python packages that implement argon2, including the excellent
 ### Hashing
 
 ```python3
-from argonautica import Hasher             # or ... from argonautica import Argon2
+from argonautica import Hasher
 
-hasher = Hasher(secret_key='somesecret')   # or ... argon2 = Argon2(secret_key='somesecret')
-hash = hasher.hash(password='P@ssw0rd')    # or ... hash = argon2.hash(password='P@ssw0rd')
+hasher = Hasher(secret_key='somesecret')
+hash = hasher.hash(password='P@ssw0rd')
 print(hash)
 # 👆 prints a random hash as the defeault `Hasher` uses a random salt by default
 ```
@@ -67,10 +67,10 @@ print(hash)
 ### Verifying
 
 ```python3
-from argonautica import Verifier              # or ... from argonautica import Argon2
+from argonautica import Verifier
 
-verifier = Verifier(secret_key='somesecret')  # or ... argon2 = Argon2(secret_key='somesecret')
-is_valid = verifier.verify(                   # or ... is_valid = argon2.verify(...
+verifier = Verifier(secret_key='somesecret')
+is_valid = verifier.verify(
     hash='$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q',
     password='P@ssw0rd',
 )
