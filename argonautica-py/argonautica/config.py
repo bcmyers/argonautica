@@ -42,6 +42,9 @@ class Variant(Enum):
     Argon2i = lib.ARGONAUTICA_ARGON2I
     Argon2id = lib.ARGONAUTICA_ARGON2ID
 
+    def __str__(self) -> str:
+        return self.name.lower()
+
 
 class Version(Enum):
     """
@@ -55,3 +58,11 @@ class Version(Enum):
     """
     _0x10 = lib.ARGONAUTICA_0x10
     _0x13 = lib.ARGONAUTICA_0x13
+
+    def __str__(self) -> str:
+        if self.name == '_0x10':
+            return str(16)
+        if self.name == '_0x13':
+            return str(19)
+        else:
+            raise Exception("Failed to encode Version into a str")

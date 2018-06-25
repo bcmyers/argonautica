@@ -47,7 +47,18 @@ class HashRaw:
         self.version = version
 
     def encode(self) -> str:
-        return 'TODO'
+        hash_encoded = base64.b64encode(self.raw_hash_bytes).decode('utf-8').rstrip('=')
+        salt_encoded = base64.b64encode(self.raw_salt_bytes).decode('utf-8').rstrip('=')
+        encoded = '${}$v={}$m={},t={},p={}${}${}'.format(
+            self.variant,
+            self.version,
+            self.memory_size,
+            self.iterations,
+            self.lanes,
+            salt_encoded,
+            hash_encoded
+        )
+        return encoded
 
 
 def decode(hash: str) -> HashRaw:
