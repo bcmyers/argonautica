@@ -101,12 +101,14 @@ hash = hasher.hash(
     password='P@ssw0rd',
     salt='somesalt',       # You can set your own salt, or use the default: RandomSalt(32)
 )
+print(hash)
+print('$argon2id$v=19$m=4096,t=192,p=4$c29tZXNhbHQ$4LiXqhNK7fzhZRa3DEHaQ0QK+ztaBsMFxTRDOCESwC8')
 assert(hash == '$argon2id$v=19$m=4096,t=192,p=4$c29tZXNhbHQ$4LiXqhNK7fzhZRa3DEHaQ0QK+ztaBsMFxTRDOCESwC8')
 
 verifier = Verifier(secret_key=None)
 verifier.additional_data = None  # As with Hasher, you can configure a Verifier's additional data
-verifier.backend = Backend.C      # As with Hasher, you can configure a Verifier's backend
-verifier.threads = 4              # As with Hasher, you can configure a Verifier's threads
+verifier.backend = Backend.C     # As with Hasher, you can configure a Verifier's backend
+verifier.threads = 4             # As with Hasher, you can configure a Verifier's threads
 
 is_valid = verifier.verify(
     hash=hash,
