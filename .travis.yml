@@ -22,8 +22,8 @@ matrix:
         - python benchmark.py
         - python examples/argon2.py
         - python examples/configuration.py
-        - python exmaples/configuration2.py
-        - python exmaples/configuration3.py
+        - python examples/configuration2.py
+        - python examples/configuration3.py
         - python examples/hash_raw.py
         - python examples/hasher.py
         - python examples/random_salt.py
@@ -42,6 +42,14 @@ matrix:
         - cd argonautica-py
         - python -m unittest
         - python benchmark.py
+        - python examples/argon2.py
+        - python examples/configuration.py
+        - python examples/configuration2.py
+        - python examples/configuration3.py
+        - python examples/hash_raw.py
+        - python examples/hasher.py
+        - python examples/random_salt.py
+        - python examples/verifier.py
     - language: python
       python: "3.4"
       install:
@@ -56,6 +64,14 @@ matrix:
         - cd argonautica-py
         - python -m unittest
         - python benchmark.py
+        - python examples/argon2.py
+        - python examples/configuration.py
+        - python examples/configuration2.py
+        - python examples/configuration3.py
+        - python examples/hash_raw.py
+        - python examples/hasher.py
+        - python examples/random_salt.py
+        - python examples/verifier.py
     - language: python
       python: "pypy3.5"
       install:
@@ -72,6 +88,14 @@ matrix:
         - cd argonautica-py
         - python -m unittest
         - python benchmark.py
+        - python examples/argon2.py
+        - python examples/configuration.py
+        - python examples/configuration2.py
+        - python examples/configuration3.py
+        - python examples/hash_raw.py
+        - python examples/hasher.py
+        - python examples/random_salt.py
+        - python examples/verifier.py
     - language: rust
       rust: stable
       cache: cargo
