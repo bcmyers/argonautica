@@ -1,5 +1,5 @@
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 from setuptools_rust import Binding, RustExtension
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -45,7 +45,7 @@ setup(
     ],
 
     install_requires=['cffi>=1.11.5', 'typing>=3.6.4'],
-    packages=find_packages(),
+    packages=['argonautica', 'argonautica.core'],
     package_dir={'': 'argonautica-py'},
     package_data={'argonautica': ['*.h']},
     python_requires='>=3.4',
