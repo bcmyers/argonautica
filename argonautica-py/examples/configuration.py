@@ -99,9 +99,7 @@ hash = hasher.hash(
     password='P@ssw0rd',
     salt='somesalt',       # You can set your own salt, or use the default: RandomSalt(32)
 )
-print(hash)
-print('$argon2id$v=19$m=4096,t=192,p=4$c29tZXNhbHQ$4LiXqhNK7fzhZRa3DEHaQ0QK+ztaBsMFxTRDOCESwC8')
-assert(hash == '$argon2id$v=19$m=4096,t=192,p=4$c29tZXNhbHQ$4LiXqhNK7fzhZRa3DEHaQ0QK+ztaBsMFxTRDOCESwC8')
+assert(hash == '$argon2id$v=19$m=4096,t=192,p=2$c29tZXNhbHQ$8nD3gRm+NeOcIiIrlnzDAdnK4iD+K0mVqFXowGs13M4')
 
 verifier = Verifier(secret_key=None)
 verifier.additional_data = None  # As with Hasher, you can configure a Verifier's additional data
