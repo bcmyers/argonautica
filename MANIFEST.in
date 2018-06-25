@@ -1,5 +1,6 @@
 include README.md
 include argonautica-py/README.md
+graft argonautica-py/examples
 include LICENSE-APACHE
 include LICENSE-MIT
 

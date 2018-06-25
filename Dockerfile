@@ -1,14 +1,14 @@
-FROM buildpack-deps:trusty-scm
+FROM python:3.4-jesse
 LABEL maintainer="Brian Myers<brian.carl.myers@gmail.com>"
 
 RUN set -eux; \
     apt-get update -y; \
-    apt-get upgrade -y
+    apt-get upgrade -y;
 
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
+ENV CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH \
-    RUST_VERSION=1.26.1
+    RUST_VERSION=1.26.1 \
+    RUSTUP_HOME=/usr/local/rustup
 
 RUN set -eux; \
     \
