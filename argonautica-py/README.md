@@ -203,6 +203,22 @@ assert(is_valid)
 
 - **argonautica** uses [mypy](http://mypy-lang.org/) type annotations everywhere in the code, which, in the author's humble opinion, is a very useful form of documentation; so if you're ever confused about what types to use for arguments, just pop open the code and take a look at the function signatures.
 
+**Argon2**
+
+`Argon2` is a convenience class that holds both a `Hasher` and a `Verifier`. If you'd like to use just one class that knows how both to hash and to verify, instantiate an `Argon2`. It works essentially the same way as `Hasher` and `Verifier` do.
+
+```python3
+from argonautica import Argon2
+
+argon2 = Argon2(secret_key='somesecret')
+
+hash = argon2.hash(password='P@ssw0rd')
+print(hash)
+
+is_valid = argon2.verify(hash=hash, password='P@ssw0rd')
+assert(is_valid)
+```
+
 **RandomSalt**
 
 - `RandomSalt` is a special kind of salt that will create new random salt bytes before each hash. A RandomSalt knows its length (in number of bytes). The default `Hasher` uses a `RandomSalt` with length of 32 bytes, but you can use your own `RandomSalt` of custom length. When you instantiate a `RandomSalt`, the constructor takes a length, e.g. `my_random_salt = RandomSalt(16)`
@@ -247,22 +263,6 @@ raw_salt_bytes = hash_raw.raw_salt_bytes  # b'somesalt'
 # Turn a `HashRaw` back into a string-encoded hash using the `encode` method
 hash2 = hash_raw.encode()
 assert(hash == hash2)
-```
-
-**Argon2**
-
-`Argon2` is a convenience class that holds both a `Hasher` and a `Verifier`. If you'd like to use just one class that knows how both to hash and to verify, instantiate an `Argon2`.
-
-```python3
-from argonautica import Argon2
-
-argon2 = Argon2(secret_key='somesecret')
-
-hash = argon2.hash(password='P@ssw0rd')
-print(hash)
-
-is_valid = argon2.verify(hash=hash, password='P@ssw0rd')
-assert(is_valid)
 ```
 
 ## License
