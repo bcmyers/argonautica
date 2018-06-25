@@ -2,10 +2,10 @@ import base64
 from typing import Union
 
 from argonautica.config import Backend, Variant, Version
+from argonautica.core.ffi import ffi, lib
 from argonautica.data import RandomSalt
 from argonautica.defaults import *
 from argonautica.utils import Void, VOID
-from .ffi import ffi, lib
 
 
 class Hasher:

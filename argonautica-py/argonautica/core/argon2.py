@@ -1,11 +1,11 @@
 from typing import Union
 
 from argonautica.config import Backend, Variant, Version
+from argonautica.core.hasher import Hasher
+from argonautica.core.verifier import Verifier
 from argonautica.data import RandomSalt
 from argonautica.defaults import *
 from argonautica.utils import Void, VOID
-from .hasher import Hasher
-from .verifier import Verifier
 
 
 class Argon2:

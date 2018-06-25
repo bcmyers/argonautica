@@ -1,4 +1,4 @@
-FROM python:3.4-jesse
+FROM python:3.4-jessie
 LABEL maintainer="Brian Myers<brian.carl.myers@gmail.com>"
 
 RUN set -eux; \
@@ -37,8 +37,8 @@ RUN set -eux; \
 
 RUN set -eux; \
     apt-get install -y \
-    build-essential clang-3.9 cmake gcc git llvm-3.9-dev \
-    libclang-3.9-dev nano valgrind;
+    build-essential clang cmake gcc git llvm-dev \
+    libclang-dev nano valgrind;
 
 WORKDIR /home/dev
 

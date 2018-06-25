@@ -45,7 +45,7 @@ setup(
     ],
 
     install_requires=['cffi>=1.11.5', 'typing>=3.6.4'],
-    packages=["argonautica"],
+    packages=find_packages(),
     package_dir={'': 'argonautica-py'},
     package_data={'argonautica': ['*.h']},
     python_requires='>=3.4',

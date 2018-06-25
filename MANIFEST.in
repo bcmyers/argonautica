@@ -1,6 +1,9 @@
 include README.md
 include argonautica-py/README.md
+graft argonautica-py/argonautica
 graft argonautica-py/examples
+graft argonautica-py/test
+include argonautica-py/benchmark.py
 include LICENSE-APACHE
 include LICENSE-MIT
 
@@ -13,3 +16,4 @@ include Cargo.toml
 prune argonautica-c/target
 prune argonautica-rs/target
 prune argonautica-rs/tests
+global-exclude *.pyc

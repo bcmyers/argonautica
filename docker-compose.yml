@@ -1,7 +1,24 @@
 version: '3'
 services:
   tests:
-    command: bash -c 'cargo test --release --features="simd serde" -- --nocapture'
+    command: bash -c '
+      set -eux;
+      pip install setuptools-rust;
+      python setup.py sdist;
+      pip uninstall setuptools-rust -y;
+      pip install dist/argonautica-0.1.4.tar.gz -v;
+      pip install passlib argon2_cffi;
+      cd argonautica-py; python -m unittest; cd ..;
+      python argonautica-py/benchmark.py;
+      python argonautica-py/examples/argon2.py;
+      python argonautica-py/examples/configuration.py;
+      python argonautica-py/examples/configuration2.py;
+      python argonautica-py/examples/configuration3.py;
+      python argonautica-py/examples/hash_raw.py;
+      python argonautica-py/examples/hasher.py;
+      python argonautica-py/examples/random_salt.py;
+      python argonautica-py/examples/verifier.py;
+      cargo test --release --features="simd serde"'
     build: .
     environment:
       - LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:/usr/lib/x86_64-linux-gnu/
