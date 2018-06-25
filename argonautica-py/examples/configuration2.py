@@ -1,5 +1,3 @@
-import multiprocessing
-
 from argonautica import Hasher, Verifier
 from argonautica.config import Backend, Variant, Version
 
@@ -12,9 +10,9 @@ hasher = Hasher(
     backend=Backend.C,
     hash_len=32,
     iterations=192,
-    lanes=multiprocessing.cpu_count(),
+    lanes=2,
     memory_size=4096,
-    threads=multiprocessing.cpu_count(),
+    threads=2,
     salt='somesalt',
     secret_key=None,
     variant=Variant.Argon2id,
@@ -28,7 +26,7 @@ verifier = Verifier(
     additional_data=None,
     backend=Backend.C,
     secret_key=None,
-    threads=multiprocessing.cpu_count()
+    threads=2
 )
 
 is_valid = verifier.verify(

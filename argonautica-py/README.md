@@ -80,8 +80,6 @@ assert(is_valid)
 ### Configuration
 
 ```python3
-import multiprocessing
-
 from argonautica import Hasher, Verifier
 from argonautica.config import Backend, Variant, Version
 
@@ -129,7 +127,7 @@ hasher.iterations = 192  # Default is 192
 # reasonably allow for your use-case (e.g. to probably about 300-500
 # milliseconds for the use-case of hashing user passwords for a website)
 
-hasher.lanes = multiprocessing.cpu_count()  # Default is multiprocessing.cpu_count()
+hasher.lanes = 2  # Default is multiprocessing.cpu_count()
 # 👆 Argon2 can break up its work into one or more "lanes" during some parts of
 # the hashing algorithm. If you configure it with multiple lanes and you also
 # use multiple threads (see below) the hashing algorithm will performed its
@@ -152,7 +150,7 @@ hasher.memory_size = 4096  # Default is 4096
 # (e.g. to probably about 300-500 milliseconds for the use-case of hashing user
 # passwords for a website)
 
-hasher.threads = multiprocessing.cpu_count()  # Default is multiprocessing.cpu_count()
+hasher.threads = 2  # Default is multiprocessing.cpu_count()
 # 👆 If you have configured a Hasher to use more than one lane (see above), you
 # can get the hashing algorithm to run in parallel during some parts of the
 # computation by setting the number of threads to be greater than one as well,
@@ -188,7 +186,7 @@ assert(hash == '$argon2id$v=19$m=4096,t=192,p=4$c29tZXNhbHQ$4LiXqhNK7fzhZRa3DEHa
 verifier = Verifier(secret_key=None)
 verifier.additional_data = None  # As with Hasher, you can configure a Verifier's additional data
 verifier.backend = Backend.C     # As with Hasher, you can configure a Verifier's backend
-verifier.threads = 4             # As with Hasher, you can configure a Verifier's threads
+verifier.threads = 2             # As with Hasher, you can configure a Verifier's threads
 
 is_valid = verifier.verify(
     hash=hash,
