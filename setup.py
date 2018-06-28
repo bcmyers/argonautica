@@ -4,8 +4,11 @@ from setuptools_rust import Binding, RustExtension
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(here, "argonautica-py", "README.md"), "r") as f:
-    long_description = f.read()
+
+def long_description():
+    with open(os.path.join(here, "argonautica-py", "README.md"), "r") as f:
+        output = f.read()
+    return output
 
 
 setup(
@@ -14,16 +17,16 @@ setup(
 
     author="Brian Myers",
     author_email="brian.carl.myers@gmail.com",
-    description="Idiomatic Argon2 password hashing for Python written in Rust",
+    description="Idiomatic Argon2 password hashing for Python",
     keywords="argon2 argon2d argon2i argon2id crypto cryptography hash hashing password security",
     license="MIT/Apache-2.0",
-    long_description=long_description,
+    long_description=long_description(),
     long_description_content_type="text/markdown",
     project_urls={
         "Docs": "https://github.com/bcmyers/argonautica/tree/master/argonautica-py",
-        "Github": "https://github.com/bcmyers/argonautica",
+        "Github": "https://github.com/bcmyers/argonautica/tree/master/argonautica-py",
     },
-    url="https://github.com/bcmyers/argonautica",
+    url="https://github.com/bcmyers/argonautica/tree/master/argonautica-py",
 
     classifiers=[
         "Intended Audience :: Developers",

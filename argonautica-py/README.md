@@ -49,7 +49,7 @@ There are several Python packages that implement argon2, including the excellent
   - Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
 - **argonautica:**
   - `pip install --upgrade pip` or `pip install setuptools-rust`. Note: setuptool-rust is not required if you have pip version 10.0 or above
-  - `pip install argonautica -v`. Unfortunately, this step may take several minutes, as argonautica needs to compile it's Rust code for your specific CPU (due to its use of SIMD instructions). The upside, however, is that once compiled, argonautica should run blazingly fast
+  - `pip install argonautica`. Unfortunately, this step may take several minutes, as argonautica needs to compile it's Rust code for your specific CPU (due to its use of SIMD instructions). The upside, however, is that once compiled, argonautica should run blazingly fast
 
 ## Usage
 
@@ -59,8 +59,6 @@ There are several Python packages that implement argon2, including the excellent
 from argonautica import Hasher
 
 hasher = Hasher(secret_key='somesecret')
-hasher.hash_len = 8
-hasher.lanes = 2
 hash = hasher.hash(password='P@ssw0rd')
 print(hash)
 # 👆 prints a random hash as the defeault `Hasher` uses a random salt by default
