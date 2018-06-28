@@ -59,6 +59,8 @@ There are several Python packages that implement argon2, including the excellent
 from argonautica import Hasher
 
 hasher = Hasher(secret_key='somesecret')
+hasher.hash_len = 8
+hasher.lanes = 2
 hash = hasher.hash(password='P@ssw0rd')
 print(hash)
 # 👆 prints a random hash as the defeault `Hasher` uses a random salt by default
@@ -71,7 +73,7 @@ from argonautica import Verifier
 
 verifier = Verifier(secret_key='somesecret')
 is_valid = verifier.verify(
-    hash='$argon2id$v=19$m=4096,t=128,p=2$c29tZXNhbHQ$WwD2/wGGTuw7u4BW8sLM0Q',
+    hash='$argon2id$v=19$m=4096,t=192,p=2$ULwasg5z5byOAork0UEhoTBVxIvAafKuceNz9NdCVXU$YxhaPnqRDys',
     password='P@ssw0rd',
 )
 assert(is_valid)
@@ -181,7 +183,7 @@ hash = hasher.hash(
     password='P@ssw0rd',
     salt='somesalt',       # You can set your own salt, or use the default: RandomSalt(32)
 )
-assert(hash == '$argon2id$v=19$m=4096,t=192,p=4$c29tZXNhbHQ$4LiXqhNK7fzhZRa3DEHaQ0QK+ztaBsMFxTRDOCESwC8')
+assert(hash == '$argon2id$v=19$m=4096,t=192,p=2$c29tZXNhbHQ$8nD3gRm+NeOcIiIrlnzDAdnK4iD+K0mVqFXowGs13M4')
 
 verifier = Verifier(secret_key=None)
 verifier.additional_data = None  # As with Hasher, you can configure a Verifier's additional data
