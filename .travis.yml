@@ -15,7 +15,7 @@ matrix:
         - pip install setuptools-rust
         - python setup.py sdist
         - pip uninstall setuptools-rust -y
-        - pip install dist/argonautica-0.1.4.tar.gz
+        - pip install dist/argonautica-0.1.5.tar.gz
       script:
         - cd argonautica-py
         - python -m unittest
@@ -37,7 +37,7 @@ matrix:
         - pip install setuptools-rust
         - python setup.py sdist
         - pip uninstall setuptools-rust -y
-        - pip install dist/argonautica-0.1.4.tar.gz
+        - pip install dist/argonautica-0.1.5.tar.gz
       script:
         - cd argonautica-py
         - python -m unittest
@@ -59,7 +59,7 @@ matrix:
         - pip install setuptools-rust
         - python setup.py sdist
         - pip uninstall setuptools-rust -y
-        - pip install dist/argonautica-0.1.4.tar.gz
+        - pip install dist/argonautica-0.1.5.tar.gz
       script:
         - cd argonautica-py
         - python -m unittest
@@ -83,7 +83,7 @@ matrix:
         - pip install setuptools-rust
         - python setup.py sdist
         - pip uninstall setuptools-rust -y
-        - pip install dist/argonautica-0.1.4.tar.gz
+        - pip install dist/argonautica-0.1.5.tar.gz
       script:
         - cd argonautica-py
         - python -m unittest
