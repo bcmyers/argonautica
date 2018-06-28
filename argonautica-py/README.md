@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/bcmyers/argonautica.svg?branch=master)](https://travis-ci.org/bcmyers/argonautica)
 [![Github.com](https://img.shields.io/badge/github-bcmyers%2Fargonautica-blue.svg)](http://www.github.com/bcmyers/argonautica)
 ![License](https://img.shields.io/crates/l/argonautica.svg)
+[![PyPI](https://img.shields.io/pypi/v/argonautica.svg)](https://pypi.org/project/argonautica)
 
 ## Overview
 
