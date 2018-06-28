@@ -286,7 +286,7 @@
 #![deny(
     missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
 )]
-#![doc(html_root_url = "https://docs.rs/argonautica/0.1.4")]
+#![doc(html_root_url = "https://docs.rs/argonautica/0.1.5")]
 
 extern crate base64;
 #[macro_use]

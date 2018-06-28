@@ -13,7 +13,7 @@ def long_description():
 
 setup(
     name="argonautica",
-    version="0.1.4",
+    version="0.1.5",
 
     author="Brian Myers",
     author_email="brian.carl.myers@gmail.com",
