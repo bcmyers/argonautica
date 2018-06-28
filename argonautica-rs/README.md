@@ -11,22 +11,23 @@
 <b>argonautica</b> is a Rust crate for hashing passwords using the cryptographically-secure
 [Argon2 hashing algorithm](https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03).
 
-[Argon2]((https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03)) won the
+[Argon2](<(https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03)>) won the
 [Password Hashing Competition](https://password-hashing.net/) in 2015, a several
 year project to identify a successor to [bcrypt](https://en.wikipedia.org/wiki/Bcrypt),
 [scrypt](https://en.wikipedia.org/wiki/Scrypt), and other common cryptographically-secure
 hashing algorithms.
 
 The <b>argonautica</b> crate was designed:
-* to be easy to use,
-* to have robust, beginner-friendly documentation, and
-* to (as much as possible) follow the
+
+- to be easy to use,
+- to have robust, beginner-friendly documentation, and
+- to (as much as possible) follow the
   [Rust API guidelines](https://rust-lang-nursery.github.io/api-guidelines/)
 
 <b>argonautica</b> was built with a simple use-case in mind: hashing passwords for storage in a
 website's database. That said, it's also "feature-complete", meaning anything you can do with
 the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2
-you can do with argonautica*.
+you can do with argonautica\*.
 
 <i>\* Indeed, argonautica has a feature that even the cannonical C implementation
 lacks, i.e. hashing passwords with secret keys (the C implementation implements this, but
@@ -34,9 +35,10 @@ does not expose it publicly)</i>
 
 ## Hashing
 
-Hashing passwords with <b>argonautica</b> is simple.  Just instantiate a default
+Hashing passwords with <b>argonautica</b> is simple. Just instantiate a default
 [`Hasher`](struct.Hasher.html), provide it with a password and a secret key, and then
 call the [`hash`](struct.Hasher.html#method.hash) method.
+
 ```rust
 extern crate argonautica;
 
@@ -57,12 +59,14 @@ fn main() {
     // 👆 prints a hash, which will be random since the default Hasher uses a random salt
 }
 ```
+
 ## Verifying
 
 Verifying passwords against a hash is equally as simple. Just instantiate a default
 [`Verifier`](struct.Verifier.html), provide it with the password and the hash you would
 like to compare, provide it with the secret key that was used to create the hash, and
 then call the [`verify`](struct.Verifier.html#method.verify) method.
+
 ```rust
 extern crate argonautica;
 
@@ -87,6 +91,7 @@ fn main() {
     assert!(is_valid);
 }
 ```
+
 ## Alternatives
 
 If <b>argonautica</b> isn't your cup of tea, other Rust crates that will do Argon2 hashing for you
@@ -97,18 +102,19 @@ in password hashing with a different algorithm,
 
 For what it's worth, besides API differences, <b>argonautica</b> has three key features that
 other crates currently lack:
-* The ability to use [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions (even on stable),
+
+- The ability to use [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions (even on stable),
   which can lead to significantly faster hashing times
-    * For example, on default settings, argonautica with SIMD runs <b>over twice
-      as fast</b> as other crates on the developer's early-2014 Macbook, which has access to
-      [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
-      through
-      [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
-    * <i>Note: SIMD instructions are specific to your CPU; so if you're compiling for
-      machines other than your own, you should not turn on the SIMD feature</i>
-* The ability to hash passwords with a secret key, which not even the
+  - For example, on default settings, argonautica with SIMD runs <b>over twice
+    as fast</b> as other crates on the developer's early-2014 Macbook, which has access to
+    [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
+    through
+    [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
+  - <i>Note: SIMD instructions are specific to your CPU; so if you're compiling for
+    machines other than your own, you should not turn on the SIMD feature</i>
+- The ability to hash passwords with a secret key, which not even the
   [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
-* The newest Argon2 variant: Argon2id
+- The newest Argon2 variant: Argon2id
 
 ## Configuration
 
@@ -121,6 +127,7 @@ as using the defaults.
 
 Here is an example that shows how to use [`Hasher`](struct.Hasher.html)'s custom
 configuration options. It provides color on each of the options.
+
 ```rust
 extern crate argonautica;
 extern crate futures_cpupool;
@@ -252,35 +259,39 @@ fn main() {
     );
 }
 ```
+
 ## Installation
 
 <b>argonautica</b> should be relatively straightforward to include in your Rust project:
-* Place `extern crate argonautica;` in your code (typically in either `lib.rs` or `main.rs`)
-* In the `[dependencies]` section of your `Cargo.toml`, place ...
-    * ... if you're building for your own machine ...
-        * `argonautica = { version = "0.1.0", features = ["simd"] }`, or
-        * `argonautica = { version = "0.1.0", features = ["serde", "simd"] }`
-    * ... if you're building for a different machine ...
-        * `argonautica = "0.1.0"`, or
-        * `argonautica = { version = "0.1.0", features = ["serde"] }`
+
+- Place `extern crate argonautica;` in your code (typically in either `lib.rs` or `main.rs`)
+- In the `[dependencies]` section of your `Cargo.toml`, place ...
+  - ... if you're building for your own machine ...
+    - `argonautica = { version = "0.1.0", features = ["simd"] }`, or
+    - `argonautica = { version = "0.1.0", features = ["serde", "simd"] }`
+  - ... if you're building for a different machine ...
+    - `argonautica = "0.1.0"`, or
+    - `argonautica = { version = "0.1.0", features = ["serde"] }`
 
 That said, <b>argonautica</b> uses [cc](https://github.com/alexcrichton/cc-rs) and
 [bindgen](https://github.com/rust-lang-nursery/rust-bindgen) to compile the cannonical
 [C implemenation](https://github.com/P-H-C/phc-winner-argon2) of Argon2 into a
 static archive during the build process. This means you need a C compiler on your
 machine in order to build <b>argonautica</b>. More specifically, you need:
-* [LLVM/Clang](https://llvm.org/) (version 3.9 or higher)
-    * Mac OS: `brew install llvm`, which requires [Homebrew](https://brew.sh/)
-    * Debian-based linux: `apt-get install clang llvm-dev libclang-dev`
-    * Arch linux: `pacman -S clang`
-    * Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
+
+- [LLVM/Clang](https://llvm.org/) (version 3.9 or higher)
+  - Mac OS: `brew install llvm`, which requires [Homebrew](https://brew.sh/)
+  - Debian-based linux: `apt-get install clang llvm-dev libclang-dev`
+  - Arch linux: `pacman -S clang`
+  - Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
 
 <b>argonautica</b> runs on stable Rust version 1.26.0 or greater.
 
 ## License
 
 <b>argonautica</b> is licensed under either of:
-* [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
-* [The MIT license](http://opensource.org/licenses/MIT)
+
+- [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0), or
+- [The MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
