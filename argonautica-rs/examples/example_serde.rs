@@ -49,7 +49,6 @@ fn deserialize_hasher(j: &str) -> Result<argonautica::Hasher, failure::Error> {
     //     additional_data: Some(AdditionalData([1,2,3,4])),
     //     config: HasherConfig {
     //         backend: C,
-    //         cpu_pool: None,
     //         hash_len: 32,
     //         iterations: 192,
     //         lanes: 4,
@@ -118,7 +117,6 @@ fn deserialize_verifier(j: &str) -> Result<argonautica::Verifier, failure::Error
     //         additional_data: Some(AdditionalData([1,2,3,4])),
     //         config: HasherConfig {
     //             backend: C,
-    //             cpu_pool: None,
     //             hash_len: 32,
     //             iterations: 192,
     //             lanes: 4,

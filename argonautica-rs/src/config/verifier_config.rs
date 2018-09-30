@@ -1,7 +1,3 @@
-use futures_cpupool::CpuPool;
-
-#[cfg(feature = "serde")]
-use config::defaults::default_cpu_pool_serde;
 use config::Backend;
 
 /// Read-only configuration for [`Verifier`](../struct.Verifier.html). Can be obtained by calling
@@ -12,11 +8,6 @@ use config::Backend;
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct VerifierConfig {
     pub(crate) backend: Backend,
-    #[cfg_attr(
-        feature = "serde",
-        serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde")
-    )]
-    pub(crate) cpu_pool: Option<CpuPool>,
     pub(crate) password_clearing: bool,
     pub(crate) secret_key_clearing: bool,
     pub(crate) threads: u32,
@@ -26,13 +17,6 @@ impl VerifierConfig {
     #[allow(missing_docs)]
     pub fn backend(&self) -> Backend {
         self.backend
-    }
-    #[allow(missing_docs)]
-    pub fn cpu_pool(&self) -> Option<CpuPool> {
-        match self.cpu_pool {
-            Some(ref cpu_pool) => Some(cpu_pool.clone()),
-            None => None,
-        }
     }
     #[allow(missing_docs)]
     pub fn password_clearing(&self) -> bool {
@@ -51,14 +35,12 @@ impl VerifierConfig {
 impl VerifierConfig {
     pub(crate) fn new(
         backend: Backend,
-        cpu_pool: Option<CpuPool>,
         password_clearing: bool,
         secret_key_clearing: bool,
         threads: u32,
     ) -> VerifierConfig {
         VerifierConfig {
             backend,
-            cpu_pool,
             password_clearing,
             secret_key_clearing,
             threads,

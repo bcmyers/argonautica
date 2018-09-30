@@ -92,6 +92,12 @@ pub enum ErrorKind {
     #[fail(display = "Password too short. Length in bytes must be greater than 0")]
     PasswordTooShortError,
 
+    /// The thread pool used to asynchronously execute operations exited prematurely
+    #[fail(
+        display = "The thread pool used to asynchronously execute operations exited prematurely"
+    )]
+    PoolTerminated,
+
     /// Salt too long. Length in bytes must be less than 2^32
     #[fail(display = "Salt too long. Length in bytes must be less than 2^32")]
     SaltTooLongError,

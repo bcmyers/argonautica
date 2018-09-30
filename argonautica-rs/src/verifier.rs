@@ -1,8 +1,8 @@
-use futures::Future;
-use futures_cpupool::CpuPool;
+use tokio::prelude::*;
+use tokio_threadpool;
 
 use backend::decode_rust;
-use config::{default_cpu_pool, Backend, VerifierConfig};
+use config::{Backend, VerifierConfig};
 use input::{AdditionalData, Password, SecretKey};
 use output::HashRaw;
 use {Error, ErrorKind, Hasher};
@@ -44,10 +44,6 @@ pub struct Verifier<'a> {
 impl<'a> Verifier<'a> {
     /// Creates a new [`Verifier`](struct.Verifier.html) with the following configuration:
     /// * `backend`: [`Backend::C`](config/enum.Backend.html#variant.C)
-    /// * `cpu_pool`: A [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html) ...
-    ///     * with threads equal to the number of logical cores on your machine
-    ///     * that is lazily created, i.e. created only if / when you call the method that
-    ///       needs it ([`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking))
     /// * `password_clearing`: `false`
     /// * `secret_key_clearing`: `false`
     /// * `threads`: The number of logical cores on your machine
@@ -61,19 +57,6 @@ impl<'a> Verifier<'a> {
     /// [`Backend::Rust`](config/enum.Backend.html#variant.Rust) it will error</i>
     pub fn configure_backend(&mut self, backend: Backend) -> &mut Verifier<'a> {
         self.hasher.config.set_backend(backend);
-        self
-    }
-    /// Allows you to configure [`Verifier`](struct.Verifier.html) with a custom
-    /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html).
-    /// The default [`Verifier`](struct.Verifier.html) does not have a cpu pool, which is
-    /// only needed for the [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking)
-    /// method. If you call [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking)
-    /// without a cpu pool, a default cpu pool will be created for you on the fly; so even
-    /// if you never configure [`Verifier`](struct.Verifier.html) with this method you can still
-    /// use the [`verify_non_blocking`](struct.Verifier.html#method.verify_non_blocking) method.
-    /// The default cpu pool has as many threads as the number of logical cores on your machine
-    pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Verifier<'a> {
-        self.hasher.config.set_cpu_pool(cpu_pool);
         self
     }
     /// Allows you to configure [`Verifier`](struct.Verifier.html) to erase the password bytes
@@ -177,16 +160,23 @@ impl<'a> Verifier<'a> {
     /// Same as [`verify`](struct.Verifier.html#method.verify) except it returns a
     /// [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html)
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
+    ///
+    /// The verification is performed on whatever thread executes the returned `Future`, but with a
+    /// [`tokio::blocking`](https://docs.rs/tokio-threadpool/0.1/tokio_threadpool/fn.blocking.html)
+    /// annotation to ensure that the `Runtime` is not blocked from polling other `Future`s. Note
+    /// that the returned `Future` relies on being executed by `tokio`, and will panic if that is
+    /// not the case.
     pub fn verify_non_blocking(&mut self) -> impl Future<Item = bool, Error = Error> {
         let mut verifier = self.to_owned();
-        match verifier.hasher.config.cpu_pool() {
-            Some(cpu_pool) => cpu_pool.spawn_fn(move || verifier.verify()),
-            None => {
-                let cpu_pool = default_cpu_pool();
-                verifier.hasher.config.set_cpu_pool(cpu_pool.clone());
-                cpu_pool.spawn_fn(move || verifier.verify())
-            }
-        }
+        future::poll_fn(move || tokio_threadpool::blocking(|| verifier.verify())).then(
+            |r| match r {
+                Ok(r) => r,
+                Err(tokio_threadpool::BlockingError { .. }) => {
+                    Err(Error::new(ErrorKind::PoolTerminated)
+                        .add_context("thread pool shut down while verifying"))
+                }
+            },
+        )
     }
     /// Allows you to provide [`Verifier`](struct.Verifier.html) with the additional data
     /// that was originally used to create the hash. Normally hashes are not created with
@@ -247,7 +237,6 @@ impl<'a> Verifier<'a> {
     pub fn config(&self) -> VerifierConfig {
         VerifierConfig::new(
             /* backend */ self.hasher.config.backend(),
-            /* cpu_pool */ self.hasher.config.cpu_pool(),
             /* password_clearing */ self.hasher.config.password_clearing(),
             /* secret_key_clearing */ self.hasher.config.secret_key_clearing(),
             /* threads */ self.hasher.config.threads(),

@@ -6,7 +6,6 @@ extern crate env_logger;
 #[macro_use]
 extern crate failure;
 extern crate futures;
-extern crate futures_cpupool;
 extern crate futures_timer;
 #[macro_use]
 extern crate serde;
@@ -23,7 +22,6 @@ use actix_web::{server, App, AsyncResponder, Error, HttpMessage, HttpRequest, Ht
 use argonautica::input::SecretKey;
 use argonautica::{Hasher, Verifier};
 use futures::Future;
-use futures_cpupool::CpuPool;
 use futures_timer::Delay;
 
 // This will be used for the register and verify routes. We want these routes to take a
@@ -52,26 +50,19 @@ struct State<'a> {
 }
 
 impl<'a> State<'a> {
-    // Since actix-web uses futures extensively, let's have the Hasher and Verifier
-    // share a common CpuPool.  In addition, as mentioned above, we "preload" the Hasher and
-    // Verifier with our secret key; so we only have to do this once (at creation of the
-    // server in 'main')
+    // As mentioned above, we "preload" the Hasher and Verifier with our secret key; so we only
+    // have to do this once (at creation of the server in 'main').
     fn new(secret_key: &SecretKey<'a>) -> State<'static> {
-        let cpu_pool = CpuPool::new(4);
         State {
             database: Arc::new(Mutex::new(HashMap::new())),
             hasher: {
                 let mut hasher = Hasher::default();
-                hasher
-                    .configure_cpu_pool(cpu_pool.clone())
-                    .with_secret_key(secret_key.to_owned());
+                hasher.with_secret_key(secret_key.to_owned());
                 hasher
             },
             verifier: {
                 let mut verifier = Verifier::default();
-                verifier
-                    .configure_cpu_pool(cpu_pool)
-                    .with_secret_key(secret_key.to_owned());
+                verifier.with_secret_key(secret_key.to_owned());
                 verifier
             },
         }

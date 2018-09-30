@@ -121,11 +121,9 @@
 //! configuration options. It provides color on each of the options.
 //! ```
 //! extern crate argonautica;
-//! extern crate futures_cpupool;
 //!
 //! use argonautica::Hasher;
 //! use argonautica::config::{Backend, Variant, Version};
-//! use futures_cpupool::CpuPool;
 //!
 //! fn main() {
 //!     let mut hasher = Hasher::default();
@@ -137,21 +135,6 @@
 //!         // do the work. In the future hopefully a Rust backend will also be supported, but,
 //!         // for the moment, you must use `Backend::C`, which is the default. Using
 //!         // `Backend::Rust` will result in an error (again, for the moment).
-//!         .configure_cpu_pool(CpuPool::new(2))
-//!         // 👆 There are two non-blocking methods on `Hasher` that perform computation on
-//!         // a separate thread and return a `Future` instead of a `Result` (`hash_non_blocking`
-//!         // and `hash_raw_non_blocking`). These methods allow argonautica to play nicely with
-//!         // futures-heavy code, but need a `CpuPool` in order to work. The blocking
-//!         // methods `hash` and `hash_raw` do not use a 'CpuPool'; so if you are using only
-//!         // these blocking methods you can ignore this configuration entirely. If, however,
-//!         // you are using the non-blocking methods and would like to provide your own `CpuPool`
-//!         // instead of using the default, which is a lazily created `CpuPool` with the number
-//!         // of threads equal to the number of logical cores on your machine, you can
-//!         // configure your `Hasher` with a custom `CpuPool` using this method. This
-//!         // might be useful if, for example, you are writing code in an environment which
-//!         // makes heavy use of futures, the code you are writing uses both a `Hasher` and
-//!         // a `Verifier`, and you would like both of them to share the same underlying
-//!         // `CpuPool`.
 //!         .configure_hash_len(16) // Default is `32`
 //!         // 👆 The hash length in bytes is configurable. The default is 32. This is probably
 //!         // a good number to use. 16 is also probably fine. You probably shouldn't go below 16
@@ -296,8 +279,9 @@ extern crate blake2_rfc;
 #[macro_use]
 extern crate failure;
 extern crate futures;
-extern crate futures_cpupool;
 extern crate libc;
+extern crate tokio;
+extern crate tokio_threadpool;
 #[macro_use]
 extern crate log;
 #[macro_use]

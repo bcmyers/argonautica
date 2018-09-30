@@ -1,5 +1,3 @@
-use futures_cpupool::CpuPool;
-
 use config::defaults::*;
 use config::{Backend, Flags, Variant, Version};
 use {Error, ErrorKind};
@@ -14,11 +12,6 @@ const PANIC_WARNING: &str = "Your program will error if you use this configurati
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub struct HasherConfig {
     backend: Backend,
-    #[cfg_attr(
-        feature = "serde",
-        serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde")
-    )]
-    cpu_pool: Option<CpuPool>,
     hash_len: u32,
     iterations: u32,
     lanes: u32,
@@ -35,13 +28,6 @@ impl HasherConfig {
     #[allow(missing_docs)]
     pub fn backend(&self) -> Backend {
         self.backend
-    }
-    #[allow(missing_docs)]
-    pub fn cpu_pool(&self) -> Option<CpuPool> {
-        match self.cpu_pool {
-            Some(ref cpu_pool) => Some(cpu_pool.clone()),
-            None => None,
-        }
     }
     #[allow(missing_docs)]
     pub fn hash_len(&self) -> u32 {
@@ -89,7 +75,6 @@ impl HasherConfig {
     pub(crate) fn default() -> HasherConfig {
         HasherConfig {
             backend: Backend::default(),
-            cpu_pool: None,
             hash_len: DEFAULT_HASH_LEN,
             iterations: DEFAULT_ITERATIONS,
             lanes: default_lanes(),
@@ -118,9 +103,6 @@ impl HasherConfig {
             warn!("{}. {}.", e, PANIC_WARNING);
         });
         self.backend = backend;
-    }
-    pub(crate) fn set_cpu_pool(&mut self, cpu_pool: CpuPool) {
-        self.cpu_pool = Some(cpu_pool);
     }
     pub(crate) fn set_hash_len(&mut self, hash_len: u32) {
         validate_hash_len(hash_len).unwrap_or_else(|e| {

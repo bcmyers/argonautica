@@ -1,8 +1,8 @@
-use futures::Future;
-use futures_cpupool::CpuPool;
 use scopeguard;
+use tokio::prelude::*;
+use tokio_threadpool;
 
-use config::defaults::{default_cpu_pool, default_lanes};
+use config::defaults::default_lanes;
 use config::{Backend, HasherConfig, Variant, Version};
 use input::{AdditionalData, Container, Password, Salt, SecretKey};
 use output::HashRaw;
@@ -55,11 +55,6 @@ impl<'a> Hasher<'a> {
     ///
     /// Here are the default configuration options:
     /// * `backend`: [`Backend::C`](config/enum.Backend.html#variant.C)
-    /// * `cpu_pool`: A [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html) ...
-    ///     * with threads equal to the number of logical cores on your machine
-    ///     * that is lazily created, i.e. created only if / when you call the methods
-    ///       that need it ([`hash_non_blocking`](struct.Hasher.html#method.hash_non_blocking) or
-    ///       [`hash_raw_non_blocking`](struct.Hasher.html#method.hash_raw_non_blocking))
     /// * `hash_len`: `32` bytes
     /// * `iterations`: `192`
     /// * `lanes`: The number of logical cores on your machine
@@ -120,19 +115,6 @@ impl<'a> Hasher<'a> {
     /// [`hash_raw`](struct.Hasher.html#method.hash_raw) or their non-blocking equivalents</i>
     pub fn configure_backend(&mut self, backend: Backend) -> &mut Hasher<'a> {
         self.config.set_backend(backend);
-        self
-    }
-    /// Allows you to configure [`Hasher`](struct.Hasher.html) with a custom
-    /// [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html).
-    /// The default [`Hasher`](struct.Hasher.html) does not have a cpu pool, which is
-    /// only needed for the [`hash_non_blocking`](struct.Hasher.html#method.hash_non_blocking)
-    /// and [`hash_raw_non_blocking`](struct.Hasher.html#method.hash_raw_non_blocking) methods.
-    /// If you call either of these methods without a cpu pool, a default cpu pool will be created
-    /// for you on the fly; so even if you never configure [`Hasher`](struct.Hasher.html) with
-    /// this method you can still use the non-blocking hashing methods.
-    /// The default cpu pool has as many threads as the number of logical cores on your machine
-    pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Hasher<'a> {
-        self.config.set_cpu_pool(cpu_pool);
         self
     }
     /// Allows you to configure [`Hasher`](struct.Hasher.html) to use a custom hash length
@@ -248,6 +230,12 @@ impl<'a> Hasher<'a> {
     /// Same as [`hash`](struct.Hasher.html#method.hash) except it returns a
     /// [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html)
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
+    ///
+    /// The hashing is performed on whatever thread executes the returned `Future`, but with a
+    /// [`tokio::blocking`](https://docs.rs/tokio-threadpool/0.1/tokio_threadpool/fn.blocking.html)
+    /// annotation to ensure that the `Runtime` is not blocked from polling other `Future`s. Note
+    /// that the returned `Future` relies on being executed by `tokio`, and will panic if that is
+    /// not the case.
     pub fn hash_non_blocking(&mut self) -> impl Future<Item = String, Error = Error> {
         self.hash_raw_non_blocking().and_then(|hash_raw| {
             let hash = hash_raw.encode_rust();
@@ -274,19 +262,27 @@ impl<'a> Hasher<'a> {
     /// Same as [`hash_raw`](struct.Hasher.html#method.hash) except it returns a
     /// [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html)
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
+    ///
+    /// The hashing is performed on whatever thread executes the returned `Future`, but with a
+    /// [`tokio::blocking`](https://docs.rs/tokio-threadpool/0.1/tokio_threadpool/fn.blocking.html)
+    /// annotation to ensure that the `Runtime` is not blocked from polling other `Future`s. Note
+    /// that the returned `Future` relies on being executed by `tokio`, and will panic if that is
+    /// not the case.
     pub fn hash_raw_non_blocking(&mut self) -> impl Future<Item = HashRaw, Error = Error> {
         let hasher = scopeguard::guard(self, |hasher| {
             hasher.clear();
         });
         let mut hasher = hasher.to_owned();
-        match hasher.config.cpu_pool() {
-            Some(cpu_pool) => cpu_pool.spawn_fn(move || hasher.hash_raw()),
-            None => {
-                let cpu_pool = default_cpu_pool();
-                hasher.config.set_cpu_pool(cpu_pool.clone());
-                cpu_pool.spawn_fn(move || hasher.hash_raw())
-            }
-        }
+
+        future::poll_fn(move || tokio_threadpool::blocking(|| hasher.hash_raw())).then(
+            |r| match r {
+                Ok(r) => r,
+                Err(tokio_threadpool::BlockingError { .. }) => {
+                    Err(Error::new(ErrorKind::PoolTerminated)
+                        .add_context("thread pool shut down while hashing"))
+                }
+            },
+        )
     }
     /// As an extra security measure, if you want to hash without a secret key, which
     /// is not recommended, you must explicitly declare that this is your intention
