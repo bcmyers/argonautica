@@ -1,6 +1,6 @@
 use scopeguard;
-use tokio::prelude::*;
 use tokio_threadpool;
+use futures::{self, Future};
 
 use config::defaults::default_lanes;
 use config::{Backend, HasherConfig, Variant, Version};
@@ -274,7 +274,7 @@ impl<'a> Hasher<'a> {
         });
         let mut hasher = hasher.to_owned();
 
-        future::poll_fn(move || tokio_threadpool::blocking(|| hasher.hash_raw())).then(
+        futures::future::poll_fn(move || tokio_threadpool::blocking(|| hasher.hash_raw())).then(
             |r| match r {
                 Ok(r) => r,
                 Err(tokio_threadpool::BlockingError { .. }) => {

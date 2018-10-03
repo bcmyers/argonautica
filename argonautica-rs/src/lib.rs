@@ -280,7 +280,6 @@ extern crate blake2_rfc;
 extern crate failure;
 extern crate futures;
 extern crate libc;
-extern crate tokio;
 extern crate tokio_threadpool;
 #[macro_use]
 extern crate log;

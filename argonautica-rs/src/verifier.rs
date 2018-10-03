@@ -1,4 +1,4 @@
-use tokio::prelude::*;
+use futures::{self, Future};
 use tokio_threadpool;
 
 use backend::decode_rust;
@@ -168,7 +168,7 @@ impl<'a> Verifier<'a> {
     /// not the case.
     pub fn verify_non_blocking(&mut self) -> impl Future<Item = bool, Error = Error> {
         let mut verifier = self.to_owned();
-        future::poll_fn(move || tokio_threadpool::blocking(|| verifier.verify())).then(
+        futures::future::poll_fn(move || tokio_threadpool::blocking(|| verifier.verify())).then(
             |r| match r {
                 Ok(r) => r,
                 Err(tokio_threadpool::BlockingError { .. }) => {
