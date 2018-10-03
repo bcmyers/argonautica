@@ -152,6 +152,7 @@ impl From<Error> for argonautica_error_t {
             PasswordMissingError => ARGONAUTICA_ERROR_PASSWORD_MISSING,
             PasswordTooLongError => ARGONAUTICA_ERROR_PASSWORD_TOO_LONG,
             PasswordTooShortError => ARGONAUTICA_ERROR_PASSWORD_TOO_SHORT,
+            PoolTerminated => ARGONAUTICA_ERROR_THREAD,
             SaltTooLongError => ARGONAUTICA_ERROR_SALT_TOO_LONG,
             SaltTooShortError => ARGONAUTICA_ERROR_SALT_TOO_SHORT,
             SecretKeyImmutableError => ARGONAUTICA_ERROR_BUG,
