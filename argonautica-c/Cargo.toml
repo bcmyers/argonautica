@@ -26,7 +26,7 @@ path = "src/bin/generate_bindings.rs"
 simd = ["argonautica/simd"]
 
 [dependencies]
-argonautica = { path = "../argonautica-rs" }
+argonautica = { version = "0.2", path = "../argonautica-rs" }
 cbindgen = "0.8"
 itoa = "0.4"
 libc = "0.2"
