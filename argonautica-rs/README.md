@@ -11,7 +11,7 @@
 <b>argonautica</b> is a Rust crate for hashing passwords using the cryptographically-secure
 [Argon2 hashing algorithm](https://en.wikipedia.org/wiki/Argon2).
 
-[Argon2]((https://en.wikipedia.org/wiki/Argon2)) won the
+[Argon2](https://en.wikipedia.org/wiki/Argon2) won the
 [Password Hashing Competition](https://password-hashing.net/) in 2015, a several
 year project to identify a successor to [bcrypt](https://en.wikipedia.org/wiki/Bcrypt),
 [scrypt](https://en.wikipedia.org/wiki/Scrypt), and other common cryptographically-secure
