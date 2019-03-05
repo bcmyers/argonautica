@@ -1,6 +1,6 @@
 [package]
 name = "argonautica-c"
-version = "0.1.5" # remember to update html_root_url
+version = "0.2.0" # remember to update html_root_url
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
 categories = ["algorithms", "api-bindings", "authentication", "cryptography"]
@@ -26,8 +26,8 @@ path = "src/bin/generate_bindings.rs"
 simd = ["argonautica/simd"]
 
 [dependencies]
-argonautica = { version = "0.1.5", path = "../argonautica-rs" }
-cbindgen = "0.6"
+argonautica = { path = "../argonautica-rs" }
+cbindgen = "0.8"
 itoa = "0.4"
 libc = "0.2"
 

@@ -256,11 +256,11 @@
 //! * Place `extern crate argonautica;` in your code (typically in either `lib.rs` or `main.rs`)
 //! * In the `[dependencies]` section of your `Cargo.toml`, place ...
 //!     * ... if you're building for your own machine ...
-//!         * `argonautica = { version = "0.1.0", features = ["simd"] }`, or
-//!         * `argonautica = { version = "0.1.0", features = ["serde", "simd"] }`
+//!         * `argonautica = { version = "0.2", features = ["simd"] }`, or
+//!         * `argonautica = { version = "0.2", features = ["serde", "simd"] }`
 //!     * ... if you're building for a different machine ...
-//!         * `argonautica = "0.1.0"`, or
-//!         * `argonautica = { version = "0.1.0", features = ["serde"] }`
+//!         * `argonautica = "0.2"`, or
+//!         * `argonautica = { version = "0.2", features = ["serde"] }`
 //!
 //! That said, <b>argonautica</b> uses [cc](https://github.com/alexcrichton/cc-rs) and
 //! [bindgen](https://github.com/rust-lang-nursery/rust-bindgen) to compile the cannonical
@@ -286,7 +286,7 @@
 #![deny(
     missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
 )]
-#![doc(html_root_url = "https://docs.rs/argonautica/0.1.5")]
+#![doc(html_root_url = "https://docs.rs/argonautica/0.2.0")]
 
 extern crate base64;
 #[macro_use]

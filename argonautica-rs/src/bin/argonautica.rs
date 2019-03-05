@@ -13,5 +13,4 @@ fn main() {
         .hash()
         .unwrap();
     println!("{}", &hash);
-    // 👆 prints a hash, which will be random since the default Hasher uses a random salt
 }
