@@ -1,11 +1,11 @@
 #![allow(non_camel_case_types)]
 
 use itoa;
-use libc::{c_int, uint32_t};
+use libc::c_int;
 
 use argonautica_variant_t;
 
-fn base64_len(len: uint32_t) -> usize {
+fn base64_len(len: u32) -> usize {
     let bits = 8 * len as usize;
     let chars = bits / 6 + if bits % 6 != 0 { 1 } else { 0 };
     chars
@@ -15,11 +15,11 @@ fn base64_len(len: uint32_t) -> usize {
 /// If an error occurrs, the function returns -1
 #[no_mangle]
 pub extern "C" fn argonautica_encoded_len(
-    hash_len: uint32_t,
-    iterations: uint32_t,
-    lanes: uint32_t,
-    memory_size: uint32_t,
-    salt_len: uint32_t,
+    hash_len: u32,
+    iterations: u32,
+    lanes: u32,
+    memory_size: u32,
+    salt_len: u32,
     variant: argonautica_variant_t,
 ) -> c_int {
     let mut buf = [0u8; 1024];

@@ -40,7 +40,7 @@ fn bench_crates(c: &mut Criterion) {
     c.bench_functions("bench_fast_but_insecure", functions, 0);
 }
 
-criterion_group!{
+criterion_group! {
     name = benches;
     config = Criterion::default().sample_size(SAMPLE_SIZE);
     targets = bench_crates

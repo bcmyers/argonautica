@@ -22,7 +22,8 @@ fn bench_crates(c: &mut Criterion) {
         /* lanes */ default_lanes(),
         /* kib */ DEFAULT_MEMORY_SIZE,
         /* variant */ argon2rs::Variant::Argon2i,
-    ).unwrap();
+    )
+    .unwrap();
     let argon2rs = Fun::new("argon2rs", move |b, _| {
         b.iter(|| {
             let mut out = [0u8; DEFAULT_HASH_LEN as usize];
@@ -83,7 +84,7 @@ fn bench_crates(c: &mut Criterion) {
     c.bench_functions("bench_crates", functions, 0);
 }
 
-criterion_group!{
+criterion_group! {
     name = benches;
     config = Criterion::default().sample_size(SAMPLE_SIZE);
     targets = bench_crates

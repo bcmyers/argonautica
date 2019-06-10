@@ -5,7 +5,7 @@ use std::ffi::CString;
 use argonautica::config::{Backend, Variant, Version};
 use argonautica::input::Salt;
 use argonautica::Hasher;
-use libc::{c_char, c_int, uint32_t, uint8_t};
+use libc::{c_char, c_int};
 
 use {argonautica_backend_t, argonautica_error_t, argonautica_variant_t, argonautica_version_t};
 
@@ -74,22 +74,22 @@ use {argonautica_backend_t, argonautica_error_t, argonautica_variant_t, argonaut
 #[no_mangle]
 pub extern "C" fn argonautica_hash(
     encoded: *mut c_char,
-    additional_data: *const uint8_t,
-    additional_data_len: uint32_t,
-    password: *mut uint8_t,
-    password_len: uint32_t,
-    salt: *const uint8_t,
-    salt_len: uint32_t,
-    secret_key: *mut uint8_t,
-    secret_key_len: uint32_t,
+    additional_data: *const u8,
+    additional_data_len: u32,
+    password: *mut u8,
+    password_len: u32,
+    salt: *const u8,
+    salt_len: u32,
+    secret_key: *mut u8,
+    secret_key_len: u32,
     backend: argonautica_backend_t,
-    hash_len: uint32_t,
-    iterations: uint32_t,
-    lanes: uint32_t,
-    memory_size: uint32_t,
+    hash_len: u32,
+    iterations: u32,
+    lanes: u32,
+    memory_size: u32,
     password_clearing: c_int,
     secret_key_clearing: c_int,
-    threads: uint32_t,
+    threads: u32,
     variant: argonautica_variant_t,
     version: argonautica_version_t,
 ) -> argonautica_error_t {
@@ -191,21 +191,21 @@ mod tests {
         let cstring = unsafe { CString::from_vec_unchecked(encoded) };
         let encoded_ptr = cstring.into_raw();
         let password = "11111111".to_string();
-        let password_ptr = password.as_bytes().as_ptr() as *mut uint8_t;
+        let password_ptr = password.as_bytes().as_ptr() as *mut u8;
         let password_len = password.as_bytes().len();
         let secret_key = "22222222".to_string();
-        let secret_key_ptr = secret_key.as_bytes().as_ptr() as *mut uint8_t;
+        let secret_key_ptr = secret_key.as_bytes().as_ptr() as *mut u8;
         let secret_key_len = secret_key.as_bytes().len();
         let err = argonautica_hash(
             /* encoded */ encoded_ptr,
             /* additional_data */ ::std::ptr::null(),
             /* additional_data_len */ 0,
             /* password */ password_ptr,
-            /* password_len */ password_len as uint32_t,
+            /* password_len */ password_len as u32,
             /* salt */ ::std::ptr::null(),
             /* salt_len */ salt_len,
             /* secret_key */ secret_key_ptr,
-            /* secret_key_len */ secret_key_len as uint32_t,
+            /* secret_key_len */ secret_key_len as u32,
             /* backend */ argonautica_backend_t::ARGONAUTICA_C,
             /* hash_len */ hash_len,
             /* iterations */ iterations,
@@ -219,10 +219,10 @@ mod tests {
         );
         assert_eq!(err, argonautica_error_t::ARGONAUTICA_OK);
         let password =
-            unsafe { ::std::slice::from_raw_parts(password_ptr as *mut uint8_t, password_len) };
+            unsafe { ::std::slice::from_raw_parts(password_ptr as *mut u8, password_len) };
         assert_eq!(password, &[0u8; 8][..]);
         let secret_key =
-            unsafe { ::std::slice::from_raw_parts(secret_key_ptr as *mut uint8_t, secret_key_len) };
+            unsafe { ::std::slice::from_raw_parts(secret_key_ptr as *mut u8, secret_key_len) };
         assert_eq!(secret_key, &[0u8; 8][..]);
         let _ = unsafe { CString::from_raw(encoded_ptr) };
     }

@@ -45,7 +45,7 @@ impl Error {
     /// the end of the [`Error`](struct.Error.html)'s display string
     pub fn add_context<S>(mut self, context: S) -> Error
     where
-        S: AsRef<str>
+        S: AsRef<str>,
     {
         self.display = format!("{}: {}", self.kind, context.as_ref());
         self

@@ -4,7 +4,7 @@ use std::ffi::CStr;
 
 use argonautica::config::Backend;
 use argonautica::Verifier;
-use libc::{c_char, c_int, uint32_t, uint8_t};
+use libc::{c_char, c_int};
 
 use {argonautica_backend_t, argonautica_error_t};
 
@@ -21,17 +21,17 @@ use {argonautica_backend_t, argonautica_error_t};
 #[no_mangle]
 pub extern "C" fn argonautica_verify(
     is_valid: *mut c_int,
-    additional_data: *const uint8_t,
-    additional_data_len: uint32_t,
+    additional_data: *const u8,
+    additional_data_len: u32,
     encoded: *const c_char,
-    password: *mut uint8_t,
-    password_len: uint32_t,
-    secret_key: *mut uint8_t,
-    secret_key_len: uint32_t,
+    password: *mut u8,
+    password_len: u32,
+    secret_key: *mut u8,
+    secret_key_len: u32,
     backend: argonautica_backend_t,
     password_clearing: c_int,
     secret_key_clearing: c_int,
-    threads: uint32_t,
+    threads: u32,
 ) -> argonautica_error_t {
     if is_valid.is_null() || encoded.is_null() || password.is_null() {
         return argonautica_error_t::ARGONAUTICA_ERROR_NULL_PTR;

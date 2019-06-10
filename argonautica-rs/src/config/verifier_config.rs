@@ -14,7 +14,11 @@ pub struct VerifierConfig {
     pub(crate) backend: Backend,
     #[cfg_attr(
         feature = "serde",
-        serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde")
+        serde(
+            skip_serializing,
+            skip_deserializing,
+            default = "default_cpu_pool_serde"
+        )
     )]
     pub(crate) cpu_pool: Option<CpuPool>,
     pub(crate) password_clearing: bool,

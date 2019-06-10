@@ -75,14 +75,15 @@ fn bench_threads(c: &mut Criterion) {
                 iterations: DEFAULT_ITERATIONS,
                 memory_size: DEFAULT_MEMORY_SIZE,
                 threads,
-            }.setup();
+            }
+            .setup();
             b.iter(|| bench.clone().run());
         },
         &THREADS,
     );
 }
 
-criterion_group!{
+criterion_group! {
     name = benches;
     config = Criterion::default().sample_size(SAMPLE_SIZE);
     targets = bench_threads,

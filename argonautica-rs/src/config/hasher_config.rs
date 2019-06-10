@@ -16,7 +16,11 @@ pub struct HasherConfig {
     backend: Backend,
     #[cfg_attr(
         feature = "serde",
-        serde(skip_serializing, skip_deserializing, default = "default_cpu_pool_serde")
+        serde(
+            skip_serializing,
+            skip_deserializing,
+            default = "default_cpu_pool_serde"
+        )
     )]
     cpu_pool: Option<CpuPool>,
     hash_len: u32,
@@ -211,7 +215,9 @@ fn validate_iterations(iterations: u32) -> Result<(), Error> {
 
 fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
-        return Err(Error::new(ErrorKind::LanesTooFewError).add_context(format!("Lanes: {}", lanes)));
+        return Err(
+            Error::new(ErrorKind::LanesTooFewError).add_context(format!("Lanes: {}", lanes))
+        );
     }
     if lanes > 0x00ff_ffff {
         return Err(

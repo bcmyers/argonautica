@@ -39,9 +39,13 @@
 //!
 //! at your option.
 #![deny(
-    missing_debug_implementations, missing_docs, unused_imports, unused_unsafe, unused_variables
+    missing_debug_implementations,
+    missing_docs,
+    unused_imports,
+    unused_unsafe,
+    unused_variables
 )]
-#![doc(html_root_url = "https://docs.rs/argonautica-c/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/argonautica-c/0.2.1")]
 
 extern crate argonautica;
 extern crate itoa;

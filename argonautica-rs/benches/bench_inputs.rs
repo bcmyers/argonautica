@@ -193,14 +193,15 @@ fn bench_inputs(c: &mut Criterion) {
                 iterations,
                 memory_size,
                 threads: num_cpus::get_physical() as u32,
-            }.setup();
+            }
+            .setup();
             b.iter(|| bench.clone().run());
         },
         &INPUTS,
     );
 }
 
-criterion_group!{
+criterion_group! {
     name = benches;
     config = Criterion::default().sample_size(SAMPLE_SIZE);
     targets = bench_inputs,
