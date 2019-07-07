@@ -93,21 +93,6 @@
 //! in password hashing with a different algorithm,
 //! [rust-bcrypt](https://github.com/Keats/rust-bcrypt) might be worth checking out.
 //!
-//! For what it's worth, besides API differences, <b>argonautica</b> has three key features that
-//! other crates currently lack:
-//! * The ability to use [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions (even on stable),
-//!   which can lead to significantly faster hashing times
-//!     * For example, on default settings, argonautica with SIMD runs <b>over twice
-//!       as fast</b> as other crates on the developer's early-2014 Macbook, which has access to
-//!       [SIMD instructions](https://software.intel.com/sites/landingpage/IntrinsicsGuide/)
-//!       through
-//!       [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions)
-//!     * <i>Note: SIMD instructions are specific to your CPU; so if you're compiling for
-//!       machines other than your own, you should not turn on the SIMD feature</i>
-//! * The ability to hash passwords with a secret key, which not even the
-//!   [C implementation](https://github.com/P-H-C/phc-winner-argon2) exposes publicly
-//! * The newest Argon2 variant: Argon2id
-//!
 //! # Configuration
 //!
 //! The default configurations for [`Hasher`](struct.Hasher.html) and
@@ -273,7 +258,7 @@
 //!     * Arch linux: `pacman -S clang`
 //!     * Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
 //!
-//! <b>argonautica</b> runs on stable Rust version 1.26.0 or greater.
+//! <b>argonautica</b> runs on stable Rust version 1.31.0 or greater.
 //!
 //! # License
 //!

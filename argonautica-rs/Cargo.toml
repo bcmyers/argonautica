@@ -27,15 +27,15 @@ simd = []
 
 [dependencies]
 base64 = "0.10"
-bitflags = "1.0"
+bitflags = "1.1"
 failure = "0.1"
 futures = "0.1"
 futures-cpupool = "0.1"
 libc = "0.2"
 log = "0.4"
-nom = "4.2"
+nom = "5.0"
 num_cpus = "1.10"
-rand = "0.6"
+rand = "0.7"
 scopeguard = "1.0"
 serde = { version = "1.0", optional = true, features = ["derive"] }
 
@@ -47,9 +47,9 @@ rust-argon2 = { version = "0.4.0", optional = true }
 sha2 = { version = "0.8", optional = true }
 
 [build-dependencies]
-bindgen = "0.49"
+bindgen = "0.50"
 cfg-if = "0.1"
-cc = { version = "1.0.30", features = ["parallel"] }
+cc = { version = "1.0.37", features = ["parallel"] }
 failure = "0.1"
 tempdir = "0.3"
 

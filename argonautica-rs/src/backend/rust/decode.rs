@@ -34,21 +34,28 @@ struct IntermediateStruct {
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 named!(parse_hash<&str, IntermediateStruct>, do_parse!(
-    take_until_and_consume!("$") >>
+    take_until!("$") >>
+    take!(1) >>
     variant: map_res!(take_until!("$"), |x: &str| x.parse::<Variant>()) >>
-    take_until_and_consume!("$v=") >>
+    take_until!("$v=") >>
+    take!(3) >>
     version: map_res!(take_until!("$"), |x: &str| x.parse::<Version>()) >>
-    take_until_and_consume!("$m=") >>
+    take_until!("$m=") >>
+    take!(3) >>
     memory_size: map_res!(take_until!(","), |x: &str| x.parse::<u32>()) >>
-    take_until_and_consume!(",t=") >>
+    take_until!(",t=") >>
+    take!(3) >>
     iterations: map_res!(take_until!(","), |x: &str| x.parse::<u32>()) >>
-    take_until_and_consume!(",p=") >>
+    take_until!(",p=") >>
+    take!(3) >>
     lanes: map_res!(take_until!("$"), |x: &str| x.parse::<u32>()) >>
-    take_until_and_consume!("$") >>
+    take_until!("$") >>
+    take!(1) >>
     raw_salt_bytes: map_res!(take_until!("$"), |x: &str| {
         base64::decode_config(x, base64::STANDARD_NO_PAD)
     }) >>
-    take_until_and_consume!("$") >>
+    take_until!("$") >>
+    take!(1) >>
     (IntermediateStruct {
         iterations,
         lanes,

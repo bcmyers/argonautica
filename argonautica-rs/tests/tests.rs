@@ -66,7 +66,7 @@ fn build_c<P: AsRef<Path>>(build_dir: P) {
 }
 
 fn generate_args(input: &Input) -> Vec<String> {
-    let mut rng = rand::thread_rng();
+    let rng = rand::thread_rng();
     let additional_data = if input.additional_data_len == 0 {
         "".to_string()
     } else {

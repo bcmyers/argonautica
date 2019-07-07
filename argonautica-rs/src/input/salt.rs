@@ -1,4 +1,4 @@
-use rand::rngs::EntropyRng;
+use rand::rngs::OsRng;
 use rand::RngCore;
 
 use {Error, ErrorKind};
@@ -9,7 +9,7 @@ impl Default for Salt {
     /// Initially, the random `Salt` has nothing in it, but every time you call `hash`,
     /// `hash_raw`, or their non-blocking equivalents on a `Hasher`, the `Salt` will update with
     /// `32` new random bytes generated using a cryptographically-secure random number
-    /// generator (`EntropyRng`)
+    /// generator (`OsRng`)
     fn default() -> Salt {
         Salt::random(32)
     }
@@ -64,7 +64,7 @@ impl<'a> From<&'a Salt> for Salt {
 ///   constructors. It will be <b>deterministic</b> if it's constructed via any of the various
 ///   `From` implementations
 /// * A <b>random</b> `Salt` will generate new random bytes using a cryptographically-secure
-///   random number generator (`EntropyRng`) upon each call to `hash`, `hash_raw` or their
+///   random number generator (`OsRng`) upon each call to `hash`, `hash_raw` or their
 ///   non-blocking equivalents. A <b>deterministic</b> `Salt` remain constant upon each of these
 ///   calls</i>
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -86,7 +86,7 @@ impl Salt {
     /// Initially, the random `Salt` has nothing in it, but every time you call `hash`,
     /// `hash_raw`, or their non-blocking equivalents on a `Hasher`, the `Salt` will update with
     /// new random bytes of the length specified generated using a cryptographically-secure
-    /// random number generator (`EntropyRng`)
+    /// random number generator (`OsRng`)
     pub fn random(len: u32) -> Salt {
         let bytes = vec![0u8; len as usize];
         Salt(Kind::Random(bytes))
@@ -122,8 +122,8 @@ impl Salt {
     pub fn update(&mut self) -> Result<(), Error> {
         match self.0 {
             Kind::Random(ref mut bytes) => {
-                let mut rng = EntropyRng::new();
-                rng.try_fill_bytes(bytes)
+                OsRng
+                    .try_fill_bytes(bytes)
                     .map_err(|_| Error::new(ErrorKind::OsRngError))?;
             }
             _ => (),
