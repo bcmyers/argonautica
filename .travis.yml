@@ -104,5 +104,14 @@ matrix:
         - cargo test --release --features="simd serde"
         - cd ../argonautica-c
         - cargo test --release --features="simd"
+    - language: rust
+      rust: 1.26.0
+      cache: cargo
+      script:
+        - cd argonautica-rs
+        - cargo test --release --features="simd serde"
+        - cd ../argonautica-c
+        - cargo test --release --features="simd"
+
 sudo: false
 dist: trusty
