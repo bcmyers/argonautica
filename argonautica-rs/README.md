@@ -260,7 +260,7 @@ machine in order to build <b>argonautica</b>. More specifically, you need:
     * Arch linux: `pacman -S clang`
     * Windows: Download a pre-built binary [here](http://releases.llvm.org/download.html)
 
-<b>argonautica</b> runs on stable Rust version 1.31.0 or greater.
+<b>argonautica</b> runs on stable Rust version 1.32.0 or greater.
 
 ## License
 
