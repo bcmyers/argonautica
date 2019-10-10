@@ -64,7 +64,8 @@ fn main() -> Result<(), failure::Error> {
         .warnings(false)
         .extra_warnings(false);
     if IS_SIMD {
-        builder.flag_if_supported("-march=native");
+        builder.flag_if_supported("-march=native")
+            .flag_if_supported("-fno-stack-check");
     }
     let opt_level = env::var("OPT_LEVEL")?.parse::<usize>()?;
     if opt_level < 3 {
