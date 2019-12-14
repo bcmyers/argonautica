@@ -232,7 +232,7 @@ impl<'a> Hasher<'a> {
     /// After you have configured a [`Hasher`](struct.Hasher.html) to your liking and provided
     /// it will all the data you would like to hash, e.g.
     /// * a [`Password`](input/struct.Password.html),
-    /// * a [`Salt`](input/struct.Password.html) (note: it is recommened you use the default random salt),
+    /// * a [`Salt`](input/struct.Salt.html) (note: it is recommened you use the default random salt),
     /// * a [`SecretKey`](input/struct.SecretKey.html),
     /// * [`AdditionalData`](input/struct.AdditionalData.html) (optional),
     ///
