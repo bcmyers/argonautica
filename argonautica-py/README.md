@@ -13,10 +13,10 @@ Argon2 won the [Password Hashing Competition](https://password-hashing.net/) in 
 
 **argonautica** was built with a simple use-case in mind: hashing passwords for storage in a
 website's database. That said, it's also "feature-complete", meaning anything you can do with
-the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2
+the canonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2
 you can do with argonautica\*.
 
-<i>\* Indeed, argonautica has a feature that even the cannonical C implementation
+<i>\* Indeed, argonautica has a feature that even the canonical C implementation
 lacks, i.e. hashing passwords with secret keys (the C implementation implements this, but
 does not expose it publicly)</i>
 
@@ -24,7 +24,7 @@ does not expose it publicly)</i>
 
 There are several Python packages that implement argon2, including the excellent [passlib](http://passlib.readthedocs.io/en/stable/), which uses [argon2_cffi](https://github.com/hynek/argon2_cffi), but...
 
-- AFAIK, **argonautica** is the only Python implementation of argon2 that supports hashing with secret keys. Not even the [cannonical C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2 exposes this feature publicly (it's in the code, but unfortunately not accessable via the public API).
+- AFAIK, **argonautica** is the only Python implementation of argon2 that supports hashing with secret keys. Not even the [canonical C implementation](https://github.com/P-H-C/phc-winner-argon2) of argon2 exposes this feature publicly (it's in the code, but unfortunately not accessable via the public API).
 
 - **argonautica** is the only Python implementation of argon2 to use [SIMD](https://en.wikipedia.org/wiki/SIMD) instructions to peform it's hashing algorithm, which means it can be quite fast. The downside is that you have to compile it for your specific machine (this is why the `pip install argonautica` process takes time). That said, on the developer's early 2014 Macbook Air, which has [SIMD](https://en.wikipedia.org/wiki/SIMD) instruction through [AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions), argonautica runs ~30% faster than passlib on default settings.
 
@@ -101,7 +101,7 @@ hasher.additional_data = None  # Default is None
 hasher.backend = Backend.C  # Default is Backend.C
 # 👆 argonautica was designed to support multiple backends (meaning multiple
 # implementations of the underlying argon2 algorithm). Currently only the
-# C backend is supported, which uses the cannonical argon2 library written
+# C backend is supported, which uses the canonical argon2 library written
 # in C to actually do the work. In the future a Rust backend will also be
 # supported, but, for the moment, you must use Backend.C, which is the
 # default. Using Backend.Rust will result in an error (again, for the

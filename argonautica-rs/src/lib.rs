@@ -23,10 +23,10 @@
 //!
 //! <b>argonautica</b> was built with a simple use-case in mind: hashing passwords for storage in a
 //! website's database. That said, it's also "feature-complete", meaning anything you can do with
-//! the cannonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2
+//! the canonical [C implementation](https://github.com/P-H-C/phc-winner-argon2) of Argon2
 //! you can do with argonautica*.
 //!
-//! <i>\* Indeed, argonautica has a feature that even the cannonical C implementation
+//! <i>\* Indeed, argonautica has a feature that even the canonical C implementation
 //! lacks, i.e. hashing passwords with secret keys (the C implementation implements this, but
 //! does not expose it publicly)</i>
 //!
@@ -118,7 +118,7 @@
 //!         .configure_backend(Backend::C) // Default is `Backend::C`
 //!         // 👆 argonautica was designed to support multiple backends (meaning multiple
 //!         // implementations of the underlying Argon2 algorithm). Currently only the C backend
-//!         // is supported, which uses the cannonical Argon2 library written in C to actually
+//!         // is supported, which uses the canonical Argon2 library written in C to actually
 //!         // do the work. In the future hopefully a Rust backend will also be supported, but,
 //!         // for the moment, you must use `Backend::C`, which is the default. Using
 //!         // `Backend::Rust` will result in an error (again, for the moment).
@@ -248,7 +248,7 @@
 //!         * `argonautica = { version = "0.2", features = ["serde"] }`
 //!
 //! That said, <b>argonautica</b> uses [cc](https://github.com/alexcrichton/cc-rs) and
-//! [bindgen](https://github.com/rust-lang-nursery/rust-bindgen) to compile the cannonical
+//! [bindgen](https://github.com/rust-lang-nursery/rust-bindgen) to compile the canonical
 //! [C implemenation](https://github.com/P-H-C/phc-winner-argon2) of Argon2 into a
 //! static archive during the build process. This means you need a C compiler on your
 //! machine in order to build <b>argonautica</b>. More specifically, you need:
