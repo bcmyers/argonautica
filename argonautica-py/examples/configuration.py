@@ -18,7 +18,7 @@ hasher.additional_data = None  # Default is None
 hasher.backend = Backend.C  # Default is Backend.C
 # 👆 argonautica was designed to support multiple backends (meaning multiple
 # implementations of the underlying argon2 algorithm). Currently only the
-# C backend is supported, which uses the cannonical argon2 library written
+# C backend is supported, which uses the canonical argon2 library written
 # in C to actually do the work. In the future a Rust backend will also be
 # supported, but, for the moment, you must use Backend.C, which is the
 # default. Using Backend.Rust will result in an error (again, for the
