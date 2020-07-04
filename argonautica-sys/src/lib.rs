@@ -1,5 +1,22 @@
 mod ffi;
 
+use std::ffi::CStr;
+use std::os::raw::c_int;
+
+/// Get the associated error message for given error code
+///
+/// * @return  The error message associated with the given error code
+pub fn argon2_error_message(error_code: i32) -> &'static str {
+    unsafe {
+        let ptr = ffi::argon2_error_message(error_code as c_int);
+        let c = CStr::from_ptr(ptr);
+        let s = c
+            .to_str()
+            .expect("argon2 error messages should be valid utf8");
+        s
+    }
+}
+
 /// Returns the encoded hash length for the given input parameters
 ///
 /// * @param t_cost  Number of iterations
