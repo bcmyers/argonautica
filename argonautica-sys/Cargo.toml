@@ -3,7 +3,7 @@ name = "argonautica-sys"
 version = "0.3.0"
 
 authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
-categories = ["algorithms", "api-bindings", "authentication", "cryptography"] # TODO
+categories = ["algorithms", "api-bindings", "authentication", "cryptography"]
 description = "Idiomatic Argon2 password hashing for Rust"
 documentation = "https://docs.rs/argonautica"
 edition = "2018"
