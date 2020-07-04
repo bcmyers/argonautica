@@ -1,0 +1,12 @@
+# Ignore all files by default
+
+*
+
+# Whitelist items by preceding them with !
+
+!argonautica/
+!argonautica-sys/
+
+# Ignore any target directory pulled in by whitelist above
+
+**/target

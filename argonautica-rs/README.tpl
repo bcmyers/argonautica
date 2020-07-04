@@ -1,3 +1,0 @@
-# argonautica-rs
-
-{{readme}}

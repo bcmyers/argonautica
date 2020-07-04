@@ -1,24 +1,4 @@
 .DS_Store
-.vscode/
-todo.txt
-foo.py
-
-**/*.rs.bk
-bindings.rs
 Cargo.lock
-target/
+target
 
-*.egg-info/
-.eggs/
-.mypy_cache
-build/
-dist/
-*$py.class
-*.py[cod]
-__pycache__/
-*.so
-venv*/
-.python-version
-
-node_modules/
-yarn.lock

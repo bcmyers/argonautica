@@ -1,0 +1,34 @@
+[package]
+name = "argonautica"
+version = "0.3.0" # remember to update html_root_url
+
+authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
+categories = ["algorithms", "api-bindings", "authentication", "cryptography"]
+description = "Idiomatic Argon2 password hashing for Rust"
+documentation = "https://docs.rs/argonautica"
+homepage = "https://github.com/bcmyers/argonautica"
+keywords = ["argon2", "cryptography", "hash", "password", "security"]
+license = "MIT/Apache-2.0"
+publish = true
+readme = "README.md"
+repository = "https://github.com/bcmyers/argonautica"
+
+[badges]
+travis-ci = { repository = "bcmyers/argonautica", branch = "master" }
+
+[dependencies]
+argonautica-sys = { path = "../argonautica-sys" }
+base64 = "0.12"
+bitflags = "1.2"
+futures = "0.3"
+libc = "0.2"
+nom = "5.1"
+num_cpus = "1.13"
+rand = "0.7"
+serde = { version = "1.0", optional = true, features = ["derive"] }
+thiserror = "1.0"
+
+[dev-dependencies]
+dotenv = "0.15"
+lazy_static = "1.4"
+serde_json = "1.0"

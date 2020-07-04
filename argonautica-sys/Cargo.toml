@@ -1,0 +1,26 @@
+[package]
+name = "argonautica-sys"
+version = "0.3.0"
+
+authors = ["Brian Myers <brian.carl.myers@gmail.com>"]
+categories = ["algorithms", "api-bindings", "authentication", "cryptography"] # TODO
+description = "Idiomatic Argon2 password hashing for Rust"
+documentation = "https://docs.rs/argonautica"
+edition = "2018"
+homepage = "https://github.com/bcmyers/argonautica"
+keywords = ["argon2", "cryptography", "hash", "password", "security"]
+license = "MIT/Apache-2.0"
+publish = true
+readme = "README.md"
+repository = "https://github.com/bcmyers/argonautica"
+
+build = "build.rs"
+links = "argon2"
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+bindgen = "0.54"
+cc = { version = "1.0", features = ["parallel"] }
+tempfile = "3.1"
