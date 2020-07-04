@@ -62,7 +62,6 @@ RUN set -eux ; \
 RUN set -eux ; \
     cargo new --lib argonautica ; \
     cargo new --lib argonautica-sys ; \
-    echo "fn main() {}" > ./argonautica/build.rs ; \
     echo "fn main() {}" > ./argonautica-sys/build.rs ; \
     echo '[workspace]\n\
 members = [\n\
@@ -78,7 +77,9 @@ RUN cargo build --release
 COPY --chown=$USERNAME ./argonautica ./argonautica
 COPY --chown=$USERNAME ./argonautica-sys ./argonautica-sys
 
-RUN cargo build --release
+RUN set -eux ; \
+    touch argonautica-sys/build.rs ; \
+    cargo build --release
 
 FROM alpine:3.12
 
