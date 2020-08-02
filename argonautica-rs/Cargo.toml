@@ -28,6 +28,7 @@ simd = []
 [dependencies]
 base64 = "0.10"
 bitflags = "1.1"
+constant_time_eq = "0.1.5"
 failure = "0.1"
 futures = "0.1"
 futures-cpupool = "0.1"

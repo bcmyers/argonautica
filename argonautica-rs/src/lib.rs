@@ -282,6 +282,7 @@ extern crate base64;
 extern crate bitflags;
 #[cfg(feature = "development")]
 extern crate blake2_rfc;
+extern crate constant_time_eq;
 #[macro_use]
 extern crate failure;
 extern crate futures;
