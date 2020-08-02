@@ -143,12 +143,10 @@ impl<'a> Verifier<'a> {
                 self.hasher.config.set_version(hash_raw.version());
                 self.hasher.salt = hash_raw.raw_salt_bytes().into();
                 let hash_raw2 = self.hasher.hash_raw()?;
-                let is_valid = if hash_raw.raw_hash_bytes() == hash_raw2.raw_hash_bytes() {
-                    true
-                } else {
-                    false
-                };
-                Ok(is_valid)
+                Ok(constant_time_eq::constant_time_eq(
+                    hash_raw.raw_hash_bytes(),
+                    hash_raw2.raw_hash_bytes(),
+                ))
             }
             Hash::Raw(ref hash_raw) => {
                 self.hasher
@@ -162,12 +160,10 @@ impl<'a> Verifier<'a> {
                 self.hasher.config.set_version(hash_raw.version());
                 self.hasher.salt = hash_raw.raw_salt_bytes().into();
                 let hash_raw2 = self.hasher.hash_raw()?;
-                let is_valid = if hash_raw.raw_hash_bytes() == hash_raw2.raw_hash_bytes() {
-                    true
-                } else {
-                    false
-                };
-                Ok(is_valid)
+                Ok(constant_time_eq::constant_time_eq(
+                    hash_raw.raw_hash_bytes(),
+                    hash_raw2.raw_hash_bytes(),
+                ))
             }
             Hash::None => return Err(Error::new(ErrorKind::HashMissingError)),
         }
