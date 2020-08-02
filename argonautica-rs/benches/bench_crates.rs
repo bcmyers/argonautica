@@ -30,9 +30,8 @@ fn bench_crates(c: &mut Criterion) {
 
             let password = PASSWORD.as_bytes();
 
-            let mut rng = OsRng::new().unwrap();
             let mut salt = [0u8; DEFAULT_SALT_LEN as usize];
-            rng.fill_bytes(&mut salt);
+            OsRng.fill_bytes(&mut salt);
 
             hasher.hash(
                 /* out */ &mut out,
@@ -72,9 +71,8 @@ fn bench_crates(c: &mut Criterion) {
         b.iter(|| {
             let password = PASSWORD.as_bytes();
 
-            let mut rng = OsRng::new().unwrap();
             let mut salt = [0u8; DEFAULT_SALT_LEN as usize];
-            rng.fill_bytes(&mut salt);
+            OsRng.fill_bytes(&mut salt);
 
             let _ = argon2::hash_raw(password, &salt[..], &config).unwrap();
         });
