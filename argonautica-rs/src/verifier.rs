@@ -129,44 +129,31 @@ impl<'a> Verifier<'a> {
     /// call this method to verify that the password matches the hash or
     /// [`HashRaw`](output/struct.HashRaw.html)
     pub fn verify(&mut self) -> Result<bool, Error> {
-        match self.hash {
-            Hash::Encoded(ref s) => {
-                let hash_raw = decode_rust(s)?;
-                self.hasher
-                    .config
-                    .set_hash_len(hash_raw.raw_hash_bytes().len() as u32);
-                self.hasher.config.set_iterations(hash_raw.iterations());
-                self.hasher.config.set_lanes(hash_raw.lanes());
-                self.hasher.config.set_memory_size(hash_raw.memory_size());
-                self.hasher.config.set_opt_out_of_secret_key(true);
-                self.hasher.config.set_variant(hash_raw.variant());
-                self.hasher.config.set_version(hash_raw.version());
-                self.hasher.salt = hash_raw.raw_salt_bytes().into();
-                let hash_raw2 = self.hasher.hash_raw()?;
-                Ok(constant_time_eq::constant_time_eq(
-                    hash_raw.raw_hash_bytes(),
-                    hash_raw2.raw_hash_bytes(),
-                ))
+        let hash_temp: HashRaw;
+        let hash_raw = match &self.hash {
+            Hash::Encoded(s) => {
+                hash_temp = decode_rust(s)?;
+                &hash_temp
             }
-            Hash::Raw(ref hash_raw) => {
-                self.hasher
-                    .config
-                    .set_hash_len(hash_raw.raw_hash_bytes().len() as u32);
-                self.hasher.config.set_iterations(hash_raw.iterations());
-                self.hasher.config.set_lanes(hash_raw.lanes());
-                self.hasher.config.set_memory_size(hash_raw.memory_size());
-                self.hasher.config.set_opt_out_of_secret_key(true);
-                self.hasher.config.set_variant(hash_raw.variant());
-                self.hasher.config.set_version(hash_raw.version());
-                self.hasher.salt = hash_raw.raw_salt_bytes().into();
-                let hash_raw2 = self.hasher.hash_raw()?;
-                Ok(constant_time_eq::constant_time_eq(
-                    hash_raw.raw_hash_bytes(),
-                    hash_raw2.raw_hash_bytes(),
-                ))
-            }
+            Hash::Raw(hash_raw) => hash_raw,
             Hash::None => return Err(Error::new(ErrorKind::HashMissingError)),
-        }
+        };
+
+        self.hasher
+            .config
+            .set_hash_len(hash_raw.raw_hash_bytes().len() as u32);
+        self.hasher.config.set_iterations(hash_raw.iterations());
+        self.hasher.config.set_lanes(hash_raw.lanes());
+        self.hasher.config.set_memory_size(hash_raw.memory_size());
+        self.hasher.config.set_opt_out_of_secret_key(true);
+        self.hasher.config.set_variant(hash_raw.variant());
+        self.hasher.config.set_version(hash_raw.version());
+        self.hasher.salt = hash_raw.raw_salt_bytes().into();
+        let hash_raw2 = self.hasher.hash_raw()?;
+        Ok(constant_time_eq::constant_time_eq(
+            hash_raw.raw_hash_bytes(),
+            hash_raw2.raw_hash_bytes(),
+        ))
     }
     /// <b><u>The primary method (non-blocking version)</u></b>
     ///
