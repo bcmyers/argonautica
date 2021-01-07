@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
-use backend::decode_rust;
-use config::{Variant, Version};
-use Error;
+use crate::backend::decode_rust;
+use crate::config::{Variant, Version};
+use crate::Error;
 
 impl FromStr for HashRaw {
     ///
@@ -95,7 +95,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<HashRaw>();
     }
@@ -103,7 +102,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<HashRaw>();
     }

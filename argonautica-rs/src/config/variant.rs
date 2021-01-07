@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
-use config::defaults::DEFAULT_VARIANT;
-use {Error, ErrorKind};
+use crate::config::defaults::DEFAULT_VARIANT;
+use crate::{Error, ErrorKind};
 
 impl Default for Variant {
     /// Returns [`Variant::Argon2id`](enum.Variant.html#variant.Argon2id)
@@ -100,7 +100,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<Variant>();
     }
@@ -108,7 +107,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<Variant>();
     }

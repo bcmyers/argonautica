@@ -7,8 +7,8 @@ use argonautica_variant_t;
 
 fn base64_len(len: u32) -> usize {
     let bits = 8 * len as usize;
-    let chars = bits / 6 + if bits % 6 != 0 { 1 } else { 0 };
-    chars
+
+    bits / 6 + if bits % 6 != 0 { 1 } else { 0 }
 }
 
 /// Function that returns the length of a string-encoded hash (in bytes and including the NULL byte).

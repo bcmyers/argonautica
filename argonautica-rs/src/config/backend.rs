@@ -1,5 +1,5 @@
-use config::defaults::DEFAULT_BACKEND;
-use {Error, ErrorKind};
+use crate::config::defaults::DEFAULT_BACKEND;
+use crate::{Error, ErrorKind};
 
 impl Default for Backend {
     /// Returns [`Backend::C`](enum.Backend.html#variant.C)
@@ -59,7 +59,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<Backend>();
     }
@@ -67,7 +66,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<Backend>();
     }

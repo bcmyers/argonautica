@@ -1,7 +1,7 @@
 use rand::rngs::OsRng;
 use rand::RngCore;
 
-use {Error, ErrorKind};
+use crate::{Error, ErrorKind};
 
 impl Default for Salt {
     /// Creates a new <u>random</u> `Salt`.
@@ -168,7 +168,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<Salt>();
     }
@@ -176,7 +175,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<Salt>();
     }

@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
-use config::defaults::DEFAULT_VERSION;
-use {Error, ErrorKind};
+use crate::config::defaults::DEFAULT_VERSION;
+use crate::{Error, ErrorKind};
 
 impl Default for Version {
     /// Returns [`Version::_0x13`](enum.Version.html#variant._0x13)
@@ -85,7 +85,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<Version>();
     }
@@ -93,7 +92,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<Version>();
     }

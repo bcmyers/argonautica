@@ -1,12 +1,10 @@
-use futures::Future;
-use futures_cpupool::CpuPool;
-use scopeguard;
+use futures::{executor::ThreadPool, task::SpawnExt, Future, TryFutureExt};
 
-use config::defaults::{default_cpu_pool, default_lanes};
-use config::{Backend, HasherConfig, Variant, Version};
-use input::{AdditionalData, Container, Password, Salt, SecretKey};
-use output::HashRaw;
-use {Error, ErrorKind};
+use crate::config::defaults::{default_lanes, default_thread_pool};
+use crate::config::{Backend, HasherConfig, Variant, Version};
+use crate::input::{AdditionalData, Container, Password, Salt, SecretKey};
+use crate::output::HashRaw;
+use crate::{Error, ErrorKind};
 
 impl<'a> Default for Hasher<'a> {
     /// Same as the [`new`](struct.Hasher.html#method.new) method
@@ -87,15 +85,15 @@ impl<'a> Hasher<'a> {
     pub fn fast_but_insecure() -> Hasher<'a> {
         fn memory_size(lanes: u32) -> u32 {
             let mut counter = 1;
-            let memory_size = loop {
+
+            loop {
                 if 2u32.pow(counter) < 8 * lanes {
                     counter += 1;
                     continue;
                 } else {
                     break 2u32.pow(counter);
                 }
-            };
-            memory_size
+            }
         }
         let lanes = default_lanes();
         let mut hasher = Hasher::default();
@@ -131,7 +129,7 @@ impl<'a> Hasher<'a> {
     /// for you on the fly; so even if you never configure [`Hasher`](struct.Hasher.html) with
     /// this method you can still use the non-blocking hashing methods.
     /// The default cpu pool has as many threads as the number of logical cores on your machine
-    pub fn configure_cpu_pool(&mut self, cpu_pool: CpuPool) -> &mut Hasher<'a> {
+    pub fn configure_cpu_pool(&mut self, cpu_pool: ThreadPool) -> &mut Hasher<'a> {
         self.config.set_cpu_pool(cpu_pool);
         self
     }
@@ -248,11 +246,9 @@ impl<'a> Hasher<'a> {
     /// Same as [`hash`](struct.Hasher.html#method.hash) except it returns a
     /// [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html)
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
-    pub fn hash_non_blocking(&mut self) -> impl Future<Item = String, Error = Error> {
-        self.hash_raw_non_blocking().and_then(|hash_raw| {
-            let hash = hash_raw.encode_rust();
-            Ok::<_, Error>(hash)
-        })
+    pub fn hash_non_blocking(&mut self) -> impl Future<Output = Result<String, Error>> {
+        self.hash_raw_non_blocking()
+            .and_then(|hash_raw| async move { Ok(hash_raw.encode_rust()) })
     }
     /// Like the [`hash`](struct.Hasher.html#method.hash) method, but instead of producing
     /// an string-encoded hash, it produces a [`HashRaw`](output/struct.HashRaw.html) struct
@@ -274,17 +270,21 @@ impl<'a> Hasher<'a> {
     /// Same as [`hash_raw`](struct.Hasher.html#method.hash) except it returns a
     /// [`Future`](https://docs.rs/futures/0.1.21/futures/future/trait.Future.html)
     /// instead of a [`Result`](https://doc.rust-lang.org/std/result/enum.Result.html)
-    pub fn hash_raw_non_blocking(&mut self) -> impl Future<Item = HashRaw, Error = Error> {
+    pub fn hash_raw_non_blocking(&mut self) -> impl Future<Output = Result<HashRaw, Error>> {
         let hasher = scopeguard::guard(self, |hasher| {
             hasher.clear();
         });
         let mut hasher = hasher.to_owned();
         match hasher.config.cpu_pool() {
-            Some(cpu_pool) => cpu_pool.spawn_fn(move || hasher.hash_raw()),
+            Some(cpu_pool) => cpu_pool
+                .spawn_with_handle(async move { hasher.hash_raw() })
+                .unwrap(),
             None => {
-                let cpu_pool = default_cpu_pool();
+                let cpu_pool = default_thread_pool();
                 hasher.config.set_cpu_pool(cpu_pool.clone());
-                cpu_pool.spawn_fn(move || hasher.hash_raw())
+                cpu_pool
+                    .spawn_with_handle(async move { hasher.hash_raw() })
+                    .unwrap()
             }
         }
     }
@@ -463,7 +463,7 @@ impl<'a> Hasher<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use config::{Variant, Version};
+    use crate::config::{Variant, Version};
 
     struct Test {
         variant: Variant,
@@ -618,8 +618,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_hasher_serialization() {
-        use serde_json;
-
         let password = "P@ssw0rd";
         let secret_key = "secret";
 
@@ -667,7 +665,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<Hasher>();
     }
@@ -675,7 +672,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<Hasher>();
     }

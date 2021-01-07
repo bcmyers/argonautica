@@ -1,9 +1,7 @@
 use std::fmt;
 
-use base64;
-
-use input::Container;
-use {Error, ErrorKind};
+use crate::input::Container;
+use crate::{Error, ErrorKind};
 
 impl<'a> From<&'a str> for SecretKey<'a> {
     fn from(s: &'a str) -> SecretKey<'a> {

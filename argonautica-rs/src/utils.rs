@@ -1,10 +1,9 @@
 //! Utility functions for generating random bytes, which can be useful for generating
 //! [`SecretKey`](input/struct.SecretKey.html)s, for example.
-use base64;
 use rand::rngs::OsRng;
 use rand::RngCore;
 
-use {Error, ErrorKind};
+use crate::{Error, ErrorKind};
 
 /// A utility function for generating cryptographically-secure random bytes. A quick glance at
 /// this function's source should give you a good idea of what the function is doing.

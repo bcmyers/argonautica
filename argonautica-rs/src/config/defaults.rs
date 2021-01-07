@@ -1,17 +1,16 @@
-use futures_cpupool::CpuPool;
-use num_cpus;
+use futures::executor::ThreadPool;
 
-use config::{Backend, Variant, Version};
+use crate::config::{Backend, Variant, Version};
 
 /// Returns a [`CpuPool`](https://docs.rs/futures-cpupool/0.1.8/futures_cpupool/struct.CpuPool.html)
 /// with threads equal to the number of logical cores on your machine
 #[inline(always)]
-pub fn default_cpu_pool() -> CpuPool {
-    CpuPool::new(num_cpus::get())
+pub fn default_thread_pool() -> ThreadPool {
+    ThreadPool::new().expect("thread pool creation")
 }
 
 #[cfg(feature = "serde")]
-pub(crate) fn default_cpu_pool_serde() -> Option<CpuPool> {
+pub(crate) fn default_thread_pool_serde() -> Option<ThreadPool> {
     None
 }
 

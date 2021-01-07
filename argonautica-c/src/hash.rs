@@ -98,12 +98,8 @@ pub extern "C" fn argonautica_hash(
     }
 
     let backend: Backend = backend.into();
-    let password_clearing = if password_clearing == 0 { false } else { true };
-    let secret_key_clearing = if secret_key_clearing == 0 {
-        false
-    } else {
-        true
-    };
+    let password_clearing = password_clearing != 0;
+    let secret_key_clearing = secret_key_clearing != 0;
     let variant: Variant = variant.into();
     let version: Version = version.into();
 

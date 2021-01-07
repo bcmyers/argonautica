@@ -9,8 +9,7 @@ use argonautica::config::{
     default_lanes, DEFAULT_HASH_LEN, DEFAULT_ITERATIONS, DEFAULT_MEMORY_SIZE, DEFAULT_SALT_LEN,
 };
 use criterion::{Criterion, Fun};
-use rand::rngs::OsRng;
-use rand::RngCore;
+use rand::{rngs::OsRng, RngCore};
 
 const PASSWORD: &str = "P@ssw0rd";
 const SAMPLE_SIZE: usize = 10;
@@ -30,9 +29,8 @@ fn bench_crates(c: &mut Criterion) {
 
             let password = PASSWORD.as_bytes();
 
-            let mut rng = OsRng::new().unwrap();
             let mut salt = [0u8; DEFAULT_SALT_LEN as usize];
-            rng.fill_bytes(&mut salt);
+            OsRng.fill_bytes(&mut salt);
 
             hasher.hash(
                 /* out */ &mut out,
@@ -72,9 +70,8 @@ fn bench_crates(c: &mut Criterion) {
         b.iter(|| {
             let password = PASSWORD.as_bytes();
 
-            let mut rng = OsRng::new().unwrap();
             let mut salt = [0u8; DEFAULT_SALT_LEN as usize];
-            rng.fill_bytes(&mut salt);
+            OsRng.fill_bytes(&mut salt);
 
             let _ = argon2::hash_raw(password, &salt[..], &config).unwrap();
         });

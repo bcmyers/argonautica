@@ -8,7 +8,7 @@ use std::env;
 
 use argonautica::input::SecretKey;
 use argonautica::{Hasher, Verifier};
-use futures::Future;
+use futures::future::TryFutureExt;
 
 // Helper method to load the secret key from a .env file. Used in `main` below.
 fn load_secret_key() -> Result<SecretKey<'static>, failure::Error> {
@@ -30,17 +30,18 @@ fn main() -> Result<(), failure::Error> {
         .hash_non_blocking()
         .and_then(|hash| {
             println!("{}", &hash);
-            verifier
+            let t = verifier
                 .with_hash(&hash)
                 .with_password("P@ssw0rd")
                 .with_secret_key(&secret_key)
-                .verify_non_blocking()
+                .verify_non_blocking();
+            t
         })
-        .and_then(|is_valid| {
+        .and_then(|is_valid| async move {
             assert!(is_valid);
             Ok(())
         })
         .map_err(|e| e.into());
 
-    future.wait()
+    futures::executor::block_on(future)
 }
