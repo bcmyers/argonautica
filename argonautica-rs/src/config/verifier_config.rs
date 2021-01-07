@@ -1,8 +1,8 @@
-use futures_cpupool::CpuPool;
+use futures::executor::ThreadPool;
 
 #[cfg(feature = "serde")]
-use config::defaults::default_cpu_pool_serde;
-use config::Backend;
+use crate::config::defaults::default_thread_pool_serde;
+use crate::config::Backend;
 
 /// Read-only configuration for [`Verifier`](../struct.Verifier.html). Can be obtained by calling
 /// the [`config`](../struct.Verifier.html#method.config) method on an instance of
@@ -17,10 +17,10 @@ pub struct VerifierConfig {
         serde(
             skip_serializing,
             skip_deserializing,
-            default = "default_cpu_pool_serde"
+            default = "default_thread_pool_serde"
         )
     )]
-    pub(crate) cpu_pool: Option<CpuPool>,
+    pub(crate) cpu_pool: Option<ThreadPool>,
     pub(crate) password_clearing: bool,
     pub(crate) secret_key_clearing: bool,
     pub(crate) threads: u32,
@@ -32,7 +32,7 @@ impl VerifierConfig {
         self.backend
     }
     #[allow(missing_docs)]
-    pub fn cpu_pool(&self) -> Option<CpuPool> {
+    pub fn cpu_pool(&self) -> Option<ThreadPool> {
         match self.cpu_pool {
             Some(ref cpu_pool) => Some(cpu_pool.clone()),
             None => None,
@@ -55,7 +55,7 @@ impl VerifierConfig {
 impl VerifierConfig {
     pub(crate) fn new(
         backend: Backend,
-        cpu_pool: Option<CpuPool>,
+        cpu_pool: Option<ThreadPool>,
         password_clearing: bool,
         secret_key_clearing: bool,
         threads: u32,
@@ -89,7 +89,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<VerifierConfig>();
     }
@@ -97,7 +96,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<VerifierConfig>();
     }

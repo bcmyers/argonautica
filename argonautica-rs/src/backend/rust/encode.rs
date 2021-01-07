@@ -1,6 +1,4 @@
-use base64;
-
-use output::HashRaw;
+use crate::output::HashRaw;
 
 impl HashRaw {
     pub(crate) fn encode_rust(&self) -> String {
@@ -24,8 +22,8 @@ mod tests {
     use rand::rngs::StdRng;
     use rand::{RngCore, SeedableRng};
 
-    use backend::encode_c;
-    use hasher::Hasher;
+    use crate::backend::encode_c;
+    use crate::hasher::Hasher;
 
     #[test]
     fn test_encode_against_c() {

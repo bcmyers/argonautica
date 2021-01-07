@@ -1,8 +1,7 @@
-use futures_cpupool::CpuPool;
-
-use config::defaults::*;
-use config::{Backend, Flags, Variant, Version};
-use {Error, ErrorKind};
+use crate::config::defaults::*;
+use crate::config::{Backend, Flags, Variant, Version};
+use crate::{Error, ErrorKind};
+use futures::executor::ThreadPool;
 
 const PANIC_WARNING: &str = "Your program will error if you use this configuration";
 
@@ -19,10 +18,10 @@ pub struct HasherConfig {
         serde(
             skip_serializing,
             skip_deserializing,
-            default = "default_cpu_pool_serde"
+            default = "default_thread_pool_serde"
         )
     )]
-    cpu_pool: Option<CpuPool>,
+    cpu_pool: Option<ThreadPool>,
     hash_len: u32,
     iterations: u32,
     lanes: u32,
@@ -41,7 +40,7 @@ impl HasherConfig {
         self.backend
     }
     #[allow(missing_docs)]
-    pub fn cpu_pool(&self) -> Option<CpuPool> {
+    pub fn cpu_pool(&self) -> Option<ThreadPool> {
         match self.cpu_pool {
             Some(ref cpu_pool) => Some(cpu_pool.clone()),
             None => None,
@@ -123,7 +122,7 @@ impl HasherConfig {
         });
         self.backend = backend;
     }
-    pub(crate) fn set_cpu_pool(&mut self, cpu_pool: CpuPool) {
+    pub(crate) fn set_cpu_pool(&mut self, cpu_pool: ThreadPool) {
         self.cpu_pool = Some(cpu_pool);
     }
     pub(crate) fn set_hash_len(&mut self, hash_len: u32) {
@@ -272,7 +271,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<HasherConfig>();
     }
@@ -280,7 +278,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<HasherConfig>();
     }

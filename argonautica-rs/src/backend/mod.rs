@@ -1,6 +1,6 @@
-mod c;
-mod rust;
+pub mod c;
+pub mod rust;
 
 #[cfg(test)]
-pub(crate) use self::c::encode_c;
-pub(crate) use self::rust::decode_rust;
+pub use c::encode_c;
+pub use rust::decode_rust;

@@ -1,7 +1,7 @@
 use std::fmt;
 
-use input::Container;
-use {Error, ErrorKind};
+use crate::input::Container;
+use crate::{Error, ErrorKind};
 
 impl<'a> From<&'a str> for Password<'a> {
     fn from(s: &'a str) -> Password<'a> {

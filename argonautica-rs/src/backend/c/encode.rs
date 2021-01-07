@@ -2,12 +2,10 @@
 
 use std::ffi::CStr;
 
-use libc;
+use crate::output::HashRaw;
+use crate::{ffi, Error, ErrorKind};
 
-use output::HashRaw;
-use {ffi, Error, ErrorKind};
-
-pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
+pub fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
     let encoded_len = unsafe {
         ffi::argon2_encodedlen(
             hash_raw.iterations(),

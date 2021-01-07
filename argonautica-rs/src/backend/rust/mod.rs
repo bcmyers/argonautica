@@ -5,4 +5,4 @@ mod encode;
 #[cfg(feature = "development")]
 mod hash_raw;
 
-pub(crate) use self::decode::decode_rust;
+pub use self::decode::decode_rust;

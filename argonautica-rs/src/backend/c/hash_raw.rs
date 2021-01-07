@@ -1,7 +1,7 @@
 use std::ffi::CStr;
 
-use output::HashRaw;
-use {ffi, Error, ErrorKind, Hasher};
+use crate::output::HashRaw;
+use crate::{ffi, Error, ErrorKind, Hasher};
 
 impl<'a> Hasher<'a> {
     pub(crate) fn hash_raw_c(&mut self) -> Result<HashRaw, Error> {

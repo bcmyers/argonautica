@@ -1,4 +1,4 @@
-use {Error, ErrorKind};
+use crate::{Error, ErrorKind};
 
 impl From<Vec<u8>> for AdditionalData {
     fn from(bytes: Vec<u8>) -> AdditionalData {
@@ -96,7 +96,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_serialize() {
-        use serde;
         fn assert_serialize<T: serde::Serialize>() {}
         assert_serialize::<AdditionalData>();
     }
@@ -104,7 +103,6 @@ mod tests {
     #[cfg(feature = "serde")]
     #[test]
     fn test_deserialize() {
-        use serde;
         fn assert_deserialize<'de, T: serde::Deserialize<'de>>() {}
         assert_deserialize::<AdditionalData>();
     }
