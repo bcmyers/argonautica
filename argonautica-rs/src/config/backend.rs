@@ -1,5 +1,5 @@
 use config::defaults::DEFAULT_BACKEND;
-use {Error, ErrorKind};
+use Error;
 
 impl Default for Backend {
     /// Returns [`Backend::C`](enum.Backend.html#variant.C)
@@ -35,7 +35,7 @@ impl Backend {
         match x {
             1 => Ok(Backend::C),
             2 => Ok(Backend::Rust),
-            _ => Err(Error::new(ErrorKind::BackendEncodeError).add_context(format!("Int: {}", x))),
+            _ => Err(Error::BackendEncodeError),
         }
     }
 }

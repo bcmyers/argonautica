@@ -5,7 +5,7 @@ use backend::decode_rust;
 use config::{default_cpu_pool, Backend, VerifierConfig};
 use input::{AdditionalData, Password, SecretKey};
 use output::HashRaw;
-use {Error, ErrorKind, Hasher};
+use {Error, Hasher};
 
 impl Default for Hash {
     fn default() -> Hash {
@@ -169,7 +169,7 @@ impl<'a> Verifier<'a> {
                 };
                 Ok(is_valid)
             }
-            Hash::None => return Err(Error::new(ErrorKind::HashMissingError)),
+            Hash::None => return Err(Error::HashMissingError),
         }
     }
     /// <b><u>The primary method (non-blocking version)</u></b>

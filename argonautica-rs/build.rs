@@ -2,10 +2,10 @@ extern crate bindgen;
 extern crate cc;
 #[macro_use]
 extern crate cfg_if;
-extern crate failure;
 extern crate tempfile;
 
 use std::env;
+use std::error::Error;
 use std::fs;
 use std::path::Path;
 
@@ -17,7 +17,7 @@ cfg_if! {
     }
 }
 
-fn main() -> Result<(), failure::Error> {
+fn main() -> Result<(), Box<dyn Error>> {
     let temp = tempfile::tempdir()?;
     let temp_dir = temp.path();
     let temp_dir_str = temp_dir.to_str().unwrap();

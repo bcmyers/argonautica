@@ -4,7 +4,7 @@ use base64;
 use rand::rngs::OsRng;
 use rand::RngCore;
 
-use {Error, ErrorKind};
+use Error;
 
 /// A utility function for generating cryptographically-secure random bytes. A quick glance at
 /// this function's source should give you a good idea of what the function is doing.
@@ -12,7 +12,7 @@ pub fn generate_random_bytes(len: u32) -> Result<Vec<u8>, Error> {
     let mut bytes = vec![0u8; len as usize];
     OsRng
         .try_fill_bytes(&mut bytes)
-        .map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
+        .map_err(|e| Error::OsRngError(e))?;
     Ok(bytes)
 }
 
@@ -25,7 +25,7 @@ pub fn generate_random_base64_encoded_string(len: u32) -> Result<String, Error> 
     let mut bytes = vec![0u8; len as usize];
     OsRng
         .try_fill_bytes(&mut bytes)
-        .map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
+        .map_err(|e| Error::OsRngError(e))?;
     let output = base64::encode_config(&bytes, base64::STANDARD);
     Ok(output)
 }
@@ -42,7 +42,7 @@ pub fn generate_random_base64_encoded_string_config(
     let mut bytes = vec![0u8; len as usize];
     OsRng
         .try_fill_bytes(&mut bytes)
-        .map_err(|e| Error::new(ErrorKind::OsRngError).add_context(format!("{}", e)))?;
+        .map_err(|e| Error::OsRngError(e))?;
     let output = base64::encode_config(&bytes, config);
     Ok(output)
 }

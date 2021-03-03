@@ -282,8 +282,6 @@ extern crate base64;
 extern crate bitflags;
 #[cfg(feature = "development")]
 extern crate blake2_rfc;
-#[macro_use]
-extern crate failure;
 extern crate futures;
 extern crate futures_cpupool;
 extern crate libc;
@@ -302,14 +300,12 @@ extern crate serde_json;
 
 mod backend;
 mod error;
-mod error_kind;
 mod ffi;
 mod hasher;
 mod verifier;
 
 pub mod config;
 pub use error::Error;
-pub use error_kind::ErrorKind;
 pub use hasher::Hasher;
 pub mod input;
 pub mod output;

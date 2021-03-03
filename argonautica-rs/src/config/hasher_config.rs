@@ -2,7 +2,7 @@ use futures_cpupool::CpuPool;
 
 use config::defaults::*;
 use config::{Backend, Flags, Variant, Version};
-use {Error, ErrorKind};
+use Error;
 
 const PANIC_WARNING: &str = "Your program will error if you use this configuration";
 
@@ -192,63 +192,51 @@ impl HasherConfig {
 fn validate_backend(backend: Backend) -> Result<(), Error> {
     match backend {
         Backend::C => (),
-        Backend::Rust => return Err(Error::new(ErrorKind::BackendUnsupportedError)),
+        Backend::Rust => return Err(Error::BackendUnsupportedError),
     }
     Ok(())
 }
 
 fn validate_hash_len(hash_len: u32) -> Result<(), Error> {
     if hash_len < 4 {
-        return Err(Error::new(ErrorKind::HashLenTooShortError)
-            .add_context(format!("Hash len: {}", hash_len)));
+        return Err(Error::HashLenTooShortError(hash_len));
     }
     Ok(())
 }
 
 fn validate_iterations(iterations: u32) -> Result<(), Error> {
     if iterations == 0 {
-        return Err(Error::new(ErrorKind::IterationsTooFewError)
-            .add_context(format!("Iterations: {}", iterations)));
+        return Err(Error::IterationsTooFewError(iterations));
     }
     Ok(())
 }
 
 fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
-        return Err(
-            Error::new(ErrorKind::LanesTooFewError).add_context(format!("Lanes: {}", lanes))
-        );
+        return Err(Error::LanesTooFewError(lanes));
     }
     if lanes > 0x00ff_ffff {
-        return Err(
-            Error::new(ErrorKind::LanesTooManyError).add_context(format!("Lanes: {}", lanes))
-        );
+        return Err(Error::LanesTooManyError(lanes));
     }
     Ok(())
 }
 
 fn validate_memory_size(lanes: u32, memory_size: u32) -> Result<(), Error> {
     if memory_size < 8 * lanes {
-        return Err(Error::new(ErrorKind::MemorySizeTooSmallError)
-            .add_context(format!("Lanes: {}. Memory size: {}", lanes, memory_size)));
+        return Err(Error::MemorySizeTooSmallError { lanes, memory_size });
     }
     if !(memory_size.is_power_of_two()) {
-        return Err(Error::new(ErrorKind::MemorySizeInvalidError)
-            .add_context(format!("Memory size: {}", memory_size)));
+        return Err(Error::MemorySizeInvalidError(memory_size));
     }
     Ok(())
 }
 
 fn validate_threads(threads: u32) -> Result<(), Error> {
     if threads == 0 {
-        return Err(
-            Error::new(ErrorKind::ThreadsTooFewError).add_context(format!("Threads: {}", threads))
-        );
+        return Err(Error::ThreadsTooFewError(threads));
     }
     if threads > 0x00ff_ffff {
-        return Err(
-            Error::new(ErrorKind::ThreadsTooManyError).add_context(format!("Threads: {}", threads))
-        );
+        return Err(Error::ThreadsTooManyError(threads));
     }
     Ok(())
 }

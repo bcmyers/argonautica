@@ -1,7 +1,7 @@
 use rand::rngs::OsRng;
 use rand::RngCore;
 
-use {Error, ErrorKind};
+use Error;
 
 impl Default for Salt {
     /// Creates a new <u>random</u> `Salt`.
@@ -111,10 +111,7 @@ impl Salt {
     }
     /// Read-only access to the underlying byte buffer as a `&str` if its bytes are valid utf-8
     pub fn to_str(&self) -> Result<&str, Error> {
-        let s = ::std::str::from_utf8(self.as_bytes()).map_err(|_| {
-            Error::new(ErrorKind::Utf8EncodeError)
-                .add_context(format!("Bytes: {:?}", self.as_bytes()))
-        })?;
+        let s = ::std::str::from_utf8(self.as_bytes()).map_err(|e| Error::Utf8EncodeError(e))?;
         Ok(s)
     }
     /// If you have a <u>random</u> `Salt`, this method will generate new random bytes of the
@@ -124,7 +121,7 @@ impl Salt {
             Kind::Random(ref mut bytes) => {
                 OsRng
                     .try_fill_bytes(bytes)
-                    .map_err(|_| Error::new(ErrorKind::OsRngError))?;
+                    .map_err(|e| Error::OsRngError(e))?;
             }
             _ => (),
         }
@@ -136,14 +133,10 @@ impl Salt {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         let len = self.len();
         if len < 8 {
-            return Err(
-                Error::new(ErrorKind::SaltTooShortError).add_context(format!("Length: {}", len))
-            );
+            return Err(Error::SaltTooShortError(len));
         }
         if len >= ::std::u32::MAX as usize {
-            return Err(
-                Error::new(ErrorKind::SaltTooLongError).add_context(format!("Length: {}", len))
-            );
+            return Err(Error::SaltTooLongError(len));
         }
         Ok(())
     }

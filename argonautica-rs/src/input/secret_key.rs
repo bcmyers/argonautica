@@ -3,7 +3,7 @@ use std::fmt;
 use base64;
 
 use input::Container;
-use {Error, ErrorKind};
+use Error;
 
 impl<'a> From<&'a str> for SecretKey<'a> {
     fn from(s: &'a str) -> SecretKey<'a> {
@@ -136,9 +136,8 @@ impl<'a> SecretKey<'a> {
     where
         S: AsRef<str>,
     {
-        let bytes = base64::decode_config(s.as_ref(), base64::STANDARD).map_err(|_| {
-            Error::new(ErrorKind::Base64DecodeError).add_context(format!("&str: {}", s.as_ref()))
-        })?;
+        let bytes = base64::decode_config(s.as_ref(), base64::STANDARD)
+            .map_err(|e| Error::Base64DecodeError(e))?;
         Ok(SecretKey {
             inner: Container::Owned(bytes),
         })
@@ -153,9 +152,8 @@ impl<'a> SecretKey<'a> {
     where
         S: AsRef<str>,
     {
-        let bytes = base64::decode_config(s.as_ref(), config).map_err(|_| {
-            Error::new(ErrorKind::Base64DecodeError).add_context(format!("&str: {}", s.as_ref()))
-        })?;
+        let bytes =
+            base64::decode_config(s.as_ref(), config).map_err(|e| Error::Base64DecodeError(e))?;
         Ok(SecretKey {
             inner: Container::Owned(bytes),
         })
@@ -205,8 +203,7 @@ impl<'a> SecretKey<'a> {
     }
     /// Read-only access to the underlying byte buffer as a `&str` if its bytes are valid utf-8
     pub fn to_str(&self) -> Result<&str, Error> {
-        let s = ::std::str::from_utf8(self.as_bytes())
-            .map_err(|_| Error::new(ErrorKind::Utf8EncodeError))?;
+        let s = ::std::str::from_utf8(self.as_bytes()).map_err(|e| Error::Utf8EncodeError(e))?;
         Ok(s)
     }
 }
@@ -214,8 +211,7 @@ impl<'a> SecretKey<'a> {
 impl<'a> SecretKey<'a> {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         if self.len() >= ::std::u32::MAX as usize {
-            return Err(Error::new(ErrorKind::SecretKeyTooLongError)
-                .add_context(format!("Length: {}", self.len())));
+            return Err(Error::SecretKeyTooLongError(self.len()));
         }
         Ok(())
     }
