@@ -5,7 +5,7 @@ use std::ffi::CStr;
 use libc;
 
 use output::HashRaw;
-use {ffi, Error, ErrorKind};
+use {ffi, Error};
 
 pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
     let encoded_len = unsafe {

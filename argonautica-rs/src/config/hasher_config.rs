@@ -2,7 +2,7 @@ use futures_cpupool::CpuPool;
 
 use config::defaults::*;
 use config::{Backend, Flags, Variant, Version};
-use {Error, ErrorKind};
+use {Error};
 
 const PANIC_WARNING: &str = "Your program will error if you use this configuration";
 

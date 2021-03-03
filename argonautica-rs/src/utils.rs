@@ -4,7 +4,7 @@ use base64;
 use rand::rngs::OsRng;
 use rand::RngCore;
 
-use {Error, ErrorKind};
+use Error;
 
 /// A utility function for generating cryptographically-secure random bytes. A quick glance at
 /// this function's source should give you a good idea of what the function is doing.

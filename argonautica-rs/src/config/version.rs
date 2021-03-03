@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use config::defaults::DEFAULT_VERSION;
-use {Error, ErrorKind};
+use {Error};
 
 impl Default for Version {
     /// Returns [`Version::_0x13`](enum.Version.html#variant._0x13)

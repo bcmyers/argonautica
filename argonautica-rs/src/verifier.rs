@@ -5,7 +5,7 @@ use backend::decode_rust;
 use config::{default_cpu_pool, Backend, VerifierConfig};
 use input::{AdditionalData, Password, SecretKey};
 use output::HashRaw;
-use {Error, ErrorKind, Hasher};
+use {Error, Hasher};
 
 impl Default for Hash {
     fn default() -> Hash {

@@ -6,7 +6,7 @@ use config::defaults::{default_cpu_pool, default_lanes};
 use config::{Backend, HasherConfig, Variant, Version};
 use input::{AdditionalData, Container, Password, Salt, SecretKey};
 use output::HashRaw;
-use {Error, ErrorKind};
+use {Error};
 
 impl<'a> Default for Hasher<'a> {
     /// Same as the [`new`](struct.Hasher.html#method.new) method
