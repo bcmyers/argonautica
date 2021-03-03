@@ -163,7 +163,7 @@ impl<'a> Password<'a> {
     /// Read-only access to the underlying byte buffer as a `&str` if its bytes are valid utf-8
     pub fn to_str(&self) -> Result<&str, Error> {
         let s = ::std::str::from_utf8(self.as_bytes())
-            .map_err(|_| Error::new(ErrorKind::Utf8EncodeError))?;
+            .map_err(|e| Error::Utf8EncodeError(e))?;
         Ok(s)
     }
 }
@@ -171,11 +171,10 @@ impl<'a> Password<'a> {
 impl<'a> Password<'a> {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         if self.len() == 0 {
-            return Err(Error::new(ErrorKind::PasswordTooShortError));
+            return Err(Error::PasswordTooShortError);
         }
         if self.len() >= ::std::u32::MAX as usize {
-            return Err(Error::new(ErrorKind::PasswordTooLongError)
-                .add_context(format!("Length: {}", self.len())));
+            return Err(Error::PasswordTooLongError(self.len()));
         }
         Ok(())
     }

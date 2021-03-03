@@ -169,7 +169,7 @@ impl<'a> Verifier<'a> {
                 };
                 Ok(is_valid)
             }
-            Hash::None => return Err(Error::new(ErrorKind::HashMissingError)),
+            Hash::None => return Err(Error::HashMissingError),
         }
     }
     /// <b><u>The primary method (non-blocking version)</u></b>

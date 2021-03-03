@@ -5,11 +5,11 @@ use output::HashRaw;
 use {Error, ErrorKind};
 
 pub(crate) fn decode_rust(hash: &str) -> Result<HashRaw, Error> {
-    let (rest, intermediate) = parse_hash(hash).map_err(|_| {
-        Error::new(ErrorKind::HashDecodeError).add_context(format!("Hash: {}", &hash))
+    let (rest, intermediate) = parse_hash(hash).map_err(|e| {
+        Error::HashDecodeError(e)
     })?;
-    let raw_hash_bytes = base64::decode_config(rest, base64::STANDARD_NO_PAD).map_err(|_| {
-        Error::new(ErrorKind::HashDecodeError).add_context(format!("Hash: {}", &hash))
+    let raw_hash_bytes = base64::decode_config(rest, base64::STANDARD_NO_PAD).map_err(|e| {
+        Error::HashDecodeError(e)
     })?;
     let hash_raw = HashRaw {
         iterations: intermediate.iterations,

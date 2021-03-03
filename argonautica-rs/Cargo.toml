@@ -28,7 +28,6 @@ simd = []
 [dependencies]
 base64 = "0.10"
 bitflags = "1.1"
-failure = "0.1"
 futures = "0.1"
 futures-cpupool = "0.1"
 libc = "0.2"
@@ -38,6 +37,8 @@ num_cpus = "1.10"
 rand = "0.7"
 scopeguard = "1.0"
 serde = { version = "1.0", optional = true, features = ["derive"] }
+# Error
+thiserror = "1.0"
 
 # benches
 argon2rs = { version = "0.2.5", optional = true }

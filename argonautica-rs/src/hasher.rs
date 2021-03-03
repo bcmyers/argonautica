@@ -267,7 +267,7 @@ impl<'a> Hasher<'a> {
         hasher.salt.update()?;
         let hash_raw = match hasher.config.backend() {
             Backend::C => hasher.hash_raw_c()?,
-            Backend::Rust => return Err(Error::new(ErrorKind::BackendUnsupportedError)),
+            Backend::Rust => return Err(Error::BackendUnsupportedError),
         };
         Ok(hash_raw)
     }
@@ -437,22 +437,22 @@ impl<'a> Hasher<'a> {
             Some(ref password) => {
                 password.validate()?;
                 if self.config.password_clearing() && !password.is_mutable() {
-                    return Err(Error::new(ErrorKind::PasswordImmutableError));
+                    return Err(Error::PasswordImmutableError);
                 }
             }
-            None => return Err(Error::new(ErrorKind::PasswordMissingError)),
+            None => return Err(Error::PasswordMissingError),
         }
         self.salt.validate()?;
         match self.secret_key {
             Some(ref secret_key) => {
                 secret_key.validate()?;
                 if self.config.secret_key_clearing() && !secret_key.is_mutable() {
-                    return Err(Error::new(ErrorKind::SecretKeyImmutableError));
+                    return Err(Error::SecretKeyImmutableError);
                 }
             }
             None => {
                 if !self.config.opt_out_of_secret_key() {
-                    return Err(Error::new(ErrorKind::SecretKeyMissingError));
+                    return Err(Error::SecretKeyMissingError);
                 }
             }
         }
@@ -588,7 +588,7 @@ mod tests {
             .hash();
         match hash {
             Ok(_) => panic!("Should return an error"),
-            Err(e) => assert_eq!(e, Error::new(ErrorKind::PasswordImmutableError)),
+            Err(e) => assert_eq!(e, Error::PasswordImmutableError),
         }
         assert!(hasher.password().is_none());
         assert!(hasher.secret_key().is_some());
@@ -603,7 +603,7 @@ mod tests {
             .hash();
         match hash {
             Ok(_) => panic!("Should return an error"),
-            Err(e) => assert_eq!(e, Error::new(ErrorKind::SecretKeyImmutableError)),
+            Err(e) => assert_eq!(e, Error::SecretKeyImmutableError),
         }
         assert!(hasher.password().is_some());
         assert!(hasher.secret_key().is_none());

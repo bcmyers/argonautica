@@ -25,7 +25,7 @@ impl FromStr for Variant {
             "argon2i" => Ok(Variant::Argon2i),
             "argon2id" => Ok(Variant::Argon2id),
             _ => {
-                Err(Error::new(ErrorKind::VariantEncodeError).add_context(format!("String: {}", s)))
+                Err(Error::VariantEncodeError(s.to_string()))
             }
         }
     }
