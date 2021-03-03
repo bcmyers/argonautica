@@ -4,7 +4,7 @@ use std::str::Utf8Error;
 use thiserror::Error;
 
 /// Enum representing the various kinds of errors
-#[derive(Err, Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Error, Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum Error {
