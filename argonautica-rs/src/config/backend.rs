@@ -1,5 +1,5 @@
 use config::defaults::DEFAULT_BACKEND;
-use {Error};
+use Error;
 
 impl Default for Backend {
     /// Returns [`Backend::C`](enum.Backend.html#variant.C)

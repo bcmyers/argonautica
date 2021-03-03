@@ -59,9 +59,7 @@ impl AdditionalData {
     }
     /// Read-only access to the underlying byte buffer as a `&str` if its bytes are valid utf-8
     pub fn to_str(&self) -> Result<&str, Error> {
-        let s = ::std::str::from_utf8(self.as_bytes()).map_err(|e| {
-            Error::Utf8EncodeError(e)
-        })?;
+        let s = ::std::str::from_utf8(self.as_bytes()).map_err(|e| Error::Utf8EncodeError(e))?;
         Ok(s)
     }
 }

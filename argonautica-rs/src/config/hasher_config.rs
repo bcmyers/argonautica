@@ -2,7 +2,7 @@ use futures_cpupool::CpuPool;
 
 use config::defaults::*;
 use config::{Backend, Flags, Variant, Version};
-use {Error};
+use Error;
 
 const PANIC_WARNING: &str = "Your program will error if you use this configuration";
 
@@ -213,14 +213,10 @@ fn validate_iterations(iterations: u32) -> Result<(), Error> {
 
 fn validate_lanes(lanes: u32) -> Result<(), Error> {
     if lanes == 0 {
-        return Err(
-            Error::LanesTooFewError(lanes)
-        );
+        return Err(Error::LanesTooFewError(lanes));
     }
     if lanes > 0x00ff_ffff {
-        return Err(
-            Error::LanesTooManyError(lanes)
-        );
+        return Err(Error::LanesTooManyError(lanes));
     }
     Ok(())
 }
@@ -237,14 +233,10 @@ fn validate_memory_size(lanes: u32, memory_size: u32) -> Result<(), Error> {
 
 fn validate_threads(threads: u32) -> Result<(), Error> {
     if threads == 0 {
-        return Err(
-            Error::ThreadsTooFewError(threads)
-        );
+        return Err(Error::ThreadsTooFewError(threads));
     }
     if threads > 0x00ff_ffff {
-        return Err(
-            Error::ThreadsTooManyError(threads)
-        );
+        return Err(Error::ThreadsTooManyError(threads));
     }
     Ok(())
 }

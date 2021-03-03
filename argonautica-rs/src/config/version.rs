@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use config::defaults::DEFAULT_VERSION;
-use {Error};
+use Error;
 
 impl Default for Version {
     /// Returns [`Version::_0x13`](enum.Version.html#variant._0x13)
@@ -22,9 +22,7 @@ impl FromStr for Version {
         match s {
             "16" => Ok(Version::_0x10),
             "19" => Ok(Version::_0x13),
-            _ => {
-                Err(Error::VersionEncodeError(format!("String: {}", s))),
-            }
+            _ => Err(Error::VersionEncodeError(format!("String: {}", s))),
         }
     }
 }

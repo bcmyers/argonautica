@@ -52,13 +52,9 @@ pub(crate) fn encode_c(hash_raw: &HashRaw) -> Result<String, Error> {
 fn check_error(err: ffi::Argon2_ErrorCodes, hash_raw: &HashRaw) -> Result<(), Error> {
     match err {
         ffi::Argon2_ErrorCodes_ARGON2_OK => Ok(()),
-        ffi::Argon2_ErrorCodes_ARGON2_MEMORY_ALLOCATION_ERROR => {
-            Err(Error::MemoryAllocationError)
-        }
+        ffi::Argon2_ErrorCodes_ARGON2_MEMORY_ALLOCATION_ERROR => Err(Error::MemoryAllocationError),
         ffi::Argon2_ErrorCodes_ARGON2_THREAD_FAIL => Err(Error::ThreadError),
-        ffi::Argon2_ErrorCodes_ARGON2_ENCODING_FAIL => {
-            Err(Error::HashEncodeError)
-        }
+        ffi::Argon2_ErrorCodes_ARGON2_ENCODING_FAIL => Err(Error::HashEncodeError),
         _ => {
             let err_msg_ptr = unsafe { ffi::argon2_error_message(err) };
             let err_msg_cstr = unsafe { CStr::from_ptr(err_msg_ptr) };

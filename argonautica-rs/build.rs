@@ -5,9 +5,9 @@ extern crate cfg_if;
 extern crate tempfile;
 
 use std::env;
+use std::error::Error;
 use std::fs;
 use std::path::Path;
-use std::error::Error;
 
 cfg_if! {
     if #[cfg(feature = "simd")] {

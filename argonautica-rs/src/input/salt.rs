@@ -1,7 +1,7 @@
 use rand::rngs::OsRng;
 use rand::RngCore;
 
-use {Error};
+use Error;
 
 impl Default for Salt {
     /// Creates a new <u>random</u> `Salt`.
@@ -111,9 +111,7 @@ impl Salt {
     }
     /// Read-only access to the underlying byte buffer as a `&str` if its bytes are valid utf-8
     pub fn to_str(&self) -> Result<&str, Error> {
-        let s = ::std::str::from_utf8(self.as_bytes()).map_err(|e| {
-            Error::Utf8EncodeError(e)
-        })?;
+        let s = ::std::str::from_utf8(self.as_bytes()).map_err(|e| Error::Utf8EncodeError(e))?;
         Ok(s)
     }
     /// If you have a <u>random</u> `Salt`, this method will generate new random bytes of the
@@ -135,14 +133,10 @@ impl Salt {
     pub(crate) fn validate(&self) -> Result<(), Error> {
         let len = self.len();
         if len < 8 {
-            return Err(
-                Error::SaltTooShortError(len)
-            );
+            return Err(Error::SaltTooShortError(len));
         }
         if len >= ::std::u32::MAX as usize {
-            return Err(
-                Error::SaltTooLongError(len)
-            );
+            return Err(Error::SaltTooLongError(len));
         }
         Ok(())
     }

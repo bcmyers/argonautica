@@ -1,7 +1,7 @@
-use thiserror::Error;
+use base64::DecodeError;
 use rand::Error as RandError;
 use std::str::Utf8Error;
-use base64::DecodeError;
+use thiserror::Error;
 
 /// Enum representing the various kinds of errors
 #[derive(Err, Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -67,10 +67,7 @@ pub enum Error {
 
     /// Memory size too small. Memory size must be at least 8 times the number of lanes
     #[error("Memory size too small. Memory size must be at least 8 times the number of lanes. Lanes: {lanes}. Memory size: {memory_size}")]
-    MemorySizeTooSmallError {
-        lanes: u32,
-        memory_size: u32,
-    },
+    MemorySizeTooSmallError { lanes: u32, memory_size: u32 },
 
     /// Failed to access OS random number generator
     #[error("Failed to access OS random number generator")]
@@ -129,7 +126,9 @@ pub enum Error {
     Utf8EncodeError(#[source] Utf8Error),
 
     /// Variant encode error. &str provided could not be encoded into a Variant
-    #[error("Variant encode error. &str provided could not be encoded into a Variant, String: {0}")]
+    #[error(
+        "Variant encode error. &str provided could not be encoded into a Variant, String: {0}"
+    )]
     VariantEncodeError(String),
 
     /// Version encode error. &str or u32 provided could not be encoded into a Version

@@ -1,16 +1,13 @@
 use base64;
 
-use Error;
 use config::{Variant, Version};
 use output::HashRaw;
+use Error;
 
 pub(crate) fn decode_rust(hash: &str) -> Result<HashRaw, Error> {
-    let (rest, intermediate) = parse_hash(hash).map_err(|e| {
-        Error::HashDecodeError(e)
-    })?;
-    let raw_hash_bytes = base64::decode_config(rest, base64::STANDARD_NO_PAD).map_err(|e| {
-        Error::HashDecodeError(e)
-    })?;
+    let (rest, intermediate) = parse_hash(hash).map_err(|e| Error::HashDecodeError(e))?;
+    let raw_hash_bytes = base64::decode_config(rest, base64::STANDARD_NO_PAD)
+        .map_err(|e| Error::HashDecodeError(e))?;
     let hash_raw = HashRaw {
         iterations: intermediate.iterations,
         lanes: intermediate.lanes,
@@ -68,8 +65,8 @@ named!(parse_hash<&str, IntermediateStruct>, do_parse!(
 
 #[cfg(test)]
 mod tests {
-    use rand::{RngCore, SeedableRng};
     use rand::rngs::StdRng;
+    use rand::{RngCore, SeedableRng};
 
     use backend::c::decode_c;
     use hasher::Hasher;
